@@ -2,11 +2,14 @@ package io.cucumber.htmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
 import io.cucumber.messages.types.Envelope;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.xmlunit.builder.Input;
 
+import javax.xml.transform.Source;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -18,8 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.htmlformatter.Jackson.OBJECT_MAPPER;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
     private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
@@ -36,6 +38,38 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void test(TestCase testCase) throws IOException {
+        ByteArrayOutputStream bytes = crateJunitXmlReport(testCase);
+
+        Source expected = Input.fromPath(testCase.expected).build();
+        Source actual = Input.fromByteArray(bytes.toByteArray()).build();
+        Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
+        Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
+
+        Assertions.assertAll(
+                () -> assertThat(actual).isValidAgainst(jenkinsSchema),
+                () -> assertThat(actual).isValidAgainst(surefireSchema),
+                () -> assertThat(actual).and(expected).ignoreWhitespace().areIdentical()
+        );
+    }
+
+    private static ByteArrayOutputStream crateJunitXmlReport(TestCase testCase) throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (InputStream in = Files.newInputStream(testCase.source)) {
+            try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
+                try (MessagesToJunitXmlWriter htmlWriter = new MessagesToJunitXmlWriter(bytes)) {
+                    for (Envelope envelope : envelopes) {
+                        htmlWriter.write(envelope);
+                    }
+                }
+            }
+        }
+        return bytes;
+    }
+
+    @ParameterizedTest
+    @MethodSource("acceptance")
+    @Disabled
+    void writeAcceptanceTest(TestCase testCase) throws IOException {
         try (InputStream in = Files.newInputStream(testCase.source)) {
             try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
                 try (MessagesToJunitXmlWriter htmlWriter = new MessagesToJunitXmlWriter(Files.newOutputStream(testCase.expected))) {
@@ -45,18 +79,6 @@ class MessagesToJunitXmlWriterAcceptanceTest {
                 }
             }
         }
-    }
-
-
-    private static String renderAsJunitXml(Envelope... messages) throws IOException {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (MessagesToJunitXmlWriter messagesToHtmlWriter = new MessagesToJunitXmlWriter(bytes)) {
-            for (Envelope message : messages) {
-                messagesToHtmlWriter.write(message);
-            }
-        }
-
-        return new String(bytes.toByteArray(), UTF_8);
     }
 
     static class TestCase {

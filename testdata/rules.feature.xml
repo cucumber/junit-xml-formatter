@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Cucumber" time="0.029" tests="3" skipped="0" failures="0" errors="0">
+<testcase classname="Rules" name="no change" time="0.007"></testcase>
+<testcase classname="Rules" name="exact change" time="0.009"></testcase>
+<testcase classname="Rules" name="no chocolates left" time="0.009"></testcase>
+</testsuite>

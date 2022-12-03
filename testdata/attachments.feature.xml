@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Cucumber" time="0.043" tests="7" skipped="0" failures="0" errors="0">
+<testcase classname="Attachments" name="Strings can be attached with a media type" time="0.005"></testcase>
+<testcase classname="Attachments" name="Log JSON" time="0.005"></testcase>
+<testcase classname="Attachments" name="Log text" time="0.005"></testcase>
+<testcase classname="Attachments" name="Log ANSI coloured text" time="0.005"></testcase>
+<testcase classname="Attachments" name="Byte arrays are base64-encoded regardless of media type" time="0.005"></testcase>
+<testcase classname="Attachments" name="Streams are always base64-encoded" time="0.005"></testcase>
+<testcase classname="Attachments" name="Attaching images in examples" time="0.005"></testcase>
+</testsuite>

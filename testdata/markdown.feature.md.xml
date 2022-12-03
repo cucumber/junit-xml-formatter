@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Cucumber" time="0.021" tests="2" skipped="0" failures="1" errors="0">
+<testcase classname="Cheese" name="Ylajali!" time="0.009"><failure>
+<![CDATA[You asked me to fail
+samples/markdown/markdown.feature.md:24
+samples/markdown/markdown.feature.md:38]]></failure>
+</testcase>
+<testcase classname="Cheese" name="Ylajali!" time="0.009"></testcase>
+</testsuite>

@@ -11,9 +11,9 @@ import java.time.Instant;
 
 import static io.cucumber.messages.TimeConversion.javaInstantToTimestamp;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MessagesToJunitXmlWriterTest {
 
@@ -26,21 +26,21 @@ class MessagesToJunitXmlWriterTest {
                 Envelope.of(new TestRunStarted(javaInstantToTimestamp(started))),
                 Envelope.of(new TestRunFinished(null, true, javaInstantToTimestamp(finished))));
 
-        assertThat(html, containsString("" +
+        assertThat(html).isEqualTo("" +
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<testsuite name=\"Cucumber\" time=\"20\" tests=\"0\" skipped=\"0\" failures=\"0\" errors=\"0\">\n" +
                 "</testsuite>\n"
-        ));
+        );
     }
 
     @Test
     void it_writes_no_message_to_xml() throws IOException {
         String html = renderAsJunitXml();
-        assertThat(html, containsString("" +
+        assertThat(html).isEqualTo("" +
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<testsuite name=\"Cucumber\" time=\"0\" tests=\"0\" skipped=\"0\" failures=\"0\" errors=\"0\">\n" +
                 "</testsuite>\n"
-        ));
+        );
     }
 
     @Test
@@ -72,7 +72,7 @@ class MessagesToJunitXmlWriterTest {
         byte[] before = bytes.toByteArray();
         assertDoesNotThrow(messagesToHtmlWriter::close);
         byte[] after = bytes.toByteArray();
-        assertArrayEquals(before, after);
+        assertThat(after).isEqualTo(before);
     }
 
 
