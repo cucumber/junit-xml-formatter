@@ -2,7 +2,7 @@
 <testsuite name="Cucumber" time="0.005" tests="1" skipped="0" failures="1" errors="0">
 <testcase classname="Parameter Types" name="undefined parameter type" time="0.003">
 <failure/><system-out><![CDATA[
-CDG is closed because of a strike...........................................undefined
+Context: CDG is closed because of a strike..................................undefined
 ]]></system-out>
 </testcase>
 </testsuite>

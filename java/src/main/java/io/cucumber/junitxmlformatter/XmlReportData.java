@@ -14,17 +14,15 @@ import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
+import javax.swing.text.html.Option;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.cucumber.messages.TimeConversion.timestampToJavaInstant;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
@@ -186,13 +184,25 @@ class XmlReportData {
 
     private Function<TestStep, String> renderTestStepText(Pickle pickle) {
         return testStep -> {
-            // TODO: Add the keyword to the pickle
             String pickleId = testStep.getPickleStepId().orElse(null);
-            return pickle.getSteps().stream()
-                    .filter(pickleStep -> pickleStep.getId().equals(pickleId))
-                    .map(PickleStep::getText)
-                    .findFirst()
+
+            // TODO: Add the keyword to the pickle
+            Optional<PickleStep> pickleStep = pickle.getSteps().stream()
+                    .filter(s -> s.getId().equals(pickleId))
+                    .findFirst();
+
+            String stepKeyWord = pickleStep
+                    .map(PickleStep::getType)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .map(pickleStepType -> pickleStepType.value() + ": ")
                     .orElse("");
+
+            String stepText = pickleStep
+                    .map(PickleStep::getText)
+                    .orElse("");
+
+            return stepKeyWord + stepText;
         };
     }
 

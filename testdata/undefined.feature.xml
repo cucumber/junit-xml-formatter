@@ -2,19 +2,19 @@
 <testsuite name="Cucumber" time="0.017" tests="3" skipped="0" failures="3" errors="0">
 <testcase classname="Undefined steps" name="Undefined step causes failure" time="0.003">
 <failure/><system-out><![CDATA[
-a step that isnt implemented yet............................................undefined
+Context: a step that isnt implemented yet...................................undefined
 ]]></system-out>
 </testcase>
 <testcase classname="Undefined steps" name="Steps before undefined steps are executed" time="0.005">
 <failure/><system-out><![CDATA[
-an implemented step.........................................................passed
-a step that isnt implemented yet............................................undefined
+Context: an implemented step................................................passed
+Action: a step that isnt implemented yet....................................undefined
 ]]></system-out>
 </testcase>
 <testcase classname="Undefined steps" name="Steps after undefined steps are skipped" time="0.005">
 <failure/><system-out><![CDATA[
-a step that isnt implemented yet............................................undefined
-a step that we expect to be skipped.........................................skipped
+Context: a step that isnt implemented yet...................................undefined
+Outcome: a step that we expect to be skipped................................skipped
 ]]></system-out>
 </testcase>
 </testsuite>
