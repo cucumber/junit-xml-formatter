@@ -29,8 +29,6 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: "maven"
 
-      - run: mvn install
+      - run: mvn verify
         working-directory: java
 
-      - run: mvn test
-        working-directory: java
