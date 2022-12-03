@@ -6,7 +6,7 @@
 samples/stack-traces/stack-traces.feature:11]]>
 </failure>
 <system-out><![CDATA[
-Action: a step throws an exception..........................................failed
+When a step throws an exception.............................................failed
 ]]></system-out>
 </testcase>
 </testsuite>

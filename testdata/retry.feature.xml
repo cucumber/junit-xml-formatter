@@ -7,7 +7,7 @@
 samples/retry/retry.feature:13]]>
 </failure>
 <system-out><![CDATA[
-Context: a step that passes the second time.................................passed
+Given a step that passes the second time....................................passed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the second attempt" time="0.003"></testcase>
@@ -17,7 +17,7 @@ Context: a step that passes the second time.................................pass
 samples/retry/retry.feature:16]]>
 </failure>
 <system-out><![CDATA[
-Context: a step that passes the third time..................................passed
+Given a step that passes the third time.....................................passed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
@@ -26,7 +26,7 @@ Context: a step that passes the third time..................................pass
 samples/retry/retry.feature:16]]>
 </failure>
 <system-out><![CDATA[
-Context: a step that passes the third time..................................passed
+Given a step that passes the third time.....................................passed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003"></testcase>
@@ -36,7 +36,7 @@ Context: a step that passes the third time..................................pass
 samples/retry/retry.feature:19]]>
 </failure>
 <system-out><![CDATA[
-Context: a step that always fails...........................................failed
+Given a step that always fails..............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
@@ -45,7 +45,7 @@ Context: a step that always fails...........................................fail
 samples/retry/retry.feature:19]]>
 </failure>
 <system-out><![CDATA[
-Context: a step that always fails...........................................failed
+Given a step that always fails..............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
@@ -54,12 +54,12 @@ Context: a step that always fails...........................................fail
 samples/retry/retry.feature:19]]>
 </failure>
 <system-out><![CDATA[
-Context: a step that always fails...........................................failed
+Given a step that always fails..............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="don't retry on UNDEFINED" time="0.003">
 <failure/><system-out><![CDATA[
-Context: a non-existent step................................................undefined
+Given a non-existent step...................................................undefined
 ]]></system-out>
 </testcase>
 </testsuite>

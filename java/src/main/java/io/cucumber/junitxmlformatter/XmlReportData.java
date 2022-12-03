@@ -14,7 +14,6 @@ import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
-import javax.swing.text.html.Option;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.cucumber.messages.TimeConversion.timestampToJavaInstant;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
@@ -50,6 +48,7 @@ class XmlReportData {
     private final Map<String, Pickle> pickleIdToPickle = new ConcurrentHashMap<>();
     private final Map<String, String> pickleIdToScenarioAstNodeId = new ConcurrentHashMap<>();
     private final Map<String, String> scenarioAstNodeIdToFeatureName = new ConcurrentHashMap<>();
+    private final Map<String, String> stepAstNodeIdToStepKeyWord = new ConcurrentHashMap<>();
 
     void collect(Envelope envelope) {
         envelope.getTestRunStarted().ifPresent(this::testRunStarted);
@@ -98,11 +97,17 @@ class XmlReportData {
                     rule.getChildren().forEach(ruleChild -> {
                         ruleChild.getScenario().ifPresent(scenario -> {
                             scenarioAstNodeIdToFeatureName.put(scenario.getId(), feature.getName());
+                            scenario.getSteps().forEach(step -> {
+                                stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
+                            });
                         });
                     });
                 });
                 featureChild.getScenario().ifPresent(scenario -> {
                     scenarioAstNodeIdToFeatureName.put(scenario.getId(), feature.getName());
+                    scenario.getSteps().forEach(step -> {
+                        stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
+                    });
                 });
             });
         });
@@ -186,16 +191,13 @@ class XmlReportData {
         return testStep -> {
             String pickleId = testStep.getPickleStepId().orElse(null);
 
-            // TODO: Add the keyword to the pickle
             Optional<PickleStep> pickleStep = pickle.getSteps().stream()
                     .filter(s -> s.getId().equals(pickleId))
                     .findFirst();
 
             String stepKeyWord = pickleStep
-                    .map(PickleStep::getType)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(pickleStepType -> pickleStepType.value() + ": ")
+                    .map(s -> s.getAstNodeIds().get(0))
+                    .map(stepAstNodeIdToStepKeyWord::get)
                     .orElse("");
 
             String stepText = pickleStep

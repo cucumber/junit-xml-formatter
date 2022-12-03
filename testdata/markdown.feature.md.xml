@@ -7,10 +7,10 @@ samples/markdown/markdown.feature.md:24
 samples/markdown/markdown.feature.md:38]]>
 </failure>
 <system-out><![CDATA[
-Context: some TypeScript code:..............................................passed
-Context: some classic Gherkin:..............................................passed
-Action: we use a data table and attach something and then fail..............failed
-Outcome: this might or might not run........................................skipped
+Given some TypeScript code:.................................................passed
+And some classic Gherkin:...................................................passed
+When we use a data table and attach something and then fail.................failed
+Then this might or might not run............................................skipped
 ]]></system-out>
 </testcase>
 <testcase classname="Cheese" name="Ylajali!" time="0.009"></testcase>

@@ -6,7 +6,7 @@
 samples/hooks/hooks.feature:5]]>
 </failure>
 <system-out><![CDATA[
-Action: a step passes.......................................................passed
+When a step passes..........................................................passed
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="no tags, failed step" time="0.009">
@@ -15,7 +15,7 @@ Action: a step passes.......................................................pass
 samples/hooks/hooks.feature:9]]>
 </failure>
 <system-out><![CDATA[
-Action: a step throws an exception..........................................failed
+When a step throws an exception.............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="no tags, undefined step" time="0.009">
@@ -24,7 +24,7 @@ Action: a step throws an exception..........................................fail
 samples/hooks/hooks.feature:12]]>
 </failure>
 <system-out><![CDATA[
-Action: a step throws an exception..........................................failed
+When a step throws an exception.............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="with a tag, passed step" time="0.011">
@@ -33,7 +33,7 @@ Action: a step throws an exception..........................................fail
 samples/hooks/hooks.feature:15]]>
 </failure>
 <system-out><![CDATA[
-Action: a step passes.......................................................passed
+When a step passes..........................................................passed
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="with an attachment in the hook" time="0.011">
@@ -42,7 +42,7 @@ Action: a step passes.......................................................pass
 samples/hooks/hooks.feature:19]]>
 </failure>
 <system-out><![CDATA[
-Action: a step passes.......................................................passed
+When a step passes..........................................................passed
 ]]></system-out>
 </testcase>
 </testsuite>

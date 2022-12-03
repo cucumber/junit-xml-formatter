@@ -12,9 +12,9 @@ samples/examples-tables/examples-tables.feature:10
 samples/examples-tables/examples-tables.feature:21]]>
 </failure>
 <system-out><![CDATA[
-Context: there are 12 cucumbers.............................................passed
-Action: I eat 20 cucumbers..................................................passed
-Outcome: I should have 0 cucumbers..........................................failed
+Given there are 12 cucumbers................................................passed
+When I eat 20 cucumbers.....................................................passed
+Then I should have 0 cucumbers..............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Examples Tables" name="eating cucumbers" time="0.007">
@@ -27,23 +27,23 @@ samples/examples-tables/examples-tables.feature:10
 samples/examples-tables/examples-tables.feature:22]]>
 </failure>
 <system-out><![CDATA[
-Context: there are 0 cucumbers..............................................passed
-Action: I eat 1 cucumbers...................................................passed
-Outcome: I should have 0 cucumbers..........................................failed
+Given there are 0 cucumbers.................................................passed
+When I eat 1 cucumbers......................................................passed
+Then I should have 0 cucumbers..............................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Examples Tables" name="eating cucumbers" time="0.007">
 <failure/><system-out><![CDATA[
-Context: there are 12 cucumbers.............................................passed
-Action: I eat banana cucumbers..............................................undefined
-Outcome: I should have 12 cucumbers.........................................skipped
+Given there are 12 cucumbers................................................passed
+When I eat banana cucumbers.................................................undefined
+Then I should have 12 cucumbers.............................................skipped
 ]]></system-out>
 </testcase>
 <testcase classname="Examples Tables" name="eating cucumbers" time="0.007">
 <failure/><system-out><![CDATA[
-Context: there are 0 cucumbers..............................................passed
-Action: I eat 1 cucumbers...................................................passed
-Outcome: I should have apple cucumbers......................................undefined
+Given there are 0 cucumbers.................................................passed
+When I eat 1 cucumbers......................................................passed
+Then I should have apple cucumbers..........................................undefined
 ]]></system-out>
 </testcase>
 </testsuite>
