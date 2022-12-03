@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.055" tests="5" skipped="0" failures="5" errors="0">
-<testcase classname="Hooks" name="no tags, passed step" time="0.009"><failure>
+<testcase classname="Hooks" name="no tags, passed step" time="0.009">
+<failure>
 <![CDATA[Exception in hook
-samples/hooks/hooks.feature:5]]></failure>
+samples/hooks/hooks.feature:5]]>
+</failure>
 </testcase>
-<testcase classname="Hooks" name="no tags, failed step" time="0.009"><failure>
+<testcase classname="Hooks" name="no tags, failed step" time="0.009">
+<failure>
 <![CDATA[Exception in step
-samples/hooks/hooks.feature:9]]></failure>
+samples/hooks/hooks.feature:9]]>
+</failure>
 </testcase>
-<testcase classname="Hooks" name="no tags, undefined step" time="0.009"><failure>
+<testcase classname="Hooks" name="no tags, undefined step" time="0.009">
+<failure>
 <![CDATA[Exception in step
-samples/hooks/hooks.feature:12]]></failure>
+samples/hooks/hooks.feature:12]]>
+</failure>
 </testcase>
-<testcase classname="Hooks" name="with a tag, passed step" time="0.011"><failure>
+<testcase classname="Hooks" name="with a tag, passed step" time="0.011">
+<failure>
 <![CDATA[Exception in conditional hook
-samples/hooks/hooks.feature:15]]></failure>
+samples/hooks/hooks.feature:15]]>
+</failure>
 </testcase>
-<testcase classname="Hooks" name="with an attachment in the hook" time="0.011"><failure>
+<testcase classname="Hooks" name="with an attachment in the hook" time="0.011">
+<failure>
 <![CDATA[Exception in hook
-samples/hooks/hooks.feature:19]]></failure>
+samples/hooks/hooks.feature:19]]>
+</failure>
 </testcase>
 </testsuite>

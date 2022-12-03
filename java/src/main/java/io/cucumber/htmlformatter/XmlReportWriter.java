@@ -62,6 +62,7 @@ class XmlReportWriter {
     private static long countFailures(Map<TestStepResultStatus, Long> counts) {
         return createNotPassedNotSkippedSet().stream().mapToLong(s -> counts.getOrDefault(s, 0L)).sum();
     }
+
     private static EnumSet<TestStepResultStatus> createNotPassedNotSkippedSet() {
         EnumSet<TestStepResultStatus> notPassedNotSkipped = EnumSet.allOf(TestStepResultStatus.class);
         notPassedNotSkipped.remove(PASSED);
@@ -89,21 +90,17 @@ class XmlReportWriter {
         }
 
         String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
+        newLine(writer);
+        writer.writeStartElement(elementName);
+
+        // TODO: Write step line listing
 
         if (result.getMessage().isPresent()) {
-            writer.writeStartElement(elementName);
-            // writer.writeAttribute("message", ); // TODO: Add to message
-            // protocol
-            // writer.writeAttribute("type", ); // TODO: Add to message
-            // protocol
             newLine(writer);
-            // TODO: Write step line listing
-
             writeCDataSafely(writer, result.getMessage().get());
-            writer.writeEndElement();
-        } else {
-            writer.writeEmptyElement(elementName);
+            newLine(writer);
         }
+        writer.writeEndElement();
         newLine(writer);
     }
 

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.017" tests="3" skipped="0" failures="3" errors="0">
-<testcase classname="Undefined steps" name="Undefined step causes failure" time="0.003"><failure/>
+<testcase classname="Undefined steps" name="Undefined step causes failure" time="0.003">
+<failure></failure>
 </testcase>
-<testcase classname="Undefined steps" name="Steps before undefined steps are executed" time="0.005"><failure/>
+<testcase classname="Undefined steps" name="Steps before undefined steps are executed" time="0.005">
+<failure></failure>
 </testcase>
-<testcase classname="Undefined steps" name="Steps after undefined steps are skipped" time="0.005"><failure/>
+<testcase classname="Undefined steps" name="Steps after undefined steps are skipped" time="0.005">
+<failure></failure>
 </testcase>
 </testsuite>

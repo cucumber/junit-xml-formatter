@@ -12,6 +12,7 @@ import javax.xml.transform.Source;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,47 +39,38 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void test(TestCase testCase) throws IOException {
-        ByteArrayOutputStream bytes = crateJunitXmlReport(testCase);
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
 
         Source expected = Input.fromPath(testCase.expected).build();
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
-        Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
 
         Assertions.assertAll(
                 () -> assertThat(actual).isValidAgainst(jenkinsSchema),
-                () -> assertThat(actual).isValidAgainst(surefireSchema),
                 () -> assertThat(actual).and(expected).ignoreWhitespace().areIdentical()
         );
-    }
-
-    private static ByteArrayOutputStream crateJunitXmlReport(TestCase testCase) throws IOException {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try (InputStream in = Files.newInputStream(testCase.source)) {
-            try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
-                try (MessagesToJunitXmlWriter htmlWriter = new MessagesToJunitXmlWriter(bytes)) {
-                    for (Envelope envelope : envelopes) {
-                        htmlWriter.write(envelope);
-                    }
-                }
-            }
-        }
-        return bytes;
     }
 
     @ParameterizedTest
     @MethodSource("acceptance")
     @Disabled
-    void writeAcceptanceTest(TestCase testCase) throws IOException {
+    void updateExpectedXmlReportFiles(TestCase testCase) throws IOException {
+        try (OutputStream out = Files.newOutputStream(testCase.expected)){
+            writeJunitXmlReport(testCase, out);
+        }
+    }
+
+    private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
         try (InputStream in = Files.newInputStream(testCase.source)) {
             try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
-                try (MessagesToJunitXmlWriter htmlWriter = new MessagesToJunitXmlWriter(Files.newOutputStream(testCase.expected))) {
+                try (MessagesToJunitXmlWriter writer = new MessagesToJunitXmlWriter(out)) {
                     for (Envelope envelope : envelopes) {
-                        htmlWriter.write(envelope);
+                        writer.write(envelope);
                     }
                 }
             }
         }
+        return out;
     }
 
     static class TestCase {
