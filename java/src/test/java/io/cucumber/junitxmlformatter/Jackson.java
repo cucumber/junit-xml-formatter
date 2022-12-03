@@ -1,4 +1,4 @@
-package io.cucumber.htmlformatter;
+package io.cucumber.junitxmlformatter;
 
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

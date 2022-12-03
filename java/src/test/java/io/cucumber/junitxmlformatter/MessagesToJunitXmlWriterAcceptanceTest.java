@@ -1,4 +1,4 @@
-package io.cucumber.htmlformatter;
+package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
 import io.cucumber.messages.types.Envelope;
@@ -16,12 +16,13 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.cucumber.htmlformatter.Jackson.OBJECT_MAPPER;
+import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
@@ -32,6 +33,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
             return paths
                     .filter(path -> path.getFileName().toString().endsWith(".ndjson"))
                     .map(TestCase::new)
+                    .sorted(Comparator.comparing(testCase -> testCase.source))
                     .collect(Collectors.toList());
         }
     }

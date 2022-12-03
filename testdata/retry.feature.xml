@@ -6,6 +6,9 @@
 <![CDATA[Exception in step
 samples/retry/retry.feature:13]]>
 </failure>
+<system-out><![CDATA[
+a step that passes the second time..........................................passed
+]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the second attempt" time="0.003"></testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
@@ -13,12 +16,18 @@ samples/retry/retry.feature:13]]>
 <![CDATA[Exception in step
 samples/retry/retry.feature:16]]>
 </failure>
+<system-out><![CDATA[
+a step that passes the third time...........................................passed
+]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
 <failure>
 <![CDATA[Exception in step
 samples/retry/retry.feature:16]]>
 </failure>
+<system-out><![CDATA[
+a step that passes the third time...........................................passed
+]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003"></testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
@@ -26,20 +35,31 @@ samples/retry/retry.feature:16]]>
 <![CDATA[Exception in step
 samples/retry/retry.feature:19]]>
 </failure>
+<system-out><![CDATA[
+a step that always fails....................................................failed
+]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
 <failure>
 <![CDATA[Exception in step
 samples/retry/retry.feature:19]]>
 </failure>
+<system-out><![CDATA[
+a step that always fails....................................................failed
+]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
 <failure>
 <![CDATA[Exception in step
 samples/retry/retry.feature:19]]>
 </failure>
+<system-out><![CDATA[
+a step that always fails....................................................failed
+]]></system-out>
 </testcase>
 <testcase classname="Retry" name="don't retry on UNDEFINED" time="0.003">
-<failure></failure>
+<failure/><system-out><![CDATA[
+a non-existent step.........................................................undefined
+]]></system-out>
 </testcase>
 </testsuite>

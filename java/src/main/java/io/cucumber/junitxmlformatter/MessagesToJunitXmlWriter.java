@@ -1,7 +1,6 @@
-package io.cucumber.htmlformatter;
+package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Envelope;
-import io.cucumber.messages.types.TestRunFinished;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;

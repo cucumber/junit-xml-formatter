@@ -6,6 +6,12 @@
 samples/markdown/markdown.feature.md:24
 samples/markdown/markdown.feature.md:38]]>
 </failure>
+<system-out><![CDATA[
+some TypeScript code:.......................................................passed
+some classic Gherkin:.......................................................passed
+we use a data table and attach something and then fail......................failed
+this might or might not run.................................................skipped
+]]></system-out>
 </testcase>
 <testcase classname="Cheese" name="Ylajali!" time="0.009"></testcase>
 </testsuite>

@@ -1,13 +1,15 @@
-package io.cucumber.htmlformatter;
+package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Pickle;
+import io.cucumber.messages.types.PickleStep;
 import io.cucumber.messages.types.TestCase;
 import io.cucumber.messages.types.TestCaseFinished;
 import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestRunFinished;
 import io.cucumber.messages.types.TestRunStarted;
+import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
@@ -16,16 +18,18 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static io.cucumber.messages.TimeConversion.timestampToJavaInstant;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsFirst;
-import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
@@ -42,9 +46,10 @@ class XmlReportData {
     private final Map<String, Instant> testCaseStartedIdToStartedInstant = new ConcurrentHashMap<>();
     private final Map<String, Instant> testCaseStartedIdToFinishedInstant = new ConcurrentHashMap<>();
     private final Map<String, TestStepResult> testCaseStartedIdToResult = new ConcurrentHashMap<>();
+    private final Map<String, TestStepResultStatus> testStepIdToTestStepResultStatus = new ConcurrentHashMap<>();
     private final Map<String, String> testCaseStartedIdToTestCaseId = new ConcurrentHashMap<>();
-    private final Map<String, String> testCaseIdToPickleId = new ConcurrentHashMap<>();
-    private final Map<String, String> pickleIdToPickleName = new ConcurrentHashMap<>();
+    private final Map<String, TestCase> testCaseIdToTestCase = new ConcurrentHashMap<>();
+    private final Map<String, Pickle> pickleIdToPickle = new ConcurrentHashMap<>();
     private final Map<String, String> pickleIdToScenarioAstNodeId = new ConcurrentHashMap<>();
     private final Map<String, String> scenarioAstNodeIdToFeatureName = new ConcurrentHashMap<>();
 
@@ -79,8 +84,13 @@ class XmlReportData {
     }
 
     void testStepFinished(TestStepFinished event) {
+        testStepIdToTestStepResultStatus.put(event.getTestStepId(), event.getTestStepResult().getStatus());
         testCaseStartedIdToResult.compute(event.getTestCaseStartedId(),
                 (__, previousStatus) -> mostSevereResult(previousStatus, event.getTestStepResult()));
+    }
+
+    private TestStepResult mostSevereResult(TestStepResult a, TestStepResult b) {
+        return testStepResultComparator.compare(a, b) >= 0 ? a : b;
     }
 
     void source(GherkinDocument event) {
@@ -100,22 +110,19 @@ class XmlReportData {
         });
     }
 
-    void pickle(Pickle pickle) {
-        pickleIdToPickleName.put(pickle.getId(), pickle.getName());
+    void pickle(Pickle event) {
+        pickleIdToPickle.put(event.getId(), event);
         // @formatter:off
-        pickle.getAstNodeIds().stream()
+        event.getAstNodeIds().stream()
                 .findFirst()
-                .ifPresent(id -> pickleIdToScenarioAstNodeId.put(pickle.getId(), id));
+                .ifPresent(id -> pickleIdToScenarioAstNodeId.put(event.getId(), id));
         // @formatter:on
     }
 
     void testCase(TestCase testCase) {
-        testCaseIdToPickleId.put(testCase.getId(), testCase.getPickleId());
+        testCaseIdToTestCase.put(testCase.getId(), testCase);
     }
 
-    private TestStepResult mostSevereResult(TestStepResult a, TestStepResult b) {
-        return testStepResultComparator.compare(a, b) >= 0 ? a : b;
-    }
 
     double getSuiteDurationInSeconds() {
         if (testRunStarted == null || testRunFinished == null) {
@@ -147,15 +154,46 @@ class XmlReportData {
 
     String getPickleName(String testCaseStartedId) {
         String testCaseId = testCaseStartedIdToTestCaseId.get(testCaseStartedId);
-        String pickleId = testCaseIdToPickleId.get(testCaseId);
-        return pickleIdToPickleName.get(pickleId);
+        String pickleId = testCaseIdToTestCase.get(testCaseId).getPickleId();
+        return pickleIdToPickle.get(pickleId).getName();
     }
 
     public String getFeatureName(String testCaseStartedId) {
         String testCaseId = testCaseStartedIdToTestCaseId.get(testCaseStartedId);
-        String pickleId = testCaseIdToPickleId.get(testCaseId);
+        String pickleId = testCaseIdToTestCase.get(testCaseId).getPickleId();
         String astNodeId = pickleIdToScenarioAstNodeId.get(pickleId);
         return scenarioAstNodeIdToFeatureName.get(astNodeId);
+    }
+
+    public LinkedHashMap<String, String> getStepsAndResult(String testCaseStartedId) {
+        String testCaseId = testCaseStartedIdToTestCaseId.get(testCaseStartedId);
+        TestCase testCase = testCaseIdToTestCase.get(testCaseId);
+        Pickle pickle = pickleIdToPickle.get(testCase.getPickleId());
+
+        return testCase.getTestSteps().stream()
+                .filter(testStep -> testStep.getPickleStepId().isPresent())
+                .collect(Collectors.toMap(
+                        renderTestStepText(pickle),
+                        this::renderTestStepResult,
+                        (existing, replacement) -> replacement,
+                        LinkedHashMap::new
+                ));
+    }
+
+    private String renderTestStepResult(TestStep testStep) {
+        return testStepIdToTestStepResultStatus.get(testStep.getId()).value().toLowerCase(Locale.ROOT);
+    }
+
+    private Function<TestStep, String> renderTestStepText(Pickle pickle) {
+        return testStep -> {
+            // TODO: Add the keyword to the pickle
+            String pickleId = testStep.getPickleStepId().orElse(null);
+            return pickle.getSteps().stream()
+                    .filter(pickleStep -> pickleStep.getId().equals(pickleId))
+                    .map(PickleStep::getText)
+                    .findFirst()
+                    .orElse("");
+        };
     }
 
     public Deque<String> testCaseStartedIds() {
@@ -164,12 +202,9 @@ class XmlReportData {
 
     private static final io.cucumber.messages.types.Duration ZERO_DURATION = new io.cucumber.messages.types.Duration(
             0L, 0L);
-    private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED); // By
+    // By definition, but see https://github.com/cucumber/gherkin/issues/11
+    private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED);
 
-    // definition,
-    // but
-    // see
-    // https://github.com/cucumber/gherkin/issues/11
     public TestStepResult getTestCaseStatus(String testCaseStartedId) {
         return testCaseStartedIdToResult.getOrDefault(testCaseStartedId, SCENARIO_WITH_NO_STEPS);
     }

@@ -1,4 +1,4 @@
-package io.cucumber.htmlformatter;
+package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
@@ -9,12 +9,14 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
+import static java.util.Locale.ROOT;
 
 class XmlReportWriter {
     private final NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
@@ -73,14 +75,18 @@ class XmlReportWriter {
     private void writeTestcase(XMLStreamWriter writer, String id) throws XMLStreamException {
         writer.writeStartElement("testcase");
 
-        writer.writeAttribute("classname", data.getFeatureName(id));
-        writer.writeAttribute("name", data.getPickleName(id));
-        writer.writeAttribute("time", numberFormat.format(data.getDurationInSeconds(id)));
+        writeTestCaseAttributes(writer, id);
 
         writeNonPassedElement(writer, id);
 
         writer.writeEndElement();
         newLine(writer);
+    }
+
+    private void writeTestCaseAttributes(XMLStreamWriter writer, String id) throws XMLStreamException {
+        writer.writeAttribute("classname", data.getFeatureName(id));
+        writer.writeAttribute("name", data.getPickleName(id));
+        writer.writeAttribute("time", numberFormat.format(data.getDurationInSeconds(id)));
     }
 
     private void writeNonPassedElement(XMLStreamWriter writer, String id) throws XMLStreamException {
@@ -89,17 +95,45 @@ class XmlReportWriter {
             return;
         }
 
-        String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
         newLine(writer);
-        writer.writeStartElement(elementName);
 
-        // TODO: Write step line listing
+        String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
 
         if (result.getMessage().isPresent()) {
+            writer.writeStartElement(elementName);
             newLine(writer);
             writeCDataSafely(writer, result.getMessage().get());
             newLine(writer);
+            writer.writeEndElement();
+            newLine(writer);
+        } else {
+            writer.writeEmptyElement(elementName);
         }
+        writeStepAndResultList(writer, id);
+    }
+
+    private void writeStepAndResultList(XMLStreamWriter writer, String id) throws XMLStreamException {
+        LinkedHashMap<String, String> results = data.getStepsAndResult(id);
+        if (results.isEmpty()) {
+            return;
+        }
+
+        writer.writeStartElement("system-out");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        results.entrySet().forEach(r -> {
+            String stepText = r.getKey();
+            String status = r.getValue();
+            sb.append(stepText);
+            sb.append(".");
+            for (int i = 75 - stepText.length(); i > 0  ; i--) {
+                sb.append(".");
+            };
+            sb.append(status);
+            sb.append("\n");
+        });
+        writeCDataSafely(writer, sb.toString());
         writer.writeEndElement();
         newLine(writer);
     }
