@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.007" tests="1" skipped="0" failures="0" errors="0">
-<testcase classname="Data Tables" name="transposed table" time="0.005"></testcase>
+<testcase classname="Data Tables" name="transposed table" time="0.005"><system-out><![CDATA[
+When the following table is transposed:.....................................passed
+Then it should be:..........................................................passed
+]]></system-out>
+</testcase>
 </testsuite>

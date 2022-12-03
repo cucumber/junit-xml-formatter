@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.049" tests="6" skipped="0" failures="4" errors="0">
-<testcase classname="Examples Tables" name="eating cucumbers" time="0.007"></testcase>
-<testcase classname="Examples Tables" name="eating cucumbers" time="0.007"></testcase>
+<testcase classname="Examples Tables" name="eating cucumbers" time="0.007"><system-out><![CDATA[
+Given there are 12 cucumbers................................................passed
+When I eat 5 cucumbers......................................................passed
+Then I should have 7 cucumbers..............................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Examples Tables" name="eating cucumbers" time="0.007"><system-out><![CDATA[
+Given there are 20 cucumbers................................................passed
+When I eat 5 cucumbers......................................................passed
+Then I should have 15 cucumbers.............................................passed
+]]></system-out>
+</testcase>
 <testcase classname="Examples Tables" name="eating cucumbers" time="0.007">
 <failure>
 <![CDATA[Expected values to be strictly equal:

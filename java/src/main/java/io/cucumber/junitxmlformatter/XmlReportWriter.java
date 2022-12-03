@@ -78,7 +78,7 @@ class XmlReportWriter {
         writeTestCaseAttributes(writer, id);
 
         writeNonPassedElement(writer, id);
-
+        writeStepAndResultList(writer, id);
         writer.writeEndElement();
         newLine(writer);
     }
@@ -109,7 +109,6 @@ class XmlReportWriter {
         } else {
             writer.writeEmptyElement(elementName);
         }
-        writeStepAndResultList(writer, id);
     }
 
     private void writeStepAndResultList(XMLStreamWriter writer, String id) throws XMLStreamException {

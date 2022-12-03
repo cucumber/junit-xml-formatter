@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.005" tests="1" skipped="0" failures="0" errors="0">
-<testcase classname="Parameter Types" name="flights" time="0.003"></testcase>
+<testcase classname="Parameter Types" name="flights" time="0.003"><system-out><![CDATA[
+Given LHR-CDG has been delayed 45 minutes...................................passed
+]]></system-out>
+</testcase>
 </testsuite>

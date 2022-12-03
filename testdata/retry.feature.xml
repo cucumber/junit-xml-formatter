@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.041" tests="10" skipped="0" failures="7" errors="0">
-<testcase classname="Retry" name="test case passes on the first attempt" time="0.003"></testcase>
+<testcase classname="Retry" name="test case passes on the first attempt" time="0.003"><system-out><![CDATA[
+Given a step that always passes.............................................passed
+]]></system-out>
+</testcase>
 <testcase classname="Retry" name="test case passes on the second attempt" time="0.003">
 <failure>
 <![CDATA[Exception in step
@@ -10,14 +13,8 @@ samples/retry/retry.feature:13]]>
 Given a step that passes the second time....................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Retry" name="test case passes on the second attempt" time="0.003"></testcase>
-<testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
-<failure>
-<![CDATA[Exception in step
-samples/retry/retry.feature:16]]>
-</failure>
-<system-out><![CDATA[
-Given a step that passes the third time.....................................passed
+<testcase classname="Retry" name="test case passes on the second attempt" time="0.003"><system-out><![CDATA[
+Given a step that passes the second time....................................passed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
@@ -29,7 +26,19 @@ samples/retry/retry.feature:16]]>
 Given a step that passes the third time.....................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Retry" name="test case passes on the final attempt" time="0.003"></testcase>
+<testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
+<failure>
+<![CDATA[Exception in step
+samples/retry/retry.feature:16]]>
+</failure>
+<system-out><![CDATA[
+Given a step that passes the third time.....................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Retry" name="test case passes on the final attempt" time="0.003"><system-out><![CDATA[
+Given a step that passes the third time.....................................passed
+]]></system-out>
+</testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
 <failure>
 <![CDATA[Exception in step
