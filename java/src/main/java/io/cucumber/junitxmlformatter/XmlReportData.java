@@ -8,7 +8,6 @@ import io.cucumber.messages.types.TestCase;
 import io.cucumber.messages.types.TestCaseFinished;
 import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestRunFinished;
-import io.cucumber.messages.types.TestRunStarted;
 import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
@@ -51,7 +50,7 @@ class XmlReportData {
     private final Map<String, String> stepAstNodeIdToStepKeyWord = new ConcurrentHashMap<>();
 
     void collect(Envelope envelope) {
-        envelope.getTestRunStarted().ifPresent(this::testRunStarted);
+        envelope.getTestRunStarted().ifPresent(event -> this.testRunStarted = timestampToJavaInstant(event.getTimestamp()));
         envelope.getTestRunFinished().ifPresent(this::testRunFinished);
         envelope.getTestCaseStarted().ifPresent(this::testCaseStarted);
         envelope.getTestCaseFinished().ifPresent(this::testCaseFinished);
@@ -61,26 +60,22 @@ class XmlReportData {
         envelope.getTestCase().ifPresent(this::testCase);
     }
 
-    void testRunStarted(TestRunStarted event) {
-        this.testRunStarted = timestampToJavaInstant(event.getTimestamp());
-    }
-
-    void testRunFinished(TestRunFinished event) {
+    private void testRunFinished(TestRunFinished event) {
         this.testRunFinished = timestampToJavaInstant(event.getTimestamp());
     }
 
-    void testCaseStarted(TestCaseStarted event) {
+    private void testCaseStarted(TestCaseStarted event) {
         this.testCaseStartedIds.add(event.getId());
         this.testCaseStartedIdToStartedInstant.put(event.getId(), timestampToJavaInstant(event.getTimestamp()));
         this.testCaseStartedIdToTestCaseId.put(event.getId(), event.getTestCaseId());
     }
 
-    void testCaseFinished(TestCaseFinished event) {
+    private void testCaseFinished(TestCaseFinished event) {
         this.testCaseStartedIdToFinishedInstant.put(event.getTestCaseStartedId(),
                 timestampToJavaInstant(event.getTimestamp()));
     }
 
-    void testStepFinished(TestStepFinished event) {
+    private void testStepFinished(TestStepFinished event) {
         testStepIdToTestStepResultStatus.put(event.getTestStepId(), event.getTestStepResult().getStatus());
         testCaseStartedIdToResult.compute(event.getTestCaseStartedId(),
                 (__, previousStatus) -> mostSevereResult(previousStatus, event.getTestStepResult()));
@@ -90,7 +85,7 @@ class XmlReportData {
         return testStepResultComparator.compare(a, b) >= 0 ? a : b;
     }
 
-    void source(GherkinDocument event) {
+    private void source(GherkinDocument event) {
         event.getFeature().ifPresent(feature -> {
             feature.getChildren().forEach(featureChild -> {
                 featureChild.getRule().ifPresent(rule -> {
@@ -113,7 +108,7 @@ class XmlReportData {
         });
     }
 
-    void pickle(Pickle event) {
+    private void pickle(Pickle event) {
         pickleIdToPickle.put(event.getId(), event);
         // @formatter:off
         event.getAstNodeIds().stream()
@@ -122,7 +117,7 @@ class XmlReportData {
         // @formatter:on
     }
 
-    void testCase(TestCase testCase) {
+    private void testCase(TestCase testCase) {
         testCaseIdToTestCase.put(testCase.getId(), testCase);
     }
 
@@ -168,7 +163,7 @@ class XmlReportData {
         return scenarioAstNodeIdToFeatureName.get(astNodeId);
     }
 
-    public LinkedHashMap<String, String> getStepsAndResult(String testCaseStartedId) {
+    LinkedHashMap<String, String> getStepsAndResult(String testCaseStartedId) {
         String testCaseId = testCaseStartedIdToTestCaseId.get(testCaseStartedId);
         TestCase testCase = testCaseIdToTestCase.get(testCaseId);
         Pickle pickle = pickleIdToPickle.get(testCase.getPickleId());
@@ -208,16 +203,16 @@ class XmlReportData {
         };
     }
 
-    public Deque<String> testCaseStartedIds() {
+    Deque<String> testCaseStartedIds() {
         return testCaseStartedIds;
     }
 
-    private static final io.cucumber.messages.types.Duration ZERO_DURATION = new io.cucumber.messages.types.Duration(
-            0L, 0L);
+    private static final io.cucumber.messages.types.Duration ZERO_DURATION =
+            new io.cucumber.messages.types.Duration(0L, 0L);
     // By definition, but see https://github.com/cucumber/gherkin/issues/11
     private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED);
 
-    public TestStepResult getTestCaseStatus(String testCaseStartedId) {
+    TestStepResult getTestCaseStatus(String testCaseStartedId) {
         return testCaseStartedIdToResult.getOrDefault(testCaseStartedId, SCENARIO_WITH_NO_STEPS);
     }
 
