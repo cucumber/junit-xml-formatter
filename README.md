@@ -5,10 +5,30 @@
 JUnit XML Formatter
 ===================
 
-Writes Cucumber message into a JUnit XML report. 
+Writes Cucumber message into a JUnit XML report.
 
-The JUnit XML report is a loose standard. We validate it against the 
+The JUnit XML report is a loose standard. We validate it against the
 [Jenkins JUnit XML XSD](./jenkins-junit.xsd) so there should be a good
 chance your CI will understand it.
 
 If not, please let us know in the issues!
+
+## Limitations
+
+Cucumber and JUnit support a different set of test outcomes. These are mapped according to the table below. 
+
+Additionally, Cucumber may execute in a non-strict mode ([#714](https://github.com/cucumber/common/issues/714)). 
+This will cause a scenario to pass when it has pending or undefined steps. To ensure consistency between a failing
+test process and the presence of `failures` in the xml report it is advisable to only use Cucumber in strict mode. 
+
+| Cucumber  | JUnit   | Passes in strict mode | Passes in non-strict mode |
+|-----------|---------|-----------------------|---------------------------|
+| UNKNOWN   | n/a     | n/a                   | n/a                       |
+| PASSED    | passed  | yes                   | yes                       |            
+| SKIPPED   | skipped | yes                   | yes                       |           
+| PENDING   | failure | no                    | yes                       |
+| UNDEFINED | failure | no                    | yes                       |
+| AMBIGUOUS | failure | no                    | no                        |
+| FAILED    | failure | no                    | no                        |
+
+

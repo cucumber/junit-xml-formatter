@@ -14,6 +14,8 @@ import static java.util.Objects.requireNonNull;
  * Writes the message output of a test run as single page html report.
  * <p>
  * Note: Messages are first collected and only written once the stream is closed.
+ *
+ * @see <a href=https://github.com/cucumber/cucumber-junit-xml-formatter>Cucumber JUnit XML Formatter - README.md</a>
  */
 public class MessagesToJunitXmlWriter implements AutoCloseable {
 
