@@ -105,6 +105,16 @@ class XmlReportData {
                         ruleChild.getScenario().ifPresent(scenario -> {
                             scenario(feature, rule, scenario);
                         });
+                        ruleChild.getBackground().ifPresent(background -> {
+                            background.getSteps().forEach(step -> {
+                                stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
+                            });
+                        });
+                    });
+                });
+                featureChild.getBackground().ifPresent(background -> {
+                    background.getSteps().forEach(step -> {
+                        stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
                     });
                 });
                 featureChild.getScenario().ifPresent(scenario -> {
