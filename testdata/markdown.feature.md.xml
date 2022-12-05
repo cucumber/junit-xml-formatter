@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.021" tests="2" skipped="0" failures="1" errors="0">
-<testcase classname="Cheese" name="Ylajali!" time="0.009">
+<testcase classname="Cheese" name="Nom nom nom - Ylajali! - because we need more tables - Example #1.1" time="0.009">
 <failure>
 <![CDATA[You asked me to fail
 samples/markdown/markdown.feature.md:24
@@ -13,7 +13,7 @@ When we use a data table and attach something and then fail.................fail
 Then this might or might not run............................................skipped
 ]]></system-out>
 </testcase>
-<testcase classname="Cheese" name="Ylajali!" time="0.009"><system-out><![CDATA[
+<testcase classname="Cheese" name="Nom nom nom - Ylajali! - because we need more tables - Example #1.2" time="0.009"><system-out><![CDATA[
 Given some TypeScript code:.................................................passed
 And some classic Gherkin:...................................................passed
 When we use a data table and attach something and then pass.................passed

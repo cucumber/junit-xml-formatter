@@ -1,9 +1,14 @@
 package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Envelope;
+import io.cucumber.messages.types.Examples;
+import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
+import io.cucumber.messages.types.Rule;
+import io.cucumber.messages.types.Scenario;
+import io.cucumber.messages.types.TableRow;
 import io.cucumber.messages.types.TestCase;
 import io.cucumber.messages.types.TestCaseFinished;
 import io.cucumber.messages.types.TestCaseStarted;
@@ -15,7 +20,13 @@ import io.cucumber.messages.types.TestStepResultStatus;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
@@ -48,6 +59,7 @@ class XmlReportData {
     private final Map<String, String> pickleIdToScenarioAstNodeId = new ConcurrentHashMap<>();
     private final Map<String, String> scenarioAstNodeIdToFeatureName = new ConcurrentHashMap<>();
     private final Map<String, String> stepAstNodeIdToStepKeyWord = new ConcurrentHashMap<>();
+    private final Map<String, String> pickleAstNodeIdToLongName = new ConcurrentHashMap<>();
 
     void collect(Envelope envelope) {
         envelope.getTestRunStarted().ifPresent(event -> this.testRunStarted = timestampToJavaInstant(event.getTimestamp()));
@@ -91,21 +103,40 @@ class XmlReportData {
                 featureChild.getRule().ifPresent(rule -> {
                     rule.getChildren().forEach(ruleChild -> {
                         ruleChild.getScenario().ifPresent(scenario -> {
-                            scenarioAstNodeIdToFeatureName.put(scenario.getId(), feature.getName());
-                            scenario.getSteps().forEach(step -> {
-                                stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
-                            });
+                            scenario(feature, rule, scenario);
                         });
                     });
                 });
                 featureChild.getScenario().ifPresent(scenario -> {
-                    scenarioAstNodeIdToFeatureName.put(scenario.getId(), feature.getName());
-                    scenario.getSteps().forEach(step -> {
-                        stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
-                    });
+                    scenario(feature, null, scenario);
                 });
             });
         });
+    }
+
+    private void scenario(Feature feature, Rule rule, Scenario scenario) {
+        scenarioAstNodeIdToFeatureName.put(scenario.getId(), feature.getName());
+        scenario.getSteps().forEach(step -> {
+            stepAstNodeIdToStepKeyWord.put(step.getId(), step.getKeyword());
+        });
+
+        String rulePrefix = rule == null ? "" : rule.getName() + " - ";
+        pickleAstNodeIdToLongName.put(scenario.getId(), rulePrefix + scenario.getName());
+
+        List<Examples> examples = scenario.getExamples();
+        for (int examplesIndex = 0; examplesIndex < examples.size(); examplesIndex++) {
+            Examples currentExamples = examples.get(examplesIndex);
+            List<TableRow> tableRows = currentExamples.getTableBody();
+            for (int exampleIndex = 0; exampleIndex < tableRows.size(); exampleIndex++) {
+                TableRow currentExample = tableRows.get(exampleIndex);
+                StringBuilder suffix = new StringBuilder(" - ");
+                if (!currentExamples.getName().isEmpty()) {
+                    suffix.append(currentExamples.getName()).append(" - ");
+                }
+                suffix.append("Example #").append(examplesIndex + 1).append(".").append(exampleIndex + 1);
+                pickleAstNodeIdToLongName.put(currentExample.getId(), rulePrefix + scenario.getName() + suffix);
+            }
+        }
     }
 
     private void pickle(Pickle event) {
@@ -153,7 +184,10 @@ class XmlReportData {
     String getPickleName(String testCaseStartedId) {
         String testCaseId = testCaseStartedIdToTestCaseId.get(testCaseStartedId);
         String pickleId = testCaseIdToTestCase.get(testCaseId).getPickleId();
-        return pickleIdToPickle.get(pickleId).getName();
+        Pickle pickle = pickleIdToPickle.get(pickleId);
+        List<String> astNodeIds = pickle.getAstNodeIds();
+        String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
+        return pickleAstNodeIdToLongName.getOrDefault(pickleAstNodeId, pickle.getName());
     }
 
     public String getFeatureName(String testCaseStartedId) {
