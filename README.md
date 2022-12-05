@@ -15,20 +15,23 @@ If not, please let us know in the issues!
 
 ## Limitations
 
-Cucumber and JUnit support a different set of test outcomes. These are mapped according to the table below. 
+Cucumber and the JUnit XML Report support a different set of test outcomes.
+These are mapped according to the table below. 
 
-Additionally, Cucumber may execute in a non-strict mode ([#714](https://github.com/cucumber/common/issues/714)). 
-This will cause a scenario to pass when it has pending or undefined steps. To ensure consistency between a failing
-test process and the presence of `failures` in the xml report it is advisable to only use Cucumber in strict mode. 
+Additionally, it is advisable to run Cucumber in strict mode. When used in
+non-strict mode scenarios with a pending or undefined outcome will not fail
+the test run ([#714](https://github.com/cucumber/common/issues/714)). This
+can lead to a xml report that contains `failure` outcomes while the build
+passes.
 
-| Cucumber  | JUnit   | Passes in strict mode | Passes in non-strict mode |
-|-----------|---------|-----------------------|---------------------------|
-| UNKNOWN   | n/a     | n/a                   | n/a                       |
-| PASSED    | passed  | yes                   | yes                       |            
-| SKIPPED   | skipped | yes                   | yes                       |           
-| PENDING   | failure | no                    | yes                       |
-| UNDEFINED | failure | no                    | yes                       |
-| AMBIGUOUS | failure | no                    | no                        |
-| FAILED    | failure | no                    | no                        |
+| Cucumber Outcome | XML Outcome | Passes in strict mode | Passes in non-strict mode |
+|------------------|-------------|-----------------------|---------------------------|
+| UNKNOWN          | n/a         | n/a                   | n/a                       |
+| PASSED           | passed      | yes                   | yes                       |            
+| SKIPPED          | skipped     | yes                   | yes                       |           
+| PENDING          | failure     | no                    | yes                       |
+| UNDEFINED        | failure     | no                    | yes                       |
+| AMBIGUOUS        | failure     | no                    | no                        |
+| FAILED           | failure     | no                    | no                        |
 
 
