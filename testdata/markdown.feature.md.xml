@@ -13,7 +13,8 @@ When we use a data table and attach something and then fail.................fail
 Then this might or might not run............................................skipped
 ]]></system-out>
 </testcase>
-<testcase classname="Cheese" name="Nom nom nom - Ylajali! - because we need more tables - Example #1.2" time="0.009"><system-out><![CDATA[
+<testcase classname="Cheese" name="Nom nom nom - Ylajali! - because we need more tables - Example #1.2" time="0.009">
+<system-out><![CDATA[
 Given some TypeScript code:.................................................passed
 And some classic Gherkin:...................................................passed
 When we use a data table and attach something and then pass.................passed

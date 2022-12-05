@@ -74,9 +74,8 @@ class XmlReportWriter {
 
     private void writeTestcase(XMLStreamWriter writer, String id) throws XMLStreamException {
         writer.writeStartElement("testcase");
-
         writeTestCaseAttributes(writer, id);
-
+        newLine(writer);
         writeNonPassedElement(writer, id);
         writeStepAndResultList(writer, id);
         writer.writeEndElement();
@@ -95,8 +94,6 @@ class XmlReportWriter {
             return;
         }
 
-        newLine(writer);
-
         String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
 
         if (result.getMessage().isPresent()) {
@@ -105,10 +102,10 @@ class XmlReportWriter {
             writeCDataSafely(writer, result.getMessage().get());
             newLine(writer);
             writer.writeEndElement();
-            newLine(writer);
         } else {
             writer.writeEmptyElement(elementName);
         }
+        newLine(writer);
     }
 
     private void writeStepAndResultList(XMLStreamWriter writer, String id) throws XMLStreamException {
