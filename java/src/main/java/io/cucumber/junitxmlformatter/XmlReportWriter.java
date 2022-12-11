@@ -12,6 +12,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
@@ -96,15 +97,29 @@ class XmlReportWriter {
 
         String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
 
-        if (result.getMessage().isPresent()) {
-            writer.writeStartElement(elementName);
-            newLine(writer);
-            writeCDataSafely(writer, result.getMessage().get());
-            newLine(writer);
-            writer.writeEndElement();
-        } else {
+        Optional<String> message = result.getMessage();
+        Optional<String> exceptionType = result.getExceptionType();
+        Optional<String> exceptionMessage = result.getExceptionMessage();
+
+        if (!(message.isPresent() || exceptionType.isPresent() || exceptionMessage.isPresent())) {
             writer.writeEmptyElement(elementName);
+            newLine(writer);
+            return;
         }
+
+        writer.writeStartElement(elementName);
+        if (exceptionType.isPresent()) {
+            writer.writeAttribute("type", exceptionType.get());
+        }
+        if (exceptionMessage.isPresent()) {
+            writer.writeAttribute("message", exceptionMessage.get());
+        }
+        if (message.isPresent()) {
+            newLine(writer);
+            writeCDataSafely(writer, message.get());
+            newLine(writer);
+        }
+        writer.writeEndElement();
         newLine(writer);
     }
 
@@ -123,9 +138,9 @@ class XmlReportWriter {
             String status = r.getValue();
             sb.append(stepText);
             sb.append(".");
-            for (int i = 75 - stepText.length(); i > 0  ; i--) {
+            for (int i = 75 - stepText.length(); i > 0; i--) {
                 sb.append(".");
-            };
+            }
             sb.append(status);
             sb.append("\n");
         });

@@ -51,7 +51,8 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>messages</artifactId>
-            <version>[19.0.0,21.0.0)</version>
+<!--            TODO: Upgrade-->
+            <version>[20.0.1-SNAPSHOT,21.0.0)</version>
         </dependency>
 
         <dependency>
