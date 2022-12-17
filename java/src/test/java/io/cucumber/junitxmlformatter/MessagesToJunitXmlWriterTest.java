@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 
-import static io.cucumber.messages.TimeConversion.javaInstantToTimestamp;
+import static io.cucumber.messages.Convertor.toMessage;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -23,8 +23,8 @@ class MessagesToJunitXmlWriterTest {
         Instant finished = Instant.ofEpochSecond(30);
 
         String html = renderAsJunitXml(
-                Envelope.of(new TestRunStarted(javaInstantToTimestamp(started))),
-                Envelope.of(new TestRunFinished(null, true, javaInstantToTimestamp(finished))));
+                Envelope.of(new TestRunStarted(toMessage(started))),
+                Envelope.of(new TestRunFinished(null, true, toMessage(finished), null)));
 
         assertThat(html).isEqualTo("" +
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

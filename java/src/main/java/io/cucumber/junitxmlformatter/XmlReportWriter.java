@@ -1,5 +1,6 @@
 package io.cucumber.junitxmlformatter;
 
+import io.cucumber.messages.types.Exception;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
@@ -98,8 +99,8 @@ class XmlReportWriter {
         String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
 
         Optional<String> message = result.getMessage();
-        Optional<String> exceptionType = result.getExceptionType();
-        Optional<String> exceptionMessage = result.getExceptionMessage();
+        Optional<String> exceptionType = result.getException().map(Exception::getType);
+        Optional<String> exceptionMessage = result.getException().flatMap(Exception::getMessage);
 
         if (!(message.isPresent() || exceptionType.isPresent() || exceptionMessage.isPresent())) {
             writer.writeEmptyElement(elementName);

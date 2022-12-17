@@ -254,7 +254,7 @@ class XmlReportData {
     private static final io.cucumber.messages.types.Duration ZERO_DURATION =
             new io.cucumber.messages.types.Duration(0L, 0L);
     // By definition, but see https://github.com/cucumber/gherkin/issues/11
-    private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED, null, null);
+    private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED, null);
 
     TestStepResult getTestCaseStatus(String testCaseStartedId) {
         return testCaseStartedIdToResult.getOrDefault(testCaseStartedId, SCENARIO_WITH_NO_STEPS);
