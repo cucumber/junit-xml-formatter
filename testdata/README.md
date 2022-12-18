@@ -1,11 +1,12 @@
 # Acceptance test data
 
-The junit xml formatter uses some test data for acceptance testing.
+The junit xml formatter uses the examples from the cucumber compatibility kit
+for acceptance testing. These examples consist of `.ndjson` files created by
+the `fake-cucumber` reference implementation. 
 
-Those test data are ndjson files copied from the cucumber compatibility kit.
+* The `.njdon` files are copied in by running `npm install`.
+* The expected `.xml` files are created by running the
+  `MessagesToJunitXmlWriterAcceptanceTest#updateExpectedXmlReportFiles` test.
 
-Having those test data as part of a npm package will enable renovate ot update the
-CCK automatically.
-
-The test-testdata github workflow will then help us keeping the test data up-to-date
-after the CCK has been updated.
+We ensure the `.ndjson` files stay up to date by running `npm install` in CI
+and verifying nothing changed.
