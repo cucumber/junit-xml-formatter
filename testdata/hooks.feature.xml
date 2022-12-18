@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.055" tests="5" skipped="0" failures="5" errors="0">
 <testcase classname="Hooks" name="no tags, passed step" time="0.009">
-<failure>
+<failure type="Error" message="Exception in hook">
 <![CDATA[Exception in hook
 samples/hooks/hooks.feature:5]]>
 </failure>
@@ -10,7 +10,7 @@ When a step passes..........................................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="no tags, failed step" time="0.009">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/hooks/hooks.feature:9]]>
 </failure>
@@ -19,7 +19,7 @@ When a step throws an exception.............................................fail
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="no tags, undefined step" time="0.009">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/hooks/hooks.feature:12]]>
 </failure>
@@ -28,7 +28,7 @@ When a step throws an exception.............................................fail
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="with a tag, passed step" time="0.011">
-<failure>
+<failure type="Error" message="Exception in conditional hook">
 <![CDATA[Exception in conditional hook
 samples/hooks/hooks.feature:15]]>
 </failure>
@@ -37,7 +37,7 @@ When a step passes..........................................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Hooks" name="with an attachment in the hook" time="0.011">
-<failure>
+<failure type="Error" message="Exception in hook">
 <![CDATA[Exception in hook
 samples/hooks/hooks.feature:19]]>
 </failure>

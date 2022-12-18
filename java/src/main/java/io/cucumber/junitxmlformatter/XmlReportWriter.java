@@ -6,7 +6,6 @@ import io.cucumber.messages.types.TestStepResultStatus;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.EnumSet;
@@ -14,11 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
-import static java.util.Locale.ROOT;
 
 class XmlReportWriter {
     private final NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
@@ -30,28 +27,28 @@ class XmlReportWriter {
 
     void writeXmlReport(Writer out) throws XMLStreamException {
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
-        XMLStreamWriter writer = factory.createXMLStreamWriter(out);
+        EscapingXmlStreamWriter writer = new EscapingXmlStreamWriter(factory.createXMLStreamWriter(out));
         writer.writeStartDocument("UTF-8", "1.0");
-        newLine(writer);
+        writer.newLine();
         writeTestsuite(data, writer);
         writer.writeEndDocument();
         writer.flush();
     }
 
-    private void writeTestsuite(XmlReportData data, XMLStreamWriter writer) throws XMLStreamException {
+    private void writeTestsuite(XmlReportData data, EscapingXmlStreamWriter writer) throws XMLStreamException {
         writer.writeStartElement("testsuite");
         writeSuiteAttributes(writer);
-        newLine(writer);
+        writer.newLine();
 
         for (String testCaseStartedId : data.testCaseStartedIds()) {
             writeTestcase(writer, testCaseStartedId);
         }
 
         writer.writeEndElement();
-        newLine(writer);
+        writer.newLine();
     }
 
-    private void writeSuiteAttributes(XMLStreamWriter writer) throws XMLStreamException {
+    private void writeSuiteAttributes(EscapingXmlStreamWriter writer) throws XMLStreamException {
         writer.writeAttribute("name", "Cucumber");
         writer.writeAttribute("time", numberFormat.format(data.getSuiteDurationInSeconds()));
 
@@ -74,23 +71,23 @@ class XmlReportWriter {
         return notPassedNotSkipped;
     }
 
-    private void writeTestcase(XMLStreamWriter writer, String id) throws XMLStreamException {
+    private void writeTestcase(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
         writer.writeStartElement("testcase");
         writeTestCaseAttributes(writer, id);
-        newLine(writer);
+        writer.newLine();
         writeNonPassedElement(writer, id);
         writeStepAndResultList(writer, id);
         writer.writeEndElement();
-        newLine(writer);
+        writer.newLine();
     }
 
-    private void writeTestCaseAttributes(XMLStreamWriter writer, String id) throws XMLStreamException {
+    private void writeTestCaseAttributes(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
         writer.writeAttribute("classname", data.getFeatureName(id));
         writer.writeAttribute("name", data.getPickleName(id));
         writer.writeAttribute("time", numberFormat.format(data.getDurationInSeconds(id)));
     }
 
-    private void writeNonPassedElement(XMLStreamWriter writer, String id) throws XMLStreamException {
+    private void writeNonPassedElement(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
         TestStepResult result = data.getTestCaseStatus(id);
         if (result.getStatus() == TestStepResultStatus.PASSED) {
             return;
@@ -102,13 +99,12 @@ class XmlReportWriter {
         Optional<String> exceptionType = result.getException().map(Exception::getType);
         Optional<String> exceptionMessage = result.getException().flatMap(Exception::getMessage);
 
-        if (!(message.isPresent() || exceptionType.isPresent() || exceptionMessage.isPresent())) {
+        if (message.isPresent()) {
+            writer.writeStartElement(elementName);
+        } else {
             writer.writeEmptyElement(elementName);
-            newLine(writer);
-            return;
         }
 
-        writer.writeStartElement(elementName);
         if (exceptionType.isPresent()) {
             writer.writeAttribute("type", exceptionType.get());
         }
@@ -116,22 +112,29 @@ class XmlReportWriter {
             writer.writeAttribute("message", exceptionMessage.get());
         }
         if (message.isPresent()) {
-            newLine(writer);
-            writeCDataSafely(writer, message.get());
-            newLine(writer);
+            writer.newLine();
+            writer.writeCData(message.get());
+            writer.newLine();
         }
-        writer.writeEndElement();
-        newLine(writer);
+
+        if (message.isPresent()) {
+            writer.writeEndElement();
+        }
+        writer.newLine();
     }
 
-    private void writeStepAndResultList(XMLStreamWriter writer, String id) throws XMLStreamException {
+    private void writeStepAndResultList(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
         LinkedHashMap<String, String> results = data.getStepsAndResult(id);
         if (results.isEmpty()) {
             return;
         }
-
         writer.writeStartElement("system-out");
+        writer.writeCData(createStepResultList(results));
+        writer.writeEndElement();
+        writer.newLine();
+    }
 
+    private static String createStepResultList(LinkedHashMap<String, String> results) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         results.entrySet().forEach(r -> {
@@ -145,21 +148,6 @@ class XmlReportWriter {
             sb.append(status);
             sb.append("\n");
         });
-        writeCDataSafely(writer, sb.toString());
-        writer.writeEndElement();
-        newLine(writer);
-    }
-
-    private static final Pattern CDATA_TERMINATOR_SPLIT = Pattern.compile("(?<=]])(?=>)");
-
-    private static void writeCDataSafely(XMLStreamWriter writer, String data) throws XMLStreamException {
-        // https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
-        for (String part : CDATA_TERMINATOR_SPLIT.split(data)) {
-            writer.writeCData(part);
-        }
-    }
-
-    private void newLine(XMLStreamWriter xmlWriter) throws XMLStreamException {
-        xmlWriter.writeCharacters("\n");
+        return sb.toString();
     }
 }

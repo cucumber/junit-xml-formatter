@@ -6,7 +6,7 @@ Given a step that always passes.............................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the second attempt" time="0.003">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/retry/retry.feature:13]]>
 </failure>
@@ -20,7 +20,7 @@ Given a step that passes the second time....................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/retry/retry.feature:16]]>
 </failure>
@@ -29,7 +29,7 @@ Given a step that passes the third time.....................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case passes on the final attempt" time="0.003">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/retry/retry.feature:16]]>
 </failure>
@@ -43,7 +43,7 @@ Given a step that passes the third time.....................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/retry/retry.feature:19]]>
 </failure>
@@ -52,7 +52,7 @@ Given a step that always fails..............................................fail
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/retry/retry.feature:19]]>
 </failure>
@@ -61,7 +61,7 @@ Given a step that always fails..............................................fail
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="test case fails on every attempt" time="0.003">
-<failure>
+<failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
 samples/retry/retry.feature:19]]>
 </failure>

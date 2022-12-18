@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.021" tests="2" skipped="0" failures="1" errors="0">
 <testcase classname="Cheese" name="Nom nom nom - Ylajali! - because we need more tables - Example #1.1" time="0.009">
-<failure>
+<failure type="Error" message="You asked me to fail">
 <![CDATA[You asked me to fail
 samples/markdown/markdown.feature.md:24
 samples/markdown/markdown.feature.md:38]]>
