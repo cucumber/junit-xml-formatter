@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Cucumber" time="0.043" tests="7" skipped="0" failures="0" errors="0">
+<testcase classname="Attachments" name="Strings can be attached with a media type" time="0.005">
+<system-out><![CDATA[
+When the string "hello" is attached as "application/octet-stream"...........passed
+]]></system-out>
+</testcase>
+<testcase classname="Attachments" name="Log JSON" time="0.005">
+<system-out><![CDATA[
+When the following string is attached as "application/json":................passed
+]]></system-out>
+</testcase>
+<testcase classname="Attachments" name="Log text" time="0.005">
+<system-out><![CDATA[
+When the string "hello" is logged...........................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Attachments" name="Log ANSI coloured text" time="0.005">
+<system-out><![CDATA[
+When text with ANSI escapes is logged.......................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Attachments" name="Byte arrays are base64-encoded regardless of media type" time="0.005">
+<system-out><![CDATA[
+When an array with 10 bytes is attached as "text/plain".....................passed
+]]></system-out>
+</testcase>
+<testcase classname="Attachments" name="Streams are always base64-encoded" time="0.005">
+<system-out><![CDATA[
+When a JPEG image is attached...............................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Attachments" name="Attaching images in examples - Example #1.1" time="0.005">
+<system-out><![CDATA[
+When the cucumber.png png is attached.......................................passed
+]]></system-out>
+</testcase>
+</testsuite>

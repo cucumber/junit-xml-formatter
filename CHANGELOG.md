@@ -7,4 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added 
+- Java implementation ([#3](https://github.com/cucumber/cucumber-junit-xml-formatter/pull/3) M.P. Korstanje)
+
+
 [Unreleased]: https://github.com/cucumber/action-publish-poetry/compare/0.0.0...HEAD

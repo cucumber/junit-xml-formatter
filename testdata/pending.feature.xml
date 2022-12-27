@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Cucumber" time="0.017" tests="3" skipped="0" failures="3" errors="0">
+<testcase classname="Pending steps" name="Unimplemented step signals pending status" time="0.003">
+<failure/>
+<system-out><![CDATA[
+Given a step that isnt implemented yet......................................pending
+]]></system-out>
+</testcase>
+<testcase classname="Pending steps" name="Steps before unimplemented steps are executed" time="0.005">
+<failure/>
+<system-out><![CDATA[
+Given an implemented step...................................................passed
+When a step that isnt implemented yet.......................................pending
+]]></system-out>
+</testcase>
+<testcase classname="Pending steps" name="Steps after unimplemented steps are skipped" time="0.005">
+<failure/>
+<system-out><![CDATA[
+Given a step that isnt implemented yet......................................pending
+Then a step that we expect to be skipped....................................skipped
+]]></system-out>
+</testcase>
+</testsuite>
