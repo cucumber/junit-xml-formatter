@@ -2,10 +2,15 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
 import io.cucumber.messages.types.Envelope;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.xmlunit.builder.Input;
+import org.xmlunit.validation.JAXPValidator;
+import org.xmlunit.validation.Languages;
+import org.xmlunit.validation.ValidationProblem;
+import org.xmlunit.validation.ValidationResult;
 
 import javax.xml.transform.Source;
 import java.io.ByteArrayOutputStream;
@@ -23,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
@@ -57,7 +61,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         assertThat(actual).isValidAgainst(jenkinsSchema);
     }
 
-    private static final List<String> scenariosWithMissingException = Arrays.asList(
+    static final List<String> testCasesWithMissingException = Arrays.asList(
             "examples-tables.feature",
             "pending.feature",
             "retry.feature",
@@ -68,13 +72,33 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void validateAgainstSurefire(TestCase testCase) throws IOException {
-        assumeFalse(scenariosWithMissingException.contains(testCase.name),
-                () -> "Test case '" + testCase.name + "' does not pass surefire validation");
-
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
-        assertThat(actual).isValidAgainst(surefireSchema);
+        if (!testCasesWithMissingException.contains(testCase.name)) {
+            assertThat(actual).isValidAgainst(surefireSchema);
+            return;
+        }
+
+        /*
+         This report tries to be compatible with the Jenkins XSD. The Surefire
+         XSD is a bit stricter and generally assumes tests fail with an
+         exception. While this is true for Cucumber-JVM, this isn't true for
+         all Cucumber implementations.
+
+         E.g. in Cucumber-JVM a scenario would report it is pending by throwing
+         a PendingException. However, in Javascript this would be done by
+         returning the string "pending".
+
+         Since the Surefire XSD is also relatively popular we do check it and
+         exclude the cases that don't pass selectively.
+         */
+        JAXPValidator validator = new JAXPValidator(Languages.W3C_XML_SCHEMA_NS_URI);
+        validator.setSchemaSource(surefireSchema);
+        ValidationResult validationResult = validator.validateInstance(actual);
+        Iterable<ValidationProblem> problems = validationResult.getProblems();
+        Assertions.assertThat(problems).extracting(ValidationProblem::getMessage)
+                .containsOnly("cvc-complex-type.4: Attribute 'type' must appear on element 'failure'.");
     }
 
     @ParameterizedTest
