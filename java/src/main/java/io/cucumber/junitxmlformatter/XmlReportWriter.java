@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.cucumber.messages.types.TestStepResultStatus.FAILED;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 
@@ -89,11 +90,12 @@ class XmlReportWriter {
 
     private void writeNonPassedElement(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
         TestStepResult result = data.getTestCaseStatus(id);
-        if (result.getStatus() == TestStepResultStatus.PASSED) {
+        TestStepResultStatus status = result.getStatus();
+        if (status == TestStepResultStatus.PASSED) {
             return;
         }
 
-        String elementName = result.getStatus() == SKIPPED ? "skipped" : "failure";
+        String elementName = status == SKIPPED ? "skipped" : "failure";
 
         Optional<String> message = result.getMessage();
         Optional<String> exceptionType = result.getException().map(Exception::getType);
@@ -105,7 +107,7 @@ class XmlReportWriter {
             writer.writeEmptyElement(elementName);
         }
 
-        if (exceptionType.isPresent()) {
+        if (status == FAILED && exceptionType.isPresent()) {
             writer.writeAttribute("type", exceptionType.get());
         }
         if (exceptionMessage.isPresent()) {
