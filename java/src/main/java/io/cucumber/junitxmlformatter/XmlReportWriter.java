@@ -107,7 +107,7 @@ class XmlReportWriter {
             writer.writeEmptyElement(elementName);
         }
 
-        if (status == FAILED && exceptionType.isPresent()) {
+        if (status != SKIPPED && exceptionType.isPresent()) {
             writer.writeAttribute("type", exceptionType.get());
         }
         if (exceptionMessage.isPresent()) {
