@@ -2,7 +2,6 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
 import io.cucumber.messages.types.Envelope;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,6 +15,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
@@ -42,22 +43,45 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @MethodSource("acceptance")
     void test(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
-
         Source expected = Input.fromPath(testCase.expected).build();
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
-        Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
+        assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
+    }
 
-        Assertions.assertAll(
-                () -> assertThat(actual).isValidAgainst(jenkinsSchema),
-                () -> assertThat(actual).and(expected).ignoreWhitespace().areIdentical()
-        );
+    @ParameterizedTest
+    @MethodSource("acceptance")
+    void validateAgainstJenkins(TestCase testCase) throws IOException {
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
+        Source actual = Input.fromByteArray(bytes.toByteArray()).build();
+        Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
+        assertThat(actual).isValidAgainst(jenkinsSchema);
+    }
+
+    private static final List<String> scenariosWithMissingException = Arrays.asList(
+            "examples-tables.feature",
+            "pending.feature",
+            "retry.feature",
+            "undefined.feature",
+            "unknown-parameter-type.feature"
+    );
+
+    @ParameterizedTest
+    @MethodSource("acceptance")
+    void validateAgainstSurefire(TestCase testCase) throws IOException {
+        assumeFalse(scenariosWithMissingException.contains(testCase.name),
+                () -> "Test case '" + testCase.name + "' does not pass surefire validation");
+
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
+        Source actual = Input.fromByteArray(bytes.toByteArray()).build();
+        Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
+        assertThat(actual).isValidAgainst(surefireSchema);
     }
 
     @ParameterizedTest
     @MethodSource("acceptance")
     @Disabled
     void updateExpectedXmlReportFiles(TestCase testCase) throws IOException {
-        try (OutputStream out = Files.newOutputStream(testCase.expected)){
+        try (OutputStream out = Files.newOutputStream(testCase.expected)) {
             writeJunitXmlReport(testCase, out);
         }
     }
