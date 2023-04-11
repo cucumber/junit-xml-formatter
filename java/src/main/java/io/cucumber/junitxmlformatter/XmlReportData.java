@@ -59,7 +59,7 @@ class XmlReportData {
     private final Map<String, String> pickleIdToScenarioAstNodeId = new ConcurrentHashMap<>();
     private final Map<String, String> scenarioAstNodeIdToFeatureName = new ConcurrentHashMap<>();
     private final Map<String, String> stepAstNodeIdToStepKeyWord = new ConcurrentHashMap<>();
-    private final Map<String, String> pickleAstNodeIdToLongName = new ConcurrentHashMap<>();
+    private final Map<String, String> pickleAstNodeIdToNameOrSuffix = new ConcurrentHashMap<>();
 
     void collect(Envelope envelope) {
         envelope.getTestRunStarted().ifPresent(event -> this.testRunStarted = timestampToJavaInstant(event.getTimestamp()));
@@ -131,7 +131,7 @@ class XmlReportData {
         });
 
         String rulePrefix = rule == null ? "" : rule.getName() + " - ";
-        pickleAstNodeIdToLongName.put(scenario.getId(), rulePrefix + scenario.getName());
+        pickleAstNodeIdToNameOrSuffix.put(scenario.getId(), rulePrefix + scenario.getName());
 
         List<Examples> examples = scenario.getExamples();
         for (int examplesIndex = 0; examplesIndex < examples.size(); examplesIndex++) {
@@ -144,7 +144,7 @@ class XmlReportData {
                     suffix.append(currentExamples.getName()).append(" - ");
                 }
                 suffix.append("Example #").append(examplesIndex + 1).append(".").append(exampleIndex + 1);
-                pickleAstNodeIdToLongName.put(currentExample.getId(), rulePrefix + scenario.getName() + suffix);
+                pickleAstNodeIdToNameOrSuffix.put(currentExample.getId(), suffix.toString());
             }
         }
     }
@@ -197,7 +197,7 @@ class XmlReportData {
         Pickle pickle = pickleIdToPickle.get(pickleId);
         List<String> astNodeIds = pickle.getAstNodeIds();
         String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
-        return pickleAstNodeIdToLongName.getOrDefault(pickleAstNodeId, pickle.getName());
+        return pickle.getName() + pickleAstNodeIdToNameOrSuffix.getOrDefault(pickleAstNodeId, "");
     }
 
     public String getFeatureName(String testCaseStartedId) {
