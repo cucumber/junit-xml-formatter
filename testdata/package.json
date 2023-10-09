@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@cucumber/compatibility-kit": "^11.1.0",
+    "@cucumber/compatibility-kit": "^13.0.0",
     "shx": "^0.3.4"
   }
 }
