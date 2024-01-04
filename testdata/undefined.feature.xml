@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="Cucumber" time="0.017" tests="3" skipped="0" failures="3" errors="0">
-<testcase classname="Undefined steps" name="Undefined step causes failure" time="0.003">
+<testcase classname="Undefined steps" name="An undefined step causes a failure" time="0.003">
 <failure/>
 <system-out><![CDATA[
-Given a step that isnt implemented yet......................................undefined
+Given a step that is yet to be defined......................................undefined
 ]]></system-out>
 </testcase>
 <testcase classname="Undefined steps" name="Steps before undefined steps are executed" time="0.005">
 <failure/>
 <system-out><![CDATA[
 Given an implemented step...................................................passed
-When a step that isnt implemented yet.......................................undefined
+And a step that is yet to be defined........................................undefined
 ]]></system-out>
 </testcase>
 <testcase classname="Undefined steps" name="Steps after undefined steps are skipped" time="0.005">
 <failure/>
 <system-out><![CDATA[
-Given a step that isnt implemented yet......................................undefined
-Then a step that we expect to be skipped....................................skipped
+Given a step that is yet to be defined......................................undefined
+And a step that will be skipped.............................................skipped
 ]]></system-out>
 </testcase>
 </testsuite>

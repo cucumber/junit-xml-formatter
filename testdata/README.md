@@ -10,3 +10,6 @@ the [`fake-cucumber` reference implementation](https://github.com/cucumber/fake-
 
 We ensure the `.ndjson` files stay up to date by running `npm install` in CI
 and verifying nothing changed.
+
+Should there be changes, these tests can be used to update the expected data:
+ * Java: `MessagesToJunitXmlWriterAcceptanceTest.updateExpectedXmlReportFiles`

@@ -3,7 +3,7 @@
 <testcase classname="Stack traces" name="A failing step" time="0.003">
 <failure type="Error" message="BOOM">
 <![CDATA[BOOM
-samples/stack-traces/stack-traces.feature:11]]>
+samples/stack-traces/stack-traces.feature:9]]>
 </failure>
 <system-out><![CDATA[
 When a step throws an exception.............................................failed

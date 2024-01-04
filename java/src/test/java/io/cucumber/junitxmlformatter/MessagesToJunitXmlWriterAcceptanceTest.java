@@ -63,6 +63,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     static final List<String> testCasesWithMissingException = Arrays.asList(
             "examples-tables.feature",
+            "hooks.feature",
             "pending.feature",
             "retry.feature",
             "undefined.feature",

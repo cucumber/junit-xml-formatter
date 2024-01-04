@@ -3,21 +3,21 @@
 <testcase classname="Skipping scenarios" name="Skipping from a Before hook" time="0.005">
 <skipped/>
 <system-out><![CDATA[
-Given a step that we expect to be skipped...................................skipped
+Given a step that is skipped................................................skipped
 ]]></system-out>
 </testcase>
 <testcase classname="Skipping scenarios" name="Skipping from a step doesn't affect the previous steps" time="0.005">
 <skipped/>
 <system-out><![CDATA[
-Given an implemented step...................................................passed
-When a step that skips......................................................skipped
+Given a step that does not skip.............................................passed
+And I skip a step...........................................................skipped
 ]]></system-out>
 </testcase>
 <testcase classname="Skipping scenarios" name="Skipping from a step causes the rest of the scenario to be skipped" time="0.005">
 <skipped/>
 <system-out><![CDATA[
-Given a step that skips.....................................................skipped
-When a step that we expect to be skipped....................................skipped
+Given I skip a step.........................................................skipped
+And a step that is skipped..................................................skipped
 ]]></system-out>
 </testcase>
 </testsuite>

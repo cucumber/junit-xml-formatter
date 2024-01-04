@@ -1,46 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Cucumber" time="0.055" tests="5" skipped="0" failures="5" errors="0">
-<testcase classname="Hooks" name="no tags, passed step" time="0.009">
-<failure type="Error" message="Exception in hook">
-<![CDATA[Exception in hook
-samples/hooks/hooks.feature:5]]>
-</failure>
+<testsuite name="Cucumber" time="0.055" tests="5" skipped="0" failures="3" errors="0">
+<testcase classname="Hooks" name="No tags and a passed step" time="0.009">
 <system-out><![CDATA[
 When a step passes..........................................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Hooks" name="no tags, failed step" time="0.009">
+<testcase classname="Hooks" name="No tags and a failed step" time="0.009">
 <failure type="Error" message="Exception in step">
 <![CDATA[Exception in step
-samples/hooks/hooks.feature:9]]>
+samples/hooks/hooks.feature:10]]>
 </failure>
 <system-out><![CDATA[
-When a step throws an exception.............................................failed
+When a step fails...........................................................failed
 ]]></system-out>
 </testcase>
-<testcase classname="Hooks" name="no tags, undefined step" time="0.009">
-<failure type="Error" message="Exception in step">
-<![CDATA[Exception in step
-samples/hooks/hooks.feature:12]]>
-</failure>
+<testcase classname="Hooks" name="No tags and a undefined step" time="0.009">
+<failure/>
 <system-out><![CDATA[
-When a step throws an exception.............................................failed
+When a step does not exist..................................................undefined
 ]]></system-out>
 </testcase>
-<testcase classname="Hooks" name="with a tag, passed step" time="0.011">
+<testcase classname="Hooks" name="With a tag, a failure in the hook and a passed step" time="0.011">
 <failure type="Error" message="Exception in conditional hook">
 <![CDATA[Exception in conditional hook
-samples/hooks/hooks.feature:15]]>
+samples/hooks/hooks.feature:16]]>
 </failure>
 <system-out><![CDATA[
 When a step passes..........................................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Hooks" name="with an attachment in the hook" time="0.011">
-<failure type="Error" message="Exception in hook">
-<![CDATA[Exception in hook
-samples/hooks/hooks.feature:19]]>
-</failure>
+<testcase classname="Hooks" name="With an tag, an valid attachment in the hook and a passed step" time="0.011">
 <system-out><![CDATA[
 When a step passes..........................................................passed
 ]]></system-out>
