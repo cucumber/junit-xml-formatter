@@ -4,17 +4,16 @@ import io.cucumber.messages.types.Exception;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
+import java.util.List;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.cucumber.messages.types.TestStepResultStatus.FAILED;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 
@@ -126,7 +125,7 @@ class XmlReportWriter {
     }
 
     private void writeStepAndResultList(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
-        LinkedHashMap<String, String> results = data.getStepsAndResult(id);
+        List<Map.Entry<String, String>> results = data.getStepsAndResult(id);
         if (results.isEmpty()) {
             return;
         }
@@ -136,10 +135,10 @@ class XmlReportWriter {
         writer.newLine();
     }
 
-    private static String createStepResultList(LinkedHashMap<String, String> results) {
+    private static String createStepResultList(List<Map.Entry<String, String>> results) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        results.entrySet().forEach(r -> {
+        results.forEach(r -> {
             String stepText = r.getKey();
             String status = r.getValue();
             sb.append(stepText);
