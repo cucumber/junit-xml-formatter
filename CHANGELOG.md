@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2024-02-15
 ### Fixed
 - Missing execution steps statuses if same step is called multiple times in a test ([#24](https://github.com/cucumber/cucumber-junit-xml-formatter/pull/24) F. Ahadi)
 
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.0.0
 
-[Unreleased]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/438ec1f6218a849eb2a684982e2ff7e304a3155f...v0.0.0
