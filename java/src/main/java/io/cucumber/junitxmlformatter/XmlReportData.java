@@ -20,9 +20,9 @@ import io.cucumber.messages.types.TestStepResultStatus;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.AbstractMap;
 import java.util.Comparator;
 import java.util.Deque;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -207,19 +207,19 @@ class XmlReportData {
         return scenarioAstNodeIdToFeatureName.get(astNodeId);
     }
 
-    LinkedHashMap<String, String> getStepsAndResult(String testCaseStartedId) {
+    List<Map.Entry<String, String>> getStepsAndResult(String testCaseStartedId) {
         String testCaseId = testCaseStartedIdToTestCaseId.get(testCaseStartedId);
         TestCase testCase = testCaseIdToTestCase.get(testCaseId);
         Pickle pickle = pickleIdToPickle.get(testCase.getPickleId());
 
         return testCase.getTestSteps().stream()
                 .filter(testStep -> testStep.getPickleStepId().isPresent())
-                .collect(Collectors.toMap(
-                        renderTestStepText(pickle),
-                        this::renderTestStepResult,
-                        (existing, replacement) -> replacement,
-                        LinkedHashMap::new
-                ));
+                .map(testStep -> {
+                    String key = renderTestStepText(pickle).apply(testStep);
+                    String value = renderTestStepResult(testStep);
+                    return new AbstractMap.SimpleEntry<>(key, value);
+                })
+                .collect(Collectors.toList());
     }
 
     private String renderTestStepResult(TestStep testStep) {
