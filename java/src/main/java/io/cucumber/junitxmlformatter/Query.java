@@ -2,12 +2,15 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.Convertor;
 import io.cucumber.messages.types.Envelope;
+import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
+import io.cucumber.messages.types.Rule;
 import io.cucumber.messages.types.Scenario;
 import io.cucumber.messages.types.Step;
+import io.cucumber.messages.types.TableRow;
 import io.cucumber.messages.types.TestCase;
 import io.cucumber.messages.types.TestCaseFinished;
 import io.cucumber.messages.types.TestCaseStarted;
@@ -19,8 +22,8 @@ import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.Timestamp;
 
 import java.time.Duration;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
@@ -30,78 +33,112 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.BiFunction;
 
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsFirst;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
-public class Query {
-    private final Comparator<TestStepResult> testStepResultComparator = nullsFirst(
-            comparing(o -> o.getStatus().ordinal()));
+class Query {
+    private final Comparator<TestStepResult> testStepResultComparator = nullsFirst(comparing(o -> o.getStatus().ordinal()));
     private TestRunStarted testRunStarted;
     private TestRunFinished testRunFinished;
     private final Deque<TestCaseStarted> testCaseStarted = new ConcurrentLinkedDeque<>();
     private final Map<String, TestCaseFinished> testCaseFinishedByTestCaseStartedId = new ConcurrentHashMap<>();
-    private final Map<String, List<TestStepFinished>> testStepFinishedByTestCaseStartedId = new ConcurrentHashMap<>();
-    private final Map<String, TestStepFinished> testStepFinishedByTestStepId = new ConcurrentHashMap<>();
+    private final Map<String, List<TestStepFinished>> testStepsFinishedByTestCaseStartedId = new ConcurrentHashMap<>();
     private final Map<String, Pickle> pickleById = new ConcurrentHashMap<>();
     private final Map<String, TestCase> testCaseById = new ConcurrentHashMap<>();
     private final Map<String, Step> stepById = new ConcurrentHashMap<>();
-    private final Map<String, Scenario> scenarioById = new ConcurrentHashMap<>();
+    private final Map<String, TestStep> testStepById = new ConcurrentHashMap<>();
     private final Map<String, PickleStep> pickleStepById = new ConcurrentHashMap<>();
-    private final Map<String, Feature> featureByScenarioId = new ConcurrentHashMap<>();
+    private final Map<String, Ancestors> ancestorsById = new ConcurrentHashMap<>();
 
     public void update(Envelope envelope) {
-        envelope.getTestRunStarted().ifPresent(event -> this.testRunStarted = event);
-        envelope.getTestRunFinished().ifPresent(event -> this.testRunFinished = event);
-
-        envelope.getTestCaseStarted().ifPresent(testCaseStarted::add);
-        envelope.getTestCaseFinished().ifPresent(event -> testCaseFinishedByTestCaseStartedId.put(event.getTestCaseStartedId(), event));
-        envelope.getTestStepFinished().ifPresent(event -> {
-            testStepFinishedByTestStepId.put(event.getTestStepId(), event);
-            testStepFinishedByTestCaseStartedId.compute(event.getTestCaseStartedId(), addToList(event));
-        });
-        envelope.getGherkinDocument()
-                .flatMap(GherkinDocument::getFeature)
-                .ifPresent(feature -> feature.getChildren()
-                        .forEach(featureChild -> {
-                            featureChild.getRule().ifPresent(rule -> rule.getChildren()
-                                    .forEach(ruleChild -> {
-                                        ruleChild.getBackground()
-                                                .ifPresent(background -> background.getSteps()
-                                                        .forEach(step -> stepById.put(step.getId(), step)));
-                                        ruleChild.getScenario()
-                                                .ifPresent(scenario -> {
-                                                    scenario.getSteps().forEach(step -> stepById.put(step.getId(), step));
-                                                    scenarioById.put(scenario.getId(), scenario);
-                                                    featureByScenarioId.put(scenario.getId(), feature);
-                                                });
-                                    }));
-                            featureChild.getBackground()
-                                    .ifPresent(background -> background.getSteps()
-                                            .forEach(step -> stepById.put(step.getId(), step)));
-                            featureChild.getScenario().ifPresent(scenario -> {
-                                scenario.getSteps().forEach(step -> stepById.put(step.getId(), step));
-                                scenarioById.put(scenario.getId(), scenario);
-                                featureByScenarioId.put(scenario.getId(), feature);
-                            });
-                        }));
-        envelope.getPickle().ifPresent(event -> {
-            pickleById.put(event.getId(), event);
-            event.getSteps().forEach(pickleStep -> pickleStepById.put(pickleStep.getId(), pickleStep));
-        });
-        envelope.getTestCase().ifPresent(event -> testCaseById.put(event.getId(), event));
+        envelope.getTestRunStarted().ifPresent(this::updateTestRunStarted);
+        envelope.getTestRunFinished().ifPresent(this::updateTestRunFinished);
+        envelope.getTestCaseStarted().ifPresent(this::updateTestCaseStarted);
+        envelope.getTestCaseFinished().ifPresent(this::updateTestCaseFinished);
+        envelope.getTestStepFinished().ifPresent(this::updateTestStepFinished);
+        envelope.getGherkinDocument().ifPresent(this::updateGherkinDocument);
+        envelope.getPickle().ifPresent(this::updatePickle);
+        envelope.getTestCase().ifPresent(this::updateTestCase);
     }
 
-    private static BiFunction<String, List<TestStepFinished>, List<TestStepFinished>> addToList(TestStepFinished event) {
-        return (k, v) -> {
-            if (v == null) {
-                List<TestStepFinished> list = new ArrayList<>();
-                list.add(event);
-                return list;
+    private void updateTestCaseStarted(TestCaseStarted testCaseStarted) {
+        this.testCaseStarted.add(testCaseStarted);
+    }
+
+    private void updateTestCase(TestCase event) {
+        this.testCaseById.put(event.getId(), event);
+        event.getTestSteps().forEach(testStep -> testStepById.put(testStep.getId(), testStep));
+    }
+
+    private void updatePickle(Pickle event) {
+        this.pickleById.put(event.getId(), event);
+        event.getSteps().forEach(pickleStep -> pickleStepById.put(pickleStep.getId(), pickleStep));
+    }
+
+    private void updateGherkinDocument(GherkinDocument gherkinDocument) {
+        gherkinDocument.getFeature().ifPresent(this::updateFeature);
+    }
+
+    private void updateFeature(Feature feature) {
+        feature.getChildren()
+                .forEach(featureChild -> {
+                    featureChild.getBackground().ifPresent(background -> updateSteps(background.getSteps()));
+                    featureChild.getScenario().ifPresent(scenario -> updateScenario(feature, null, scenario));
+                    featureChild.getRule().ifPresent(rule -> rule.getChildren().forEach(ruleChild -> {
+                        ruleChild.getBackground().ifPresent(background -> updateSteps(background.getSteps()));
+                        ruleChild.getScenario().ifPresent(scenario -> updateScenario(feature, rule, scenario));
+                    }));
+                });
+    }
+
+    private void updateSteps(List<Step> steps) {
+        steps.forEach(step -> stepById.put(step.getId(), step));
+    }
+
+    private void updateTestStepFinished(TestStepFinished event) {
+        this.testStepsFinishedByTestCaseStartedId.compute(event.getTestCaseStartedId(), addToList(event));
+    }
+
+    private void updateTestCaseFinished(TestCaseFinished event) {
+        this.testCaseFinishedByTestCaseStartedId.put(event.getTestCaseStartedId(), event);
+    }
+
+    private void updateTestRunFinished(TestRunFinished event) {
+        this.testRunFinished = event;
+    }
+
+    private void updateTestRunStarted(TestRunStarted event) {
+        this.testRunStarted = event;
+    }
+
+    private void updateScenario(Feature feature, Rule rule, Scenario scenario) {
+        this.ancestorsById.put(scenario.getId(), new Ancestors(feature, rule, scenario));
+        updateSteps(scenario.getSteps());
+
+        List<Examples> examples = scenario.getExamples();
+        for (int examplesIndex = 0; examplesIndex < examples.size(); examplesIndex++) {
+            Examples currentExamples = examples.get(examplesIndex);
+            List<TableRow> tableRows = currentExamples.getTableBody();
+            for (int exampleIndex = 0; exampleIndex < tableRows.size(); exampleIndex++) {
+                TableRow currentExample = tableRows.get(exampleIndex);
+                ancestorsById.put(currentExample.getId(), new Ancestors(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
             }
-            v.add(event);
-            return v;
+        }
+    }
+
+    private static <K, E> BiFunction<K, List<E>, List<E>> addToList(E element) {
+        return (key, existing) -> {
+            if (existing != null) {
+                existing.add(element);
+                return existing;
+            }
+            List<E> list = new ArrayList<>();
+            list.add(element);
+            return list;
         };
     }
 
@@ -113,13 +150,6 @@ public class Query {
         return ofNullable(testRunFinished);
     }
 
-    public Optional<Feature> findFeatureByTestCaseStarted(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        return findPickleByTestCaseStarted(testCaseStarted)
-                .flatMap(this::findScenarioByPickle)
-                .flatMap(this::findFeatureByScenario);
-    }
-    
     public Optional<TestCaseFinished> findTestCaseFinishedByTestCaseStarted(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
         return ofNullable(testCaseFinishedByTestCaseStartedId.get(testCaseStarted.getId()));
@@ -127,20 +157,17 @@ public class Query {
 
     public Optional<TestStepResult> findMostSevereTestStepResultStatusByTestCaseStarted(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
-        return findTestStepFinishedByTestCaseStarted(testCaseStarted)
+        return findTestStepsFinishedByTestCaseStarted(testCaseStarted)
                 .stream()
                 .map(TestStepFinished::getTestStepResult)
                 .max(testStepResultComparator);
     }
 
-    public List<TestStepFinished> findTestStepFinishedByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public List<TestStepFinished> findTestStepsFinishedByTestCaseStarted(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
-        return testStepFinishedByTestCaseStartedId.getOrDefault(testCaseStarted.getId(), Collections.emptyList());
-    }
-
-    public Optional<TestStepFinished> findTestStepFinishedByTestStep(TestStep testStep) {
-        requireNonNull(testStep);
-        return ofNullable(testStepFinishedByTestStepId.get(testStep.getId()));
+        List<TestStepFinished> testStepsFinished = testStepsFinishedByTestCaseStartedId.
+                getOrDefault(testCaseStarted.getId(), emptyList());
+        return new ArrayList<>(testStepsFinished);
     }
 
     public Optional<Step> findStepByPickleStep(PickleStep pickleStep) {
@@ -148,11 +175,9 @@ public class Query {
         String stepId = pickleStep.getAstNodeIds().get(0);
         return ofNullable(stepById.get(stepId));
     }
-
-    public Optional<Scenario> findScenarioByPickle(Pickle pickle) {
-        requireNonNull(pickle);
-        String scenarioId = pickle.getAstNodeIds().get(0);
-        return ofNullable(scenarioById.get(scenarioId));
+    public Optional<TestStep> findTestStepByTestStepFinished(TestStepFinished testStepFinished) {
+        requireNonNull(testStepFinished);
+        return ofNullable(testStepById.get(testStepFinished.getTestStepId()));
     }
 
     public Optional<TestCase> findTestCaseByTestCaseStarted(TestCaseStarted testCaseStarted) {
@@ -167,12 +192,7 @@ public class Query {
                 .map(pickleById::get);
     }
 
-    public Optional<Feature> findFeatureByScenario(Scenario scenario) {
-        requireNonNull(scenario);
-        return ofNullable(featureByScenarioId.get(scenario.getId()));
-    }
-
-    public Optional<Duration> findTestCaseDurationByTestCaseStarted(TestCaseStarted testCaseStarted){
+    public Optional<Duration> findTestCaseDurationByTestCaseStarted(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
         Timestamp started = testCaseStarted.getTimestamp();
         return findTestCaseFinishedByTestCaseStarted(testCaseStarted)
@@ -183,7 +203,7 @@ public class Query {
                 ));
     }
 
-    public Optional<Duration> findTestRunDuration(){
+    public Optional<Duration> findTestRunDuration() {
         if (testRunStarted == null || testRunFinished == null) {
             return Optional.empty();
         }
@@ -204,9 +224,18 @@ public class Query {
                 .map(pickleStepById::get);
     }
 
-    public Optional<String> findFeatureNameByTestCaseStarted(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        return findFeatureByTestCaseStarted(testCaseStarted)
-                .map(Feature::getName);
+    public Optional<Ancestors> findAncestors(Pickle pickle) {
+        requireNonNull(pickle);
+        List<String> astNodeIds = pickle.getAstNodeIds();
+        String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
+        return Optional.ofNullable(ancestorsById.get(pickleAstNodeId));
+    }
+
+    List<SimpleEntry<TestStep, TestStepFinished>> findTestStepAndTestStepFinished(TestCaseStarted testCaseStarted) {
+        return findTestStepsFinishedByTestCaseStarted(testCaseStarted).stream()
+                .map(testStepFinished -> findTestStepByTestStepFinished(testStepFinished).map(testStep -> new SimpleEntry<>(testStep, testStepFinished)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toList());
     }
 }

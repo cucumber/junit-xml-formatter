@@ -2,14 +2,11 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.Examples;
-import io.cucumber.messages.types.GherkinDocument;
+import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
 import io.cucumber.messages.types.Rule;
-import io.cucumber.messages.types.Scenario;
 import io.cucumber.messages.types.Step;
-import io.cucumber.messages.types.TableRow;
-import io.cucumber.messages.types.TestCase;
 import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
@@ -17,12 +14,12 @@ import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
 import java.time.Duration;
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
@@ -30,54 +27,16 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 class XmlReportData {
 
     private final Query query = new Query();
 
     private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
-    private final Map<String, String> pickleAstNodeIdToLongName = new ConcurrentHashMap<>();
 
     void collect(Envelope envelope) {
         query.update(envelope);
-        envelope.getGherkinDocument().ifPresent(this::source);
-    }
-
-    private void source(GherkinDocument event) {
-        event.getFeature().ifPresent(feature -> {
-            feature.getChildren().forEach(featureChild -> {
-                featureChild.getRule().ifPresent(rule -> {
-                    rule.getChildren().forEach(ruleChild -> {
-                        ruleChild.getScenario().ifPresent(scenario -> {
-                            scenario(rule, scenario);
-                        });
-                    });
-                });
-                featureChild.getScenario().ifPresent(scenario -> {
-                    scenario(null, scenario);
-                });
-            });
-        });
-    }
-
-    private void scenario(Rule rule, Scenario scenario) {
-        String rulePrefix = rule == null ? "" : rule.getName() + " - ";
-        pickleAstNodeIdToLongName.put(scenario.getId(), rulePrefix + scenario.getName());
-
-        List<Examples> examples = scenario.getExamples();
-        for (int examplesIndex = 0; examplesIndex < examples.size(); examplesIndex++) {
-            Examples currentExamples = examples.get(examplesIndex);
-            List<TableRow> tableRows = currentExamples.getTableBody();
-            for (int exampleIndex = 0; exampleIndex < tableRows.size(); exampleIndex++) {
-                TableRow currentExample = tableRows.get(exampleIndex);
-                StringBuilder suffix = new StringBuilder(" - ");
-                if (!currentExamples.getName().isEmpty()) {
-                    suffix.append(currentExamples.getName()).append(" - ");
-                }
-                suffix.append("Example #").append(examplesIndex + 1).append(".").append(exampleIndex + 1);
-                pickleAstNodeIdToLongName.put(currentExample.getId(), rulePrefix + scenario.getName() + suffix);
-            }
-        }
     }
 
     double getSuiteDurationInSeconds() {
@@ -110,37 +69,63 @@ class XmlReportData {
     String getPickleName(TestCaseStarted testCaseStarted) {
         Pickle pickle = query.findPickleByTestCaseStarted(testCaseStarted)
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
-        List<String> astNodeIds = pickle.getAstNodeIds();
-        String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
-        return pickleAstNodeIdToLongName.getOrDefault(pickleAstNodeId, pickle.getName());
+
+        return query.findAncestors(pickle)
+                .map(XmlReportData::getPickleName)
+                .orElse(pickle.getName());
+    }
+
+    private static String getPickleName(Ancestors ancestors) {
+        List<String> pieces = new ArrayList<>();
+
+        ancestors.rule().map(Rule::getName).ifPresent(pieces::add);
+
+        pieces.add(ancestors.scenario().getName());
+
+        ancestors.examples().map(Examples::getName).ifPresent(pieces::add);
+
+        String examplesPrefix = ancestors.examplesIndex()
+                .map(examplesIndex -> examplesIndex + 1)
+                .map(examplesIndex -> +examplesIndex + ".")
+                .orElse("");
+
+        ancestors.exampleIndex()
+                .map(exampleIndex -> exampleIndex + 1)
+                .map(exampleSuffix -> "Example #" + examplesPrefix + exampleSuffix)
+                .ifPresent(pieces::add);
+
+        return pieces.stream()
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(" - "));
     }
 
     public String getFeatureName(TestCaseStarted testCaseStarted) {
-        return query.findFeatureNameByTestCaseStarted(testCaseStarted)
+        return query.findPickleByTestCaseStarted(testCaseStarted)
+                .flatMap(query::findAncestors)
+                .map(Ancestors::feature)
+                .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }
 
     List<Map.Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
-        TestCase testCase = query.findTestCaseByTestCaseStarted(testCaseStarted)
-                .orElseThrow(() -> new IllegalStateException("No testcase for " + testCaseStarted.getId()));
-        return testCase.getTestSteps().stream()
+        return query.findTestStepAndTestStepFinished(testCaseStarted)
+                .stream()
                 // Exclude hooks
-                .filter(testStep -> testStep.getPickleStepId().isPresent())
+                .filter(entry -> entry.getKey().getPickleStepId().isPresent())
                 .map(testStep -> {
-                    String key = renderTestStepText(testStep);
-                    String value = renderTestStepResult(testStep);
-                    return new AbstractMap.SimpleEntry<>(key, value);
+                    String key = renderTestStepText(testStep.getKey());
+                    String value = renderTestStepResult(testStep.getValue());
+                    return new SimpleEntry<>(key, value);
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
-    private String renderTestStepResult(TestStep testStep) {
-        return query.findTestStepFinishedByTestStep(testStep)
-                .map(TestStepFinished::getTestStepResult)
-                .map(TestStepResult::getStatus)
-                .map(TestStepResultStatus::toString)
-                .map(s -> s.toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new IllegalStateException("No test step finished for " + testStep.getId()));
+    private String renderTestStepResult(TestStepFinished testStepFinished) {
+        return testStepFinished
+                .getTestStepResult()
+                .getStatus()
+                .toString()
+                .toLowerCase(Locale.ROOT);
     }
 
     private String renderTestStepText(TestStep testStep) {

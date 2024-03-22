@@ -11,7 +11,7 @@ Given a step that always passes.............................................pass
 samples/retry/retry.feature:12]]>
 </failure>
 <system-out><![CDATA[
-Given a step that passes the second time....................................passed
+Given a step that passes the second time....................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="Test cases that fail are retried if within the --retry limit" time="0.003">
@@ -25,7 +25,7 @@ Given a step that passes the second time....................................pass
 samples/retry/retry.feature:15]]>
 </failure>
 <system-out><![CDATA[
-Given a step that passes the third time.....................................passed
+Given a step that passes the third time.....................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="Test cases that fail will continue to retry up to the --retry limit" time="0.003">
@@ -34,7 +34,7 @@ Given a step that passes the third time.....................................pass
 samples/retry/retry.feature:15]]>
 </failure>
 <system-out><![CDATA[
-Given a step that passes the third time.....................................passed
+Given a step that passes the third time.....................................failed
 ]]></system-out>
 </testcase>
 <testcase classname="Retry" name="Test cases that fail will continue to retry up to the --retry limit" time="0.003">
