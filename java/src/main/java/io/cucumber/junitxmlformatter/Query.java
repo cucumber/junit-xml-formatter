@@ -43,6 +43,12 @@ import static java.util.stream.Collectors.toList;
 /**
  * Given one Cucumber Message, find another.
  * <p>
+ * This class is effectively a simple in memory database. It can be updated in
+ * real time through the {@link #update(Envelope)} method. Queries can be made
+ * while the test run is incomplete - and this will of-course return incomplete
+ * results.
+ * <p>
+ * It is safe to query and update concurrently.
  *
  * @see <a href=https://github.com/cucumber/messages?tab=readme-ov-file#message-overview>Cucumber Messages - Message Overview</a>
  */
@@ -61,6 +67,7 @@ class Query {
     private TestRunFinished testRunFinished;
 
     public List<TestCaseStarted> findAllTestCaseStarted() {
+        // Concurrency
         return new ArrayList<>(testCaseStarted);
     }
 
@@ -160,6 +167,7 @@ class Query {
         requireNonNull(testCaseStarted);
         List<TestStepFinished> testStepsFinished = testStepsFinishedByTestCaseStartedId.
                 getOrDefault(testCaseStarted.getId(), emptyList());
+        // Concurrency
         return new ArrayList<>(testStepsFinished);
     }
 
