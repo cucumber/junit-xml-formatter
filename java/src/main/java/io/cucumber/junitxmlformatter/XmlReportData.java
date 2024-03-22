@@ -70,12 +70,12 @@ class XmlReportData {
         Pickle pickle = query.findPickleBy(testCaseStarted)
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
 
-        return query.findGherkinDocumentElementsBy(pickle)
+        return query.findGherkinAstNodesBy(pickle)
                 .map(XmlReportData::getPickleName)
                 .orElse(pickle.getName());
     }
 
-    private static String getPickleName(GherkinDocumentElements elements) {
+    private static String getPickleName(GherkingAstNodes elements) {
         List<String> pieces = new ArrayList<>();
 
         elements.rule().map(Rule::getName).ifPresent(pieces::add);
@@ -100,8 +100,8 @@ class XmlReportData {
     }
 
     public String getFeatureName(TestCaseStarted testCaseStarted) {
-        return query.findGherkinDocumentElementsBy(testCaseStarted)
-                .map(GherkinDocumentElements::feature)
+        return query.findGherkinAstNodesBy(testCaseStarted)
+                .map(GherkingAstNodes::feature)
                 .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }

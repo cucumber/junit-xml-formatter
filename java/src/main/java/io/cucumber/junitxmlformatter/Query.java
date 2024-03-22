@@ -56,7 +56,7 @@ class Query {
     private final Map<String, Step> stepById = new ConcurrentHashMap<>();
     private final Map<String, TestStep> testStepById = new ConcurrentHashMap<>();
     private final Map<String, PickleStep> pickleStepById = new ConcurrentHashMap<>();
-    private final Map<String, GherkinDocumentElements> ancestorsById = new ConcurrentHashMap<>();
+    private final Map<String, GherkingAstNodes> gherkinAstNodesById = new ConcurrentHashMap<>();
     private TestRunStarted testRunStarted;
     private TestRunFinished testRunFinished;
 
@@ -64,16 +64,16 @@ class Query {
         return new ArrayList<>(testCaseStarted);
     }
 
-    public Optional<GherkinDocumentElements> findGherkinDocumentElementsBy(Pickle pickle) {
+    public Optional<GherkingAstNodes> findGherkinAstNodesBy(Pickle pickle) {
         requireNonNull(pickle);
         List<String> astNodeIds = pickle.getAstNodeIds();
         String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
-        return Optional.ofNullable(ancestorsById.get(pickleAstNodeId));
+        return Optional.ofNullable(gherkinAstNodesById.get(pickleAstNodeId));
     }
 
-    public Optional<GherkinDocumentElements> findGherkinDocumentElementsBy(TestCaseStarted testCaseStarted) {
+    public Optional<GherkingAstNodes> findGherkinAstNodesBy(TestCaseStarted testCaseStarted) {
         return findPickleBy(testCaseStarted)
-                .flatMap(this::findGherkinDocumentElementsBy);
+                .flatMap(this::findGherkinAstNodesBy);
     }
 
     public Optional<TestStepResult> findMostSevereTestStepResultStatusBy(TestCaseStarted testCaseStarted) {
@@ -225,7 +225,7 @@ class Query {
     }
 
     private void updateScenario(Feature feature, Rule rule, Scenario scenario) {
-        this.ancestorsById.put(scenario.getId(), new GherkinDocumentElements(feature, rule, scenario));
+        this.gherkinAstNodesById.put(scenario.getId(), new GherkingAstNodes(feature, rule, scenario));
         updateSteps(scenario.getSteps());
 
         List<Examples> examples = scenario.getExamples();
@@ -234,7 +234,7 @@ class Query {
             List<TableRow> tableRows = currentExamples.getTableBody();
             for (int exampleIndex = 0; exampleIndex < tableRows.size(); exampleIndex++) {
                 TableRow currentExample = tableRows.get(exampleIndex);
-                ancestorsById.put(currentExample.getId(), new GherkinDocumentElements(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
+                gherkinAstNodesById.put(currentExample.getId(), new GherkingAstNodes(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
             }
         }
     }
