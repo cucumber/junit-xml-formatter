@@ -40,10 +40,14 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Given one Cucumber Message, find another.
+ * <p>
+ *
+ * @see <a href=https://github.com/cucumber/messages?tab=readme-ov-file#message-overview>Cucumber Messages - Message Overview</a>
+ */
 class Query {
     private final Comparator<TestStepResult> testStepResultComparator = nullsFirst(comparing(o -> o.getStatus().ordinal()));
-    private TestRunStarted testRunStarted;
-    private TestRunFinished testRunFinished;
     private final Deque<TestCaseStarted> testCaseStarted = new ConcurrentLinkedDeque<>();
     private final Map<String, TestCaseFinished> testCaseFinishedByTestCaseStartedId = new ConcurrentHashMap<>();
     private final Map<String, List<TestStepFinished>> testStepsFinishedByTestCaseStartedId = new ConcurrentHashMap<>();
@@ -52,7 +56,112 @@ class Query {
     private final Map<String, Step> stepById = new ConcurrentHashMap<>();
     private final Map<String, TestStep> testStepById = new ConcurrentHashMap<>();
     private final Map<String, PickleStep> pickleStepById = new ConcurrentHashMap<>();
-    private final Map<String, Ancestors> ancestorsById = new ConcurrentHashMap<>();
+    private final Map<String, GherkinDocumentElements> ancestorsById = new ConcurrentHashMap<>();
+    private TestRunStarted testRunStarted;
+    private TestRunFinished testRunFinished;
+
+    public List<TestCaseStarted> findAllTestCaseStarted() {
+        return new ArrayList<>(testCaseStarted);
+    }
+
+    public Optional<GherkinDocumentElements> findGherkinDocumentElementsBy(Pickle pickle) {
+        requireNonNull(pickle);
+        List<String> astNodeIds = pickle.getAstNodeIds();
+        String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
+        return Optional.ofNullable(ancestorsById.get(pickleAstNodeId));
+    }
+
+    public Optional<GherkinDocumentElements> findGherkinDocumentElementsBy(TestCaseStarted testCaseStarted) {
+        return findPickleBy(testCaseStarted)
+                .flatMap(this::findGherkinDocumentElementsBy);
+    }
+
+    public Optional<TestStepResult> findMostSevereTestStepResultStatusBy(TestCaseStarted testCaseStarted) {
+        requireNonNull(testCaseStarted);
+        return findTestStepsFinishedBy(testCaseStarted)
+                .stream()
+                .map(TestStepFinished::getTestStepResult)
+                .max(testStepResultComparator);
+    }
+
+    public Optional<Pickle> findPickleBy(TestCaseStarted testCaseStarted) {
+        requireNonNull(testCaseStarted);
+        return findTestCaseBy(testCaseStarted)
+                .map(TestCase::getPickleId)
+                .map(pickleById::get);
+    }
+
+    public Optional<PickleStep> findPickleStepBy(TestStep testStep) {
+        requireNonNull(testCaseStarted);
+        return testStep.getPickleStepId()
+                .map(pickleStepById::get);
+    }
+
+    public Optional<Step> findStepBy(PickleStep pickleStep) {
+        requireNonNull(pickleStep);
+        String stepId = pickleStep.getAstNodeIds().get(0);
+        return ofNullable(stepById.get(stepId));
+    }
+
+    public Optional<TestCase> findTestCaseBy(TestCaseStarted testCaseStarted) {
+        requireNonNull(testCaseStarted);
+        return ofNullable(testCaseById.get(testCaseStarted.getTestCaseId()));
+    }
+
+    public Optional<Duration> findTestCaseDurationBy(TestCaseStarted testCaseStarted) {
+        requireNonNull(testCaseStarted);
+        Timestamp started = testCaseStarted.getTimestamp();
+        return findTestCaseFinishedBy(testCaseStarted)
+                .map(TestCaseFinished::getTimestamp)
+                .map(finished -> Duration.between(
+                        Convertor.toInstant(started),
+                        Convertor.toInstant(finished)
+                ));
+    }
+
+    public Optional<TestCaseFinished> findTestCaseFinishedBy(TestCaseStarted testCaseStarted) {
+        requireNonNull(testCaseStarted);
+        return ofNullable(testCaseFinishedByTestCaseStartedId.get(testCaseStarted.getId()));
+    }
+
+    public Optional<Duration> findTestRunDuration() {
+        if (testRunStarted == null || testRunFinished == null) {
+            return Optional.empty();
+        }
+        Duration between = Duration.between(
+                Convertor.toInstant(testRunStarted.getTimestamp()),
+                Convertor.toInstant(testRunFinished.getTimestamp())
+        );
+        return Optional.of(between);
+    }
+
+    public Optional<TestRunFinished> findTestRunFinished() {
+        return ofNullable(testRunFinished);
+    }
+
+    public Optional<TestRunStarted> findTestRunStarted() {
+        return ofNullable(testRunStarted);
+    }
+
+    public List<SimpleEntry<TestStep, TestStepFinished>> findTestStepAndTestStepFinishedBy(TestCaseStarted testCaseStarted) {
+        return findTestStepsFinishedBy(testCaseStarted).stream()
+                .map(testStepFinished -> findTestStepBy(testStepFinished).map(testStep -> new SimpleEntry<>(testStep, testStepFinished)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toList());
+    }
+
+    public Optional<TestStep> findTestStepBy(TestStepFinished testStepFinished) {
+        requireNonNull(testStepFinished);
+        return ofNullable(testStepById.get(testStepFinished.getTestStepId()));
+    }
+
+    public List<TestStepFinished> findTestStepsFinishedBy(TestCaseStarted testCaseStarted) {
+        requireNonNull(testCaseStarted);
+        List<TestStepFinished> testStepsFinished = testStepsFinishedByTestCaseStartedId.
+                getOrDefault(testCaseStarted.getId(), emptyList());
+        return new ArrayList<>(testStepsFinished);
+    }
 
     public void update(Envelope envelope) {
         envelope.getTestRunStarted().ifPresent(this::updateTestRunStarted);
@@ -100,7 +209,7 @@ class Query {
     }
 
     private void updateTestStepFinished(TestStepFinished event) {
-        this.testStepsFinishedByTestCaseStartedId.compute(event.getTestCaseStartedId(), addToList(event));
+        this.testStepsFinishedByTestCaseStartedId.compute(event.getTestCaseStartedId(), updateList(event));
     }
 
     private void updateTestCaseFinished(TestCaseFinished event) {
@@ -116,7 +225,7 @@ class Query {
     }
 
     private void updateScenario(Feature feature, Rule rule, Scenario scenario) {
-        this.ancestorsById.put(scenario.getId(), new Ancestors(feature, rule, scenario));
+        this.ancestorsById.put(scenario.getId(), new GherkinDocumentElements(feature, rule, scenario));
         updateSteps(scenario.getSteps());
 
         List<Examples> examples = scenario.getExamples();
@@ -125,12 +234,12 @@ class Query {
             List<TableRow> tableRows = currentExamples.getTableBody();
             for (int exampleIndex = 0; exampleIndex < tableRows.size(); exampleIndex++) {
                 TableRow currentExample = tableRows.get(exampleIndex);
-                ancestorsById.put(currentExample.getId(), new Ancestors(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
+                ancestorsById.put(currentExample.getId(), new GherkinDocumentElements(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
             }
         }
     }
 
-    private static <K, E> BiFunction<K, List<E>, List<E>> addToList(E element) {
+    private <K, E> BiFunction<K, List<E>, List<E>> updateList(E element) {
         return (key, existing) -> {
             if (existing != null) {
                 existing.add(element);
@@ -140,109 +249,6 @@ class Query {
             list.add(element);
             return list;
         };
-    }
-
-    public Optional<TestRunStarted> findTestRunStarted() {
-        return ofNullable(testRunStarted);
-    }
-
-    public Optional<TestRunFinished> findTestRunFinished() {
-        return ofNullable(testRunFinished);
-    }
-
-    public Optional<TestCaseFinished> findTestCaseFinishedBy(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        return ofNullable(testCaseFinishedByTestCaseStartedId.get(testCaseStarted.getId()));
-    }
-
-    public Optional<TestStepResult> findMostSevereTestStepResultStatusBy(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        return findTestStepsFinishedBy(testCaseStarted)
-                .stream()
-                .map(TestStepFinished::getTestStepResult)
-                .max(testStepResultComparator);
-    }
-
-    public List<TestStepFinished> findTestStepsFinishedBy(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        List<TestStepFinished> testStepsFinished = testStepsFinishedByTestCaseStartedId.
-                getOrDefault(testCaseStarted.getId(), emptyList());
-        return new ArrayList<>(testStepsFinished);
-    }
-
-    public Optional<Step> findStepBy(PickleStep pickleStep) {
-        requireNonNull(pickleStep);
-        String stepId = pickleStep.getAstNodeIds().get(0);
-        return ofNullable(stepById.get(stepId));
-    }
-
-    public Optional<TestStep> findTestStepBy(TestStepFinished testStepFinished) {
-        requireNonNull(testStepFinished);
-        return ofNullable(testStepById.get(testStepFinished.getTestStepId()));
-    }
-
-    public Optional<TestCase> findTestCaseBy(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        return ofNullable(testCaseById.get(testCaseStarted.getTestCaseId()));
-    }
-
-    public Optional<Pickle> findPickleBy(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        return findTestCaseBy(testCaseStarted)
-                .map(TestCase::getPickleId)
-                .map(pickleById::get);
-    }
-
-    public Optional<Duration> findTestCaseDurationBy(TestCaseStarted testCaseStarted) {
-        requireNonNull(testCaseStarted);
-        Timestamp started = testCaseStarted.getTimestamp();
-        return findTestCaseFinishedBy(testCaseStarted)
-                .map(TestCaseFinished::getTimestamp)
-                .map(finished -> Duration.between(
-                        Convertor.toInstant(started),
-                        Convertor.toInstant(finished)
-                ));
-    }
-
-    public Optional<Duration> findTestRunDuration() {
-        if (testRunStarted == null || testRunFinished == null) {
-            return Optional.empty();
-        }
-        Duration between = Duration.between(
-                Convertor.toInstant(testRunStarted.getTimestamp()),
-                Convertor.toInstant(testRunFinished.getTimestamp())
-        );
-        return Optional.of(between);
-    }
-
-    public List<TestCaseStarted> findAllTestCaseStarted() {
-        return new ArrayList<>(testCaseStarted);
-    }
-
-    public Optional<PickleStep> findPickleStepBy(TestStep testStep) {
-        requireNonNull(testCaseStarted);
-        return testStep.getPickleStepId()
-                .map(pickleStepById::get);
-    }
-
-    public Optional<Ancestors> findAncestorsBy(TestCaseStarted testCaseStarted) {
-        return findPickleBy(testCaseStarted)
-                .flatMap(this::findAncestorsBy);
-    }
-
-    public Optional<Ancestors> findAncestorsBy(Pickle pickle) {
-        requireNonNull(pickle);
-        List<String> astNodeIds = pickle.getAstNodeIds();
-        String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
-        return Optional.ofNullable(ancestorsById.get(pickleAstNodeId));
-    }
-
-    public List<SimpleEntry<TestStep, TestStepFinished>> findTestStepAndTestStepFinishedBy(TestCaseStarted testCaseStarted) {
-        return findTestStepsFinishedBy(testCaseStarted).stream()
-                .map(testStepFinished -> findTestStepBy(testStepFinished).map(testStep -> new SimpleEntry<>(testStep, testStepFinished)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(toList());
     }
 
 }

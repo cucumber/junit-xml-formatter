@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-class Ancestors {
+class GherkinDocumentElements {
     private final Feature feature;
     private final Rule rule;
     private final Scenario scenario;
@@ -19,11 +19,11 @@ class Ancestors {
     private final Integer examplesIndex;
     private final Integer exampleIndex;
 
-    public Ancestors(Feature feature, Rule rule, Scenario scenario) {
+    public GherkinDocumentElements(Feature feature, Rule rule, Scenario scenario) {
         this(feature, rule, scenario, null, null, null, null);
     }
 
-    public Ancestors(Feature feature, Rule rule, Scenario scenario, Integer examplesIndex, Examples examples, Integer exampleIndex, TableRow example) {
+    public GherkinDocumentElements(Feature feature, Rule rule, Scenario scenario, Integer examplesIndex, Examples examples, Integer exampleIndex, TableRow example) {
         this.feature = requireNonNull(feature);
         this.rule = rule;
         this.scenario = requireNonNull(scenario);

@@ -70,26 +70,26 @@ class XmlReportData {
         Pickle pickle = query.findPickleBy(testCaseStarted)
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
 
-        return query.findAncestorsBy(pickle)
+        return query.findGherkinDocumentElementsBy(pickle)
                 .map(XmlReportData::getPickleName)
                 .orElse(pickle.getName());
     }
 
-    private static String getPickleName(Ancestors ancestors) {
+    private static String getPickleName(GherkinDocumentElements elements) {
         List<String> pieces = new ArrayList<>();
 
-        ancestors.rule().map(Rule::getName).ifPresent(pieces::add);
+        elements.rule().map(Rule::getName).ifPresent(pieces::add);
 
-        pieces.add(ancestors.scenario().getName());
+        pieces.add(elements.scenario().getName());
 
-        ancestors.examples().map(Examples::getName).ifPresent(pieces::add);
+        elements.examples().map(Examples::getName).ifPresent(pieces::add);
 
-        String examplesPrefix = ancestors.examplesIndex()
+        String examplesPrefix = elements.examplesIndex()
                 .map(examplesIndex -> examplesIndex + 1)
-                .map(examplesIndex -> +examplesIndex + ".")
+                .map(examplesIndex -> examplesIndex + ".")
                 .orElse("");
 
-        ancestors.exampleIndex()
+        elements.exampleIndex()
                 .map(exampleIndex -> exampleIndex + 1)
                 .map(exampleSuffix -> "Example #" + examplesPrefix + exampleSuffix)
                 .ifPresent(pieces::add);
@@ -100,8 +100,8 @@ class XmlReportData {
     }
 
     public String getFeatureName(TestCaseStarted testCaseStarted) {
-        return query.findAncestorsBy(testCaseStarted)
-                .map(Ancestors::feature)
+        return query.findGherkinDocumentElementsBy(testCaseStarted)
+                .map(GherkinDocumentElements::feature)
                 .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }
