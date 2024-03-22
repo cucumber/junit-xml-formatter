@@ -1,6 +1,7 @@
 package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Exception;
+import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
@@ -40,8 +41,8 @@ class XmlReportWriter {
         writeSuiteAttributes(writer);
         writer.newLine();
 
-        for (String testCaseStartedId : data.testCaseStartedIds()) {
-            writeTestcase(writer, testCaseStartedId);
+        for (TestCaseStarted testCaseStarted : data.getAllTestCaseStarted()) {
+            writeTestcase(writer, testCaseStarted);
         }
 
         writer.writeEndElement();
@@ -71,24 +72,24 @@ class XmlReportWriter {
         return notPassedNotSkipped;
     }
 
-    private void writeTestcase(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
+    private void writeTestcase(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
         writer.writeStartElement("testcase");
-        writeTestCaseAttributes(writer, id);
+        writeTestCaseAttributes(writer, testCaseStarted);
         writer.newLine();
-        writeNonPassedElement(writer, id);
-        writeStepAndResultList(writer, id);
+        writeNonPassedElement(writer, testCaseStarted);
+        writeStepAndResultList(writer, testCaseStarted);
         writer.writeEndElement();
         writer.newLine();
     }
 
-    private void writeTestCaseAttributes(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
-        writer.writeAttribute("classname", data.getFeatureName(id));
-        writer.writeAttribute("name", data.getPickleName(id));
-        writer.writeAttribute("time", numberFormat.format(data.getDurationInSeconds(id)));
+    private void writeTestCaseAttributes(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
+        writer.writeAttribute("classname", data.getFeatureName(testCaseStarted));
+        writer.writeAttribute("name", data.getPickleName(testCaseStarted));
+        writer.writeAttribute("time", numberFormat.format(data.getDurationInSeconds(testCaseStarted)));
     }
 
-    private void writeNonPassedElement(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
-        TestStepResult result = data.getTestCaseStatus(id);
+    private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
+        TestStepResult result = data.getTestCaseStatus(testCaseStarted);
         TestStepResultStatus status = result.getStatus();
         if (status == TestStepResultStatus.PASSED) {
             return;
@@ -124,8 +125,8 @@ class XmlReportWriter {
         writer.newLine();
     }
 
-    private void writeStepAndResultList(EscapingXmlStreamWriter writer, String id) throws XMLStreamException {
-        List<Map.Entry<String, String>> results = data.getStepsAndResult(id);
+    private void writeStepAndResultList(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
+        List<Map.Entry<String, String>> results = data.getStepsAndResult(testCaseStarted);
         if (results.isEmpty()) {
             return;
         }
