@@ -150,52 +150,53 @@ class Query {
         return ofNullable(testRunFinished);
     }
 
-    public Optional<TestCaseFinished> findTestCaseFinishedByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public Optional<TestCaseFinished> findTestCaseFinishedBy(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
         return ofNullable(testCaseFinishedByTestCaseStartedId.get(testCaseStarted.getId()));
     }
 
-    public Optional<TestStepResult> findMostSevereTestStepResultStatusByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public Optional<TestStepResult> findMostSevereTestStepResultStatusBy(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
-        return findTestStepsFinishedByTestCaseStarted(testCaseStarted)
+        return findTestStepsFinishedBy(testCaseStarted)
                 .stream()
                 .map(TestStepFinished::getTestStepResult)
                 .max(testStepResultComparator);
     }
 
-    public List<TestStepFinished> findTestStepsFinishedByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public List<TestStepFinished> findTestStepsFinishedBy(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
         List<TestStepFinished> testStepsFinished = testStepsFinishedByTestCaseStartedId.
                 getOrDefault(testCaseStarted.getId(), emptyList());
         return new ArrayList<>(testStepsFinished);
     }
 
-    public Optional<Step> findStepByPickleStep(PickleStep pickleStep) {
+    public Optional<Step> findStepBy(PickleStep pickleStep) {
         requireNonNull(pickleStep);
         String stepId = pickleStep.getAstNodeIds().get(0);
         return ofNullable(stepById.get(stepId));
     }
-    public Optional<TestStep> findTestStepByTestStepFinished(TestStepFinished testStepFinished) {
+
+    public Optional<TestStep> findTestStepBy(TestStepFinished testStepFinished) {
         requireNonNull(testStepFinished);
         return ofNullable(testStepById.get(testStepFinished.getTestStepId()));
     }
 
-    public Optional<TestCase> findTestCaseByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public Optional<TestCase> findTestCaseBy(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
         return ofNullable(testCaseById.get(testCaseStarted.getTestCaseId()));
     }
 
-    public Optional<Pickle> findPickleByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public Optional<Pickle> findPickleBy(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
-        return findTestCaseByTestCaseStarted(testCaseStarted)
+        return findTestCaseBy(testCaseStarted)
                 .map(TestCase::getPickleId)
                 .map(pickleById::get);
     }
 
-    public Optional<Duration> findTestCaseDurationByTestCaseStarted(TestCaseStarted testCaseStarted) {
+    public Optional<Duration> findTestCaseDurationBy(TestCaseStarted testCaseStarted) {
         requireNonNull(testCaseStarted);
         Timestamp started = testCaseStarted.getTimestamp();
-        return findTestCaseFinishedByTestCaseStarted(testCaseStarted)
+        return findTestCaseFinishedBy(testCaseStarted)
                 .map(TestCaseFinished::getTimestamp)
                 .map(finished -> Duration.between(
                         Convertor.toInstant(started),
@@ -218,24 +219,30 @@ class Query {
         return new ArrayList<>(testCaseStarted);
     }
 
-    public Optional<PickleStep> findPickleStepByTestStep(TestStep testStep) {
+    public Optional<PickleStep> findPickleStepBy(TestStep testStep) {
         requireNonNull(testCaseStarted);
         return testStep.getPickleStepId()
                 .map(pickleStepById::get);
     }
 
-    public Optional<Ancestors> findAncestors(Pickle pickle) {
+    public Optional<Ancestors> findAncestorsBy(TestCaseStarted testCaseStarted) {
+        return findPickleBy(testCaseStarted)
+                .flatMap(this::findAncestorsBy);
+    }
+
+    public Optional<Ancestors> findAncestorsBy(Pickle pickle) {
         requireNonNull(pickle);
         List<String> astNodeIds = pickle.getAstNodeIds();
         String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
         return Optional.ofNullable(ancestorsById.get(pickleAstNodeId));
     }
 
-    List<SimpleEntry<TestStep, TestStepFinished>> findTestStepAndTestStepFinished(TestCaseStarted testCaseStarted) {
-        return findTestStepsFinishedByTestCaseStarted(testCaseStarted).stream()
-                .map(testStepFinished -> findTestStepByTestStepFinished(testStepFinished).map(testStep -> new SimpleEntry<>(testStep, testStepFinished)))
+    public List<SimpleEntry<TestStep, TestStepFinished>> findTestStepAndTestStepFinishedBy(TestCaseStarted testCaseStarted) {
+        return findTestStepsFinishedBy(testCaseStarted).stream()
+                .map(testStepFinished -> findTestStepBy(testStepFinished).map(testStep -> new SimpleEntry<>(testStep, testStepFinished)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toList());
     }
+
 }

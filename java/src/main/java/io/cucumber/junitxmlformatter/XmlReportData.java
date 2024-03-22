@@ -46,7 +46,7 @@ class XmlReportData {
     }
 
     double getDurationInSeconds(TestCaseStarted testCaseStarted) {
-        return query.findTestCaseDurationByTestCaseStarted(testCaseStarted)
+        return query.findTestCaseDurationBy(testCaseStarted)
                 .orElse(Duration.ZERO)
                 .toMillis() / (double) MILLIS_PER_SECOND;
     }
@@ -54,7 +54,7 @@ class XmlReportData {
     Map<TestStepResultStatus, Long> getTestCaseStatusCounts() {
         // @formatter:off
         return query.findAllTestCaseStarted().stream()
-                .map(query::findMostSevereTestStepResultStatusByTestCaseStarted)
+                .map(query::findMostSevereTestStepResultStatusBy)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(TestStepResult::getStatus)
@@ -67,10 +67,10 @@ class XmlReportData {
     }
 
     String getPickleName(TestCaseStarted testCaseStarted) {
-        Pickle pickle = query.findPickleByTestCaseStarted(testCaseStarted)
+        Pickle pickle = query.findPickleBy(testCaseStarted)
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
 
-        return query.findAncestors(pickle)
+        return query.findAncestorsBy(pickle)
                 .map(XmlReportData::getPickleName)
                 .orElse(pickle.getName());
     }
@@ -100,15 +100,14 @@ class XmlReportData {
     }
 
     public String getFeatureName(TestCaseStarted testCaseStarted) {
-        return query.findPickleByTestCaseStarted(testCaseStarted)
-                .flatMap(query::findAncestors)
+        return query.findAncestorsBy(testCaseStarted)
                 .map(Ancestors::feature)
                 .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }
 
     List<Map.Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
-        return query.findTestStepAndTestStepFinished(testCaseStarted)
+        return query.findTestStepAndTestStepFinishedBy(testCaseStarted)
                 .stream()
                 // Exclude hooks
                 .filter(entry -> entry.getKey().getPickleStepId().isPresent())
@@ -129,10 +128,10 @@ class XmlReportData {
     }
 
     private String renderTestStepText(TestStep testStep) {
-        Optional<PickleStep> pickleStep = query.findPickleStepByTestStep(testStep);
+        Optional<PickleStep> pickleStep = query.findPickleStepBy(testStep);
 
         String stepKeyWord = pickleStep
-                .flatMap(query::findStepByPickleStep)
+                .flatMap(query::findStepBy)
                 .map(Step::getKeyword)
                 .orElse("");
 
@@ -153,7 +152,7 @@ class XmlReportData {
     private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED, null);
 
     TestStepResult getTestCaseStatus(TestCaseStarted testCaseStarted) {
-        return query.findMostSevereTestStepResultStatusByTestCaseStarted(testCaseStarted)
+        return query.findMostSevereTestStepResultStatusBy(testCaseStarted)
                 .orElse(SCENARIO_WITH_NO_STEPS);
     }
 
