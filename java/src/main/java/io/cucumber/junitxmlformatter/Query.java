@@ -62,7 +62,7 @@ class Query {
     private final Map<String, Step> stepById = new ConcurrentHashMap<>();
     private final Map<String, TestStep> testStepById = new ConcurrentHashMap<>();
     private final Map<String, PickleStep> pickleStepById = new ConcurrentHashMap<>();
-    private final Map<String, GherkingAstNodes> gherkinAstNodesById = new ConcurrentHashMap<>();
+    private final Map<String, GherkinAstNodes> gherkinAstNodesById = new ConcurrentHashMap<>();
     private TestRunStarted testRunStarted;
     private TestRunFinished testRunFinished;
 
@@ -71,14 +71,14 @@ class Query {
         return new ArrayList<>(testCaseStarted);
     }
 
-    public Optional<GherkingAstNodes> findGherkinAstNodesBy(Pickle pickle) {
+    public Optional<GherkinAstNodes> findGherkinAstNodesBy(Pickle pickle) {
         requireNonNull(pickle);
         List<String> astNodeIds = pickle.getAstNodeIds();
         String pickleAstNodeId = astNodeIds.get(astNodeIds.size() - 1);
         return Optional.ofNullable(gherkinAstNodesById.get(pickleAstNodeId));
     }
 
-    public Optional<GherkingAstNodes> findGherkinAstNodesBy(TestCaseStarted testCaseStarted) {
+    public Optional<GherkinAstNodes> findGherkinAstNodesBy(TestCaseStarted testCaseStarted) {
         return findPickleBy(testCaseStarted)
                 .flatMap(this::findGherkinAstNodesBy);
     }
@@ -233,7 +233,7 @@ class Query {
     }
 
     private void updateScenario(Feature feature, Rule rule, Scenario scenario) {
-        this.gherkinAstNodesById.put(scenario.getId(), new GherkingAstNodes(feature, rule, scenario));
+        this.gherkinAstNodesById.put(scenario.getId(), new GherkinAstNodes(feature, rule, scenario));
         updateSteps(scenario.getSteps());
 
         List<Examples> examples = scenario.getExamples();
@@ -242,7 +242,7 @@ class Query {
             List<TableRow> tableRows = currentExamples.getTableBody();
             for (int exampleIndex = 0; exampleIndex < tableRows.size(); exampleIndex++) {
                 TableRow currentExample = tableRows.get(exampleIndex);
-                gherkinAstNodesById.put(currentExample.getId(), new GherkingAstNodes(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
+                gherkinAstNodesById.put(currentExample.getId(), new GherkinAstNodes(feature, rule, scenario, examplesIndex, currentExamples, exampleIndex, currentExample));
             }
         }
     }

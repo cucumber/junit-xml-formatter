@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Writes the message output of a test run as single page html report.
+ * Writes the message output of a test run as single page xml report.
  * <p>
  * Note: Messages are first collected and only written once the stream is closed.
  *

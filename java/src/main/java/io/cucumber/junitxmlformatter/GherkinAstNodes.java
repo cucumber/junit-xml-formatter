@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-class GherkingAstNodes {
+class GherkinAstNodes {
     private final Feature feature;
     private final Rule rule;
     private final Scenario scenario;
@@ -19,11 +19,11 @@ class GherkingAstNodes {
     private final Integer examplesIndex;
     private final Integer exampleIndex;
 
-    public GherkingAstNodes(Feature feature, Rule rule, Scenario scenario) {
+    public GherkinAstNodes(Feature feature, Rule rule, Scenario scenario) {
         this(feature, rule, scenario, null, null, null, null);
     }
 
-    public GherkingAstNodes(Feature feature, Rule rule, Scenario scenario, Integer examplesIndex, Examples examples, Integer exampleIndex, TableRow example) {
+    public GherkinAstNodes(Feature feature, Rule rule, Scenario scenario, Integer examplesIndex, Examples examples, Integer exampleIndex, TableRow example) {
         this.feature = requireNonNull(feature);
         this.rule = rule;
         this.scenario = requireNonNull(scenario);

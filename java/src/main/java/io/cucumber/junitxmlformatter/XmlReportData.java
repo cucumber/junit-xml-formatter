@@ -75,7 +75,7 @@ class XmlReportData {
                 .orElse(pickle.getName());
     }
 
-    private static String getPickleName(GherkingAstNodes elements) {
+    private static String getPickleName(GherkinAstNodes elements) {
         List<String> pieces = new ArrayList<>();
 
         elements.rule().map(Rule::getName).ifPresent(pieces::add);
@@ -101,7 +101,7 @@ class XmlReportData {
 
     public String getFeatureName(TestCaseStarted testCaseStarted) {
         return query.findGherkinAstNodesBy(testCaseStarted)
-                .map(GherkingAstNodes::feature)
+                .map(GherkinAstNodes::feature)
                 .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }
