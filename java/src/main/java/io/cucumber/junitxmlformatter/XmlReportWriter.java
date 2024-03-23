@@ -100,8 +100,10 @@ class XmlReportWriter {
         Optional<String> message = result.getMessage();
         Optional<String> exceptionType = result.getException().map(Exception::getType);
         Optional<String> exceptionMessage = result.getException().flatMap(Exception::getMessage);
+        Optional<String> exceptionStackTrace = result.getException().flatMap(Exception::getStackTrace);
 
-        if (message.isPresent()) {
+        boolean hasMessageOrStackTrace = message.isPresent() || exceptionStackTrace.isPresent();
+        if (hasMessageOrStackTrace) {
             writer.writeStartElement(elementName);
         } else {
             writer.writeEmptyElement(elementName);
@@ -113,13 +115,21 @@ class XmlReportWriter {
         if (exceptionMessage.isPresent()) {
             writer.writeAttribute("message", exceptionMessage.get());
         }
-        if (message.isPresent()) {
-            writer.newLine();
-            writer.writeCData(message.get());
-            writer.newLine();
+        if (hasMessageOrStackTrace) {
+            if (exceptionStackTrace.isPresent()) {
+                writer.newLine();
+                writer.writeCData(exceptionStackTrace.get());
+                writer.newLine();
+            } else {
+                // Fall back to message for older implementations
+                // that put the stack trace in the message
+                writer.newLine();
+                writer.writeCData(message.get());
+                writer.newLine();
+            }
         }
 
-        if (message.isPresent()) {
+        if (hasMessageOrStackTrace) {
             writer.writeEndElement();
         }
         writer.newLine();
