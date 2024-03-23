@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added 
+
+## [0.3.0] - 2024-03-23
+### Added
 - Include value from Exception.stacktrace if available ([#30](https://github.com/cucumber/cucumber-junit-xml-formatter/pull/30), M.P. Korstanje)
 
 ### Fixed
@@ -24,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.0.0
 
-[Unreleased]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cucumber/cucumber-junit-xml-formatter/compare/438ec1f6218a849eb2a684982e2ff7e304a3155f...v0.0.0
