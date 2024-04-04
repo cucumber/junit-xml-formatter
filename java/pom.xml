@@ -9,21 +9,21 @@
     </parent>
 
     <artifactId>junit-xml-formatter</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Cucumber JUnit XML Formatter</name>
+    <name>JUnit XML Formatter</name>
     <description>Renders Cucumber Messages as JUnit XML</description>
-    <url>https://github.com/cucumber/cucumber-junit-xml-formatter</url>
+    <url>https://github.com/cucumber/junit-xml-formatter</url>
 
     <properties>
         <project.Automatic-Module-Name>io.cucumber.junitxmlformatter</project.Automatic-Module-Name>
-        <project.build.outputTimestamp>1708025463</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1711217894</project.build.outputTimestamp>
     </properties>
 
     <scm>
-        <connection>scm:git:git://github.com/cucumber/cucumber-junit-xml-formatter.git</connection>
-        <developerConnection>scm:git:git@github.com:cucumber/cucumber-junit-xml-formatter.git</developerConnection>
-        <url>git://github.com/cucumber/cucumber-junit-xml-formatter.git</url>
+        <connection>scm:git:git://github.com/cucumber/junit-xml-formatter.git</connection>
+        <developerConnection>scm:git:git@github.com:cucumber/junit-xml-formatter.git</developerConnection>
+        <url>git://github.com/cucumber/junit-xml-formatter.git</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>messages</artifactId>
-            <version>[21.0.1,25.0.0)</version>
+            <version>[24.0.0,25.0.0)</version>
         </dependency>
 
         <dependency>
