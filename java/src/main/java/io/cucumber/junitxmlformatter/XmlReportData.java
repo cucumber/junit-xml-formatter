@@ -1,28 +1,28 @@
 package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Envelope;
-import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
-import io.cucumber.messages.types.Rule;
 import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
+import io.cucumber.query.NamingStrategy;
+import io.cucumber.query.Query;
 
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
+import static io.cucumber.query.NamingStrategy.FeatureName.EXCLUDE;
+import static io.cucumber.query.NamingStrategy.Strategy.LONG;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
@@ -32,6 +32,10 @@ import static java.util.stream.Collectors.toList;
 class XmlReportData {
 
     private final Query query = new Query();
+    private final NamingStrategy namingStrategy = NamingStrategy
+            .strategy(LONG)
+            .featureName(EXCLUDE)
+            .build();
 
     private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
 
@@ -54,7 +58,7 @@ class XmlReportData {
     Map<TestStepResultStatus, Long> getTestCaseStatusCounts() {
         // @formatter:off
         return query.findAllTestCaseStarted().stream()
-                .map(query::findMostSevereTestStepResultStatusBy)
+                .map(query::findMostSevereTestStepResulBy)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(TestStepResult::getStatus)
@@ -70,50 +74,23 @@ class XmlReportData {
         Pickle pickle = query.findPickleBy(testCaseStarted)
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
 
-        return query.findGherkinAstNodesBy(pickle)
-                .map(XmlReportData::getPickleName)
-                .orElse(pickle.getName());
-    }
-
-    private static String getPickleName(GherkinAstNodes elements) {
-        List<String> pieces = new ArrayList<>();
-
-        elements.rule().map(Rule::getName).ifPresent(pieces::add);
-
-        pieces.add(elements.scenario().getName());
-
-        elements.examples().map(Examples::getName).ifPresent(pieces::add);
-
-        String examplesPrefix = elements.examplesIndex()
-                .map(examplesIndex -> examplesIndex + 1)
-                .map(examplesIndex -> examplesIndex + ".")
-                .orElse("");
-
-        elements.exampleIndex()
-                .map(exampleIndex -> exampleIndex + 1)
-                .map(exampleSuffix -> "Example #" + examplesPrefix + exampleSuffix)
-                .ifPresent(pieces::add);
-
-        return pieces.stream()
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(" - "));
+        return query.findNameOf(pickle, namingStrategy);
     }
 
     public String getFeatureName(TestCaseStarted testCaseStarted) {
-        return query.findGherkinAstNodesBy(testCaseStarted)
-                .map(GherkinAstNodes::feature)
+        return query.findFeatureBy(testCaseStarted)
                 .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }
 
     List<Map.Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
-        return query.findTestStepAndTestStepFinishedBy(testCaseStarted)
+        return query.findTestStepFinishedAndTestStepBy(testCaseStarted)
                 .stream()
                 // Exclude hooks
-                .filter(entry -> entry.getKey().getPickleStepId().isPresent())
+                .filter(entry -> entry.getValue().getPickleStepId().isPresent())
                 .map(testStep -> {
-                    String key = renderTestStepText(testStep.getKey());
-                    String value = renderTestStepResult(testStep.getValue());
+                    String key = renderTestStepText(testStep.getValue());
+                    String value = renderTestStepResult(testStep.getKey());
                     return new SimpleEntry<>(key, value);
                 })
                 .collect(toList());
@@ -152,7 +129,7 @@ class XmlReportData {
     private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED, null);
 
     TestStepResult getTestCaseStatus(TestCaseStarted testCaseStarted) {
-        return query.findMostSevereTestStepResultStatusBy(testCaseStarted)
+        return query.findMostSevereTestStepResulBy(testCaseStarted)
                 .orElse(SCENARIO_WITH_NO_STEPS);
     }
 

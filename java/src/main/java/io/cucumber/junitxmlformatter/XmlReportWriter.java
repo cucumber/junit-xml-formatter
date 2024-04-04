@@ -31,12 +31,12 @@ class XmlReportWriter {
         EscapingXmlStreamWriter writer = new EscapingXmlStreamWriter(factory.createXMLStreamWriter(out));
         writer.writeStartDocument("UTF-8", "1.0");
         writer.newLine();
-        writeTestsuite(data, writer);
+        writeTestsuite(writer);
         writer.writeEndDocument();
         writer.flush();
     }
 
-    private void writeTestsuite(XmlReportData data, EscapingXmlStreamWriter writer) throws XMLStreamException {
+    private void writeTestsuite(EscapingXmlStreamWriter writer) throws XMLStreamException {
         writer.writeStartElement("testsuite");
         writeSuiteAttributes(writer);
         writer.newLine();
