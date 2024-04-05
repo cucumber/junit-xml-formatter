@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Extracted common code to [Cucumber Query](https://github.com/cucumber/query/tree/main) ([#30](https://github.com/cucumber/cucumber-junit-xml-formatter/pull/31), M.P. Korstanje)
+- Extracted common code to [Cucumber Query](https://github.com/cucumber/query/tree/main) ([#31](https://github.com/cucumber/cucumber-junit-xml-formatter/pull/31), M.P. Korstanje)
 
 ## [0.3.0] - 2024-03-23
 ### Added
