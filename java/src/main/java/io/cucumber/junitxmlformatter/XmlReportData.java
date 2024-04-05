@@ -18,6 +18,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
@@ -83,7 +84,7 @@ class XmlReportData {
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
     }
 
-    List<Map.Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
+    List<Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
         return query.findTestStepFinishedAndTestStepBy(testCaseStarted)
                 .stream()
                 // Exclude hooks
