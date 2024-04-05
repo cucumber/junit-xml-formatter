@@ -22,8 +22,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
-import static io.cucumber.query.NamingStrategy.FeatureName.EXCLUDE;
-import static io.cucumber.query.NamingStrategy.Strategy.LONG;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
@@ -33,12 +31,13 @@ import static java.util.stream.Collectors.toList;
 class XmlReportData {
 
     private final Query query = new Query();
-    private final NamingStrategy namingStrategy = NamingStrategy
-            .strategy(LONG)
-            .featureName(EXCLUDE)
-            .build();
+    private final NamingStrategy namingStrategy;
 
     private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
+
+    public XmlReportData(NamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
+    }
 
     void collect(Envelope envelope) {
         query.update(envelope);
