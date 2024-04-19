@@ -11,7 +11,7 @@ class EscapingXmlStreamWriter implements AutoCloseable {
 
     private final XMLStreamWriter writer;
 
-    public EscapingXmlStreamWriter(XMLStreamWriter writer) {
+    EscapingXmlStreamWriter(XMLStreamWriter writer) {
         this.writer = Objects.requireNonNull(writer);
     }
 
@@ -20,41 +20,41 @@ class EscapingXmlStreamWriter implements AutoCloseable {
         writer.close();
     }
 
-    public void writeStartDocument(String encoding, String version) throws XMLStreamException {
+    void writeStartDocument(String encoding, String version) throws XMLStreamException {
         writer.writeStartDocument(encoding, version);
     }
 
-    public void newLine() throws XMLStreamException {
+    void writeNewLine() throws XMLStreamException {
         writer.writeCharacters("\n");
     }
 
-    public void writeStartElement(String localName) throws XMLStreamException {
+    void writeStartElement(String localName) throws XMLStreamException {
         writer.writeStartElement(localName);
     }
 
-    public void writeEndElement() throws XMLStreamException {
+    void writeEndElement() throws XMLStreamException {
         writer.writeEndElement();
     }
 
-    public void writeEndDocument() throws XMLStreamException {
+    void writeEndDocument() throws XMLStreamException {
         writer.writeEndDocument();
     }
 
-    public void flush() throws XMLStreamException {
+    void flush() throws XMLStreamException {
         writer.flush();
     }
 
-    public void writeEmptyElement(String localName) throws XMLStreamException {
+    void writeEmptyElement(String localName) throws XMLStreamException {
         writer.writeEmptyElement(localName);
     }
 
-    public void writeAttribute(String localName, String value) throws XMLStreamException {
+    void writeAttribute(String localName, String value) throws XMLStreamException {
         writer.writeAttribute(localName, escapeIllegalChars(value));
     }
 
     private static final Pattern CDATA_TERMINATOR_SPLIT = Pattern.compile("(?<=]])(?=>)");
 
-    public void writeCData(String data) throws XMLStreamException {
+    void writeCData(String data) throws XMLStreamException {
         // https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
         for (String part : CDATA_TERMINATOR_SPLIT.split(data)) {
             // see https://www.w3.org/TR/xml/#dt-cdsection

@@ -30,7 +30,7 @@ class XmlReportWriter {
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
         EscapingXmlStreamWriter writer = new EscapingXmlStreamWriter(factory.createXMLStreamWriter(out));
         writer.writeStartDocument("UTF-8", "1.0");
-        writer.newLine();
+        writer.writeNewLine();
         writeTestsuite(writer);
         writer.writeEndDocument();
         writer.flush();
@@ -39,14 +39,14 @@ class XmlReportWriter {
     private void writeTestsuite(EscapingXmlStreamWriter writer) throws XMLStreamException {
         writer.writeStartElement("testsuite");
         writeSuiteAttributes(writer);
-        writer.newLine();
+        writer.writeNewLine();
 
         for (TestCaseStarted testCaseStarted : data.getAllTestCaseStarted()) {
             writeTestcase(writer, testCaseStarted);
         }
 
         writer.writeEndElement();
-        writer.newLine();
+        writer.writeNewLine();
     }
 
     private void writeSuiteAttributes(EscapingXmlStreamWriter writer) throws XMLStreamException {
@@ -75,11 +75,11 @@ class XmlReportWriter {
     private void writeTestcase(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
         writer.writeStartElement("testcase");
         writeTestCaseAttributes(writer, testCaseStarted);
-        writer.newLine();
+        writer.writeNewLine();
         writeNonPassedElement(writer, testCaseStarted);
         writeStepAndResultList(writer, testCaseStarted);
         writer.writeEndElement();
-        writer.newLine();
+        writer.writeNewLine();
     }
 
     private void writeTestCaseAttributes(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
@@ -117,22 +117,22 @@ class XmlReportWriter {
         }
         if (hasMessageOrStackTrace) {
             if (exceptionStackTrace.isPresent()) {
-                writer.newLine();
+                writer.writeNewLine();
                 writer.writeCData(exceptionStackTrace.get());
-                writer.newLine();
+                writer.writeNewLine();
             } else {
                 // Fall back to message for older implementations
                 // that put the stack trace in the message
-                writer.newLine();
+                writer.writeNewLine();
                 writer.writeCData(message.get());
-                writer.newLine();
+                writer.writeNewLine();
             }
         }
 
         if (hasMessageOrStackTrace) {
             writer.writeEndElement();
         }
-        writer.newLine();
+        writer.writeNewLine();
     }
 
     private void writeStepAndResultList(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
@@ -143,7 +143,7 @@ class XmlReportWriter {
         writer.writeStartElement("system-out");
         writer.writeCData(createStepResultList(results));
         writer.writeEndElement();
-        writer.newLine();
+        writer.writeNewLine();
     }
 
     private static String createStepResultList(List<Map.Entry<String, String>> results) {

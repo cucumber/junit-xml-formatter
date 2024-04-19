@@ -35,7 +35,7 @@ class XmlReportData {
 
     private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
 
-    public XmlReportData(NamingStrategy namingStrategy) {
+    XmlReportData(NamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
     }
 
@@ -77,7 +77,7 @@ class XmlReportData {
         return query.findNameOf(pickle, namingStrategy);
     }
 
-    public String getFeatureName(TestCaseStarted testCaseStarted) {
+    String getFeatureName(TestCaseStarted testCaseStarted) {
         return query.findFeatureBy(testCaseStarted)
                 .map(Feature::getName)
                 .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
