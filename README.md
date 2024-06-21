@@ -78,7 +78,8 @@ Feature: Rules
 ```
 
 Likewise for example tables, the rule (if any), scenario outline name, example
-name, and number are included. 
+name, and number are included. Additionally, if the scenario outline name is
+parameterized, the pickle name is included too.
 
 ```feature
 Feature: Examples Tables
@@ -97,13 +98,27 @@ Feature: Examples Tables
       | start | eat | left |
       |    12 |  20 |    0 |
       |     0 |   1 |    0 |
+
+  Scenario Outline: Eating <color> cucumbers
+    Given I am transparent
+    When I eat <color> cucumbers
+    Then I become <color>
+
+    Examples:
+      | color | 
+      |   red | 
+      | green | 
+      |  blue | 
 ```
 
 ```xml
-<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - Example #1.1" />
-<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - Example #1.2" />
-<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - Example #2.1" />
-<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - Example #2.2" />
+<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - #1.1" />
+<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - #1.2" />
+<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - #2.1" />
+<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - #2.2" />
+<testcase classname="Examples Tables" name="Eating &lt;color&gt; cucumbers - #1.1: Eating red cucumbers" />
+<testcase classname="Examples Tables" name="Eating &lt;color&gt; cucumbers - #1.2: Eating green cucumbers" />
+<testcase classname="Examples Tables" name="Eating &lt;color&gt; cucumbers - #1.3: Eating blue cucumbers" />
 ```
 ## Contributing
 

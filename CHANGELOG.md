@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Include pickle name if parameterized [#34](https://github.com/cucumber/junit-xml-formatter/pull/34)
 - Support configurable `NamingStrategy.ExampleName`  ([#32](https://github.com/cucumber/cucumber-junit-xml-formatter/pull/32), M.P. Korstanje)
 
 ## [0.4.0] - 2024-04-05
