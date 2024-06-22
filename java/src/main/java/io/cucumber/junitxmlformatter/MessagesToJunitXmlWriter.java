@@ -27,7 +27,7 @@ public class MessagesToJunitXmlWriter implements AutoCloseable {
     private boolean streamClosed = false;
 
     public MessagesToJunitXmlWriter(OutputStream out) {
-        this(NamingStrategy.ExampleName.NUMBER, out);
+        this(NamingStrategy.ExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED, out);
     }
 
     public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, OutputStream out) {

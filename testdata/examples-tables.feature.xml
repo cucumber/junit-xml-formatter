@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Cucumber" time="0.049" tests="6" skipped="0" failures="4" errors="0">
-<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - Example #1.1" time="0.007">
+<testsuite name="Cucumber" time="0.073" tests="9" skipped="0" failures="4" errors="0">
+<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - #1.1" time="0.007">
 <system-out><![CDATA[
 Given there are 12 cucumbers................................................passed
 When I eat 5 cucumbers......................................................passed
 Then I should have 7 cucumbers..............................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - Example #1.2" time="0.007">
+<testcase classname="Examples Tables" name="Eating cucumbers - These are passing - #1.2" time="0.007">
 <system-out><![CDATA[
 Given there are 20 cucumbers................................................passed
 When I eat 5 cucumbers......................................................passed
 Then I should have 15 cucumbers.............................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - Example #2.1" time="0.007">
+<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - #2.1" time="0.007">
 <failure type="AssertionError" message="Expected values to be strictly equal:
 
 -8 !== 0
@@ -23,8 +23,8 @@ Then I should have 15 cucumbers.............................................pass
 
 -8 !== 0
 
-samples/examples-tables/examples-tables.feature:9
-samples/examples-tables/examples-tables.feature:20]]>
+samples/examples-tables/examples-tables.feature:14
+samples/examples-tables/examples-tables.feature:25]]>
 </failure>
 <system-out><![CDATA[
 Given there are 12 cucumbers................................................passed
@@ -32,7 +32,7 @@ When I eat 20 cucumbers.....................................................pass
 Then I should have 0 cucumbers..............................................failed
 ]]></system-out>
 </testcase>
-<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - Example #2.2" time="0.007">
+<testcase classname="Examples Tables" name="Eating cucumbers - These are failing - #2.2" time="0.007">
 <failure type="AssertionError" message="Expected values to be strictly equal:
 
 -1 !== 0
@@ -41,8 +41,8 @@ Then I should have 0 cucumbers..............................................fail
 
 -1 !== 0
 
-samples/examples-tables/examples-tables.feature:9
-samples/examples-tables/examples-tables.feature:21]]>
+samples/examples-tables/examples-tables.feature:14
+samples/examples-tables/examples-tables.feature:26]]>
 </failure>
 <system-out><![CDATA[
 Given there are 0 cucumbers.................................................passed
@@ -50,7 +50,7 @@ When I eat 1 cucumbers......................................................pass
 Then I should have 0 cucumbers..............................................failed
 ]]></system-out>
 </testcase>
-<testcase classname="Examples Tables" name="Eating cucumbers - These are undefined because the value is not an {int} - Example #3.1" time="0.007">
+<testcase classname="Examples Tables" name="Eating cucumbers - These are undefined because the value is not an {int} - #3.1" time="0.007">
 <failure/>
 <system-out><![CDATA[
 Given there are 12 cucumbers................................................passed
@@ -58,12 +58,33 @@ When I eat banana cucumbers.................................................unde
 Then I should have 12 cucumbers.............................................skipped
 ]]></system-out>
 </testcase>
-<testcase classname="Examples Tables" name="Eating cucumbers - These are undefined because the value is not an {int} - Example #3.2" time="0.007">
+<testcase classname="Examples Tables" name="Eating cucumbers - These are undefined because the value is not an {int} - #3.2" time="0.007">
 <failure/>
 <system-out><![CDATA[
 Given there are 0 cucumbers.................................................passed
 When I eat 1 cucumbers......................................................passed
 Then I should have apple cucumbers..........................................undefined
+]]></system-out>
+</testcase>
+<testcase classname="Examples Tables" name="Eating cucumbers with &lt;friends&gt; friends - #1.1: Eating cucumbers with 11 friends" time="0.007">
+<system-out><![CDATA[
+Given there are 11 friends..................................................passed
+When there are 12 cucumbers.................................................passed
+Then each person can eat 1 cucumbers........................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Examples Tables" name="Eating cucumbers with &lt;friends&gt; friends - #1.2: Eating cucumbers with 1 friends" time="0.007">
+<system-out><![CDATA[
+Given there are 1 friends...................................................passed
+When there are 4 cucumbers..................................................passed
+Then each person can eat 2 cucumbers........................................passed
+]]></system-out>
+</testcase>
+<testcase classname="Examples Tables" name="Eating cucumbers with &lt;friends&gt; friends - #1.3: Eating cucumbers with 0 friends" time="0.007">
+<system-out><![CDATA[
+Given there are 0 friends...................................................passed
+When there are 4 cucumbers..................................................passed
+Then each person can eat 4 cucumbers........................................passed
 ]]></system-out>
 </testcase>
 </testsuite>

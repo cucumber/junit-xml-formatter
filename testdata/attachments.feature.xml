@@ -35,12 +35,12 @@ When a JPEG image is attached...............................................pass
 When a PNG image is attached................................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Attachments" name="Attaching images in an examples table - Example #1.1" time="0.005">
+<testcase classname="Attachments" name="Attaching images in an examples table - #1.1" time="0.005">
 <system-out><![CDATA[
 When a JPEG image is attached...............................................passed
 ]]></system-out>
 </testcase>
-<testcase classname="Attachments" name="Attaching images in an examples table - Example #1.2" time="0.005">
+<testcase classname="Attachments" name="Attaching images in an examples table - #1.2" time="0.005">
 <system-out><![CDATA[
 When a PNG image is attached................................................passed
 ]]></system-out>
