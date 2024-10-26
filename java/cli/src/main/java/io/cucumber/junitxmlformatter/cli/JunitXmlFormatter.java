@@ -18,7 +18,6 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,9 +25,13 @@ import java.util.concurrent.Callable;
 
 import static io.cucumber.query.NamingStrategy.ExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED;
 
-@Command(name = "to-junit-xml", mixinStandardHelpOptions = true, version = "to-junit-xml 4.0",
-         description = "Converts Cucumber messages to JUnit XML")
-class ToJUnitXml implements Callable<Integer> {
+// TODO: Read version from manifest?
+@Command(
+        name = "junit-xml-formatter",
+        mixinStandardHelpOptions = true,
+        description = "Converts Cucumber messages to JUnit XML"
+)
+class JunitXmlFormatter implements Callable<Integer> {
     @Spec
     private CommandSpec spec;
 
@@ -49,6 +52,7 @@ class ToJUnitXml implements Callable<Integer> {
 
         // TODO: Use the CLI options.
         NamingStrategy.ExampleName exampleNameStrategy = NUMBER_AND_PICKLE_IF_PARAMETERIZED;
+        // TODO: Read from standard in, or read/write from files.
         Writer out = spec.commandLine().getOut();
 
         try (InputStream in = Files.newInputStream(source)) {
@@ -64,10 +68,8 @@ class ToJUnitXml implements Callable<Integer> {
         return 0;
     }
 
-    // this example implements Callable, so parsing, error handling and handling user
-    // requests for usage help or version help can be done with one line of code.
     public static void main(String... args) {
-        int exitCode = new CommandLine(new ToJUnitXml()).execute(args);
+        int exitCode = new CommandLine(new JunitXmlFormatter()).execute(args);
         System.exit(exitCode);
     }
 }
