@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -8,18 +9,15 @@
         <version>4.2.0</version>
     </parent>
 
-    <artifactId>junit-xml-formatter</artifactId>
+    <artifactId>junit-xml-formatter-parent</artifactId>
     <version>0.5.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>JUnit XML Formatter</name>
-    <description>Renders Cucumber Messages as JUnit XML</description>
+    <packaging>pom</packaging>
+    <name>JUnit XML Formatter Parent</name>
     <url>https://github.com/cucumber/junit-xml-formatter</url>
 
     <properties>
-        <project.Automatic-Module-Name>io.cucumber.junitxmlformatter</project.Automatic-Module-Name>
         <project.build.outputTimestamp>1719064372</project.build.outputTimestamp>
     </properties>
-
     <scm>
         <connection>scm:git:git://github.com/cucumber/junit-xml-formatter.git</connection>
         <developerConnection>scm:git:git@github.com:cucumber/junit-xml-formatter.git</developerConnection>
@@ -27,87 +25,23 @@
         <tag>HEAD</tag>
     </scm>
 
+    <modules>
+        <module>lib</module>
+        <module>cli</module>
+    </modules>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>5.11.3</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.cucumber</groupId>
+                <artifactId>junit-xml-formatter</artifactId>
+                <version>0.5.1-SNAPSHOT</version>
             </dependency>
-
             <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>2.18.0</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.cucumber</groupId>
+                <artifactId>junit-xml-formatter-cli</artifactId>
+                <version>0.5.1-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>messages</artifactId>
-            <version>[24.0.0,27.0.0)</version>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>query</artifactId>
-            <version>[12.2.0,13.0.0)</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-parameter-names</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest</artifactId>
-            <version>3.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.26.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.xmlunit</groupId>
-            <artifactId>xmlunit-assertj</artifactId>
-            <version>2.10.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>

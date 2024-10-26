@@ -7,6 +7,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 import static io.cucumber.query.NamingStrategy.FeatureName.EXCLUDE;
@@ -22,7 +23,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class MessagesToJunitXmlWriter implements AutoCloseable {
 
-    private final OutputStreamWriter out;
+    private final Writer out;
     private final XmlReportData data;
     private boolean streamClosed = false;
 
@@ -34,16 +35,23 @@ public class MessagesToJunitXmlWriter implements AutoCloseable {
         this(createNamingStrategy(requireNonNull(exampleNameStrategy)), out);
     }
 
+    public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, Writer out) {
+        this(createNamingStrategy(exampleNameStrategy), out);
+    }
+
+
     private static NamingStrategy createNamingStrategy(NamingStrategy.ExampleName exampleName) {
         return NamingStrategy.strategy(LONG).featureName(EXCLUDE).exampleName(exampleName).build();
     }
 
     private MessagesToJunitXmlWriter(NamingStrategy namingStrategy, OutputStream out) {
-        this.data = new XmlReportData(namingStrategy);
-        this.out = new OutputStreamWriter(
-                requireNonNull(out),
-                StandardCharsets.UTF_8
+        this(namingStrategy, new OutputStreamWriter(requireNonNull(out), StandardCharsets.UTF_8)
         );
+    }
+
+    private MessagesToJunitXmlWriter(NamingStrategy namingStrategy, Writer out) {
+        this.data = new XmlReportData(namingStrategy);
+        this.out = out;
     }
 
     /**

@@ -34,7 +34,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
 
     static List<TestCase> acceptance() throws IOException {
-        try (Stream<Path> paths = Files.list(Paths.get("../testdata"))) {
+        try (Stream<Path> paths = Files.list(Paths.get("../../testdata"))) {
             return paths
                     .filter(path -> path.getFileName().toString().endsWith(".ndjson"))
                     .map(TestCase::new)
@@ -57,7 +57,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     void validateAgainstJenkins(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
-        Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
+        Source jenkinsSchema = Input.fromPath(Paths.get("../../jenkins-junit.xsd")).build();
         assertThat(actual).isValidAgainst(jenkinsSchema);
     }
 
@@ -75,7 +75,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     void validateAgainstSurefire(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
-        Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
+        Source surefireSchema = Input.fromPath(Paths.get("../../surefire-test-report-3.0.xsd")).build();
         if (!testCasesWithMissingException.contains(testCase.name)) {
             assertThat(actual).isValidAgainst(surefireSchema);
             return;
