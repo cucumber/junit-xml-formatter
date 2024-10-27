@@ -33,7 +33,6 @@ import static java.nio.file.Files.newOutputStream;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
-// TODO: Read version from manifest?
 @Command(
         name = JUNIT_XML_FORMATTER_NAME,
         mixinStandardHelpOptions = true,
