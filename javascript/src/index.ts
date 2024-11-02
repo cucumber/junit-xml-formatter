@@ -6,6 +6,18 @@ import xmlbuilder from 'xmlbuilder'
 
 import { ExtendedQuery } from './ExtendedQuery.js'
 import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
+import {
+  namingStrategy,
+  NamingStrategyExampleName,
+  NamingStrategyFeatureName,
+  NamingStrategyLength,
+} from './Lineage.js'
+
+const NAMING_STRATEGY = namingStrategy(
+  NamingStrategyLength.LONG,
+  NamingStrategyFeatureName.EXCLUDE,
+  NamingStrategyExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED
+)
 
 export default {
   type: 'formatter',
@@ -93,9 +105,10 @@ function makeTestCases(query: ExtendedQuery): ReadonlyArray<ReportTestCase> {
     const pickle = query.findPickleBy(testCaseStarted)
     assert.ok(pickle, 'Expected to find Pickle by TestCaseStarted')
     const lineage = query.findLineageBy(pickle)
+
     return {
       classname: lineage?.feature?.name ?? pickle.uri,
-      name: pickle.name,
+      name: query.findNameOf(pickle, NAMING_STRATEGY),
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
       failure: makeFailure(query, testCaseStarted),
       output: query

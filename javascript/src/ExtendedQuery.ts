@@ -2,7 +2,6 @@ import * as assert from 'node:assert'
 
 import {
   Envelope,
-  Examples,
   Feature,
   getWorstTestStepResult,
   GherkinDocument,
@@ -11,7 +10,6 @@ import {
   Rule,
   Scenario,
   Step,
-  TableRow,
   TestCase,
   TestCaseFinished,
   TestCaseStarted,
@@ -24,16 +22,7 @@ import {
 } from '@cucumber/messages'
 import { ArrayMultimap } from '@teppeis/multimaps'
 
-export interface Lineage {
-  gherkinDocument?: GherkinDocument
-  feature?: Feature
-  rule?: Rule
-  scenario?: Scenario
-  examples?: Examples
-  examplesIndex?: number
-  example?: TableRow
-  exampleIndex?: number
-}
+import { Lineage, NamingStrategy } from './Lineage.js'
 
 export class ExtendedQuery {
   private testRunStarted: TestRunStarted
@@ -186,6 +175,11 @@ export class ExtendedQuery {
     const deepestAstNodeId = pickle.astNodeIds.at(-1)
     assert.ok(deepestAstNodeId, 'Expected Pickle to have at least one astNodeId')
     return this.lineageById.get(deepestAstNodeId)
+  }
+
+  findNameOf(pickle: Pickle, namingStrategy: NamingStrategy) {
+    const lineage = this.findLineageBy(pickle)
+    return lineage ? namingStrategy.reduce(lineage, pickle) : pickle.name
   }
 
   findStepBy(pickleStep: PickleStep) {
