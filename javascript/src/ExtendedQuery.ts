@@ -133,9 +133,7 @@ export class ExtendedQuery {
 
   findPickleBy(testCaseStarted: TestCaseStarted) {
     const testCase = this.findTestCaseBy(testCaseStarted)
-    if (!testCase) {
-      return undefined
-    }
+    assert.ok(testCase, 'Expected to find TestCase from TestCaseStarted')
     return this.pickleById.get(testCase.pickleId)
   }
 
@@ -164,6 +162,14 @@ export class ExtendedQuery {
     return TimeConversion.millisecondsToDuration(
       TimeConversion.timestampToMillisecondsSinceEpoch(testCaseFinished.timestamp) -
         TimeConversion.timestampToMillisecondsSinceEpoch(testCaseStarted.timestamp)
+    )
+  }
+
+  findMostSevereTestStepResultBy(testCaseStarted: TestCaseStarted) {
+    return getWorstTestStepResult(
+      this.findTestStepFinishedAndTestStepBy(testCaseStarted).map(
+        ([testStepFinished]) => testStepFinished.testStepResult
+      )
     )
   }
 

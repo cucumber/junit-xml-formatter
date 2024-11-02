@@ -1,7 +1,7 @@
 import * as assert from 'node:assert'
 
 import { Query as GherkinQuery } from '@cucumber/gherkin-utils'
-import { Envelope, TestStepResultStatus } from '@cucumber/messages'
+import { Envelope, TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
 import xmlbuilder from 'xmlbuilder'
 
 import { ExtendedQuery } from './ExtendedQuery.js'
@@ -35,12 +35,15 @@ export default {
         builder.att('errors', testSuite.errors)
 
         for (const testCase of testSuite.testCases) {
-          const element = builder.ele('testcase', {
+          const testcaseElement = builder.ele('testcase', {
             classname: testCase.classname,
             name: testCase.name,
             time: testCase.time,
           })
-          element.ele('system-out', {}).cdata(testCase.output)
+          if (testCase.failure) {
+            testcaseElement.ele(testCase.failure.type)
+          }
+          testcaseElement.ele('system-out', {}).cdata(testCase.output)
         }
 
         write(builder.end({ pretty: true }))
@@ -49,23 +52,28 @@ export default {
   },
 }
 
-interface Report {
+interface ReportSuite {
   time: number
   tests: number
   skipped: number
   failures: number
   errors: number
-  testCases: ReadonlyArray<TestCase>
+  testCases: ReadonlyArray<ReportTestCase>
 }
 
-interface TestCase {
+interface ReportTestCase {
   classname: string
   name: string
   time: number
+  failure?: ReportFailure
   output: string
 }
 
-function makeReport(query: ExtendedQuery): Report {
+interface ReportFailure {
+  type: 'failure' | 'skipped'
+}
+
+function makeReport(query: ExtendedQuery): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
     time: durationToSeconds(query.findTestRunDuration()),
@@ -80,7 +88,7 @@ function makeReport(query: ExtendedQuery): Report {
   }
 }
 
-function makeTestCases(query: ExtendedQuery): ReadonlyArray<TestCase> {
+function makeTestCases(query: ExtendedQuery): ReadonlyArray<ReportTestCase> {
   return query.findAllTestCaseStarted().map((testCaseStarted) => {
     const pickle = query.findPickleBy(testCaseStarted)
     assert.ok(pickle, 'Expected to find Pickle by TestCaseStarted')
@@ -88,6 +96,7 @@ function makeTestCases(query: ExtendedQuery): ReadonlyArray<TestCase> {
       classname: pickle.uri,
       name: pickle.name,
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
+      failure: makeFailure(query, testCaseStarted),
       output: query
         .findTestStepFinishedAndTestStepBy(testCaseStarted)
         // filter out hooks
@@ -102,4 +111,17 @@ function makeTestCases(query: ExtendedQuery): ReadonlyArray<TestCase> {
         .join('\n'),
     }
   })
+}
+
+function makeFailure(
+  query: ExtendedQuery,
+  testCaseStarted: TestCaseStarted
+): ReportFailure | undefined {
+  const result = query.findMostSevereTestStepResultBy(testCaseStarted)
+  if (result.status === TestStepResultStatus.PASSED) {
+    return undefined
+  }
+  return {
+    type: result.status === TestStepResultStatus.SKIPPED ? 'skipped' : 'failure',
+  }
 }
