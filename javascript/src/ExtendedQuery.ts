@@ -2,12 +2,16 @@ import * as assert from 'node:assert'
 
 import {
   Envelope,
+  Examples,
   Feature,
   getWorstTestStepResult,
   GherkinDocument,
   Pickle,
   PickleStep,
+  Rule,
+  Scenario,
   Step,
+  TableRow,
   TestCase,
   TestCaseFinished,
   TestCaseStarted,
@@ -20,10 +24,22 @@ import {
 } from '@cucumber/messages'
 import { ArrayMultimap } from '@teppeis/multimaps'
 
+export interface Lineage {
+  gherkinDocument?: GherkinDocument
+  feature?: Feature
+  rule?: Rule
+  scenario?: Scenario
+  examples?: Examples
+  examplesIndex?: number
+  example?: TableRow
+  exampleIndex?: number
+}
+
 export class ExtendedQuery {
   private testRunStarted: TestRunStarted
   private testRunFinished: TestRunFinished
   private testCaseStarted: Array<TestCaseStarted> = []
+  private readonly lineageById: Map<string, Lineage> = new Map()
   private readonly stepById: Map<string, Step> = new Map()
   private readonly pickleById: Map<string, Pickle> = new Map()
   private readonly pickleStepById: Map<string, PickleStep> = new Map()
@@ -62,29 +78,70 @@ export class ExtendedQuery {
 
   private updateGherkinDocument(gherkinDocument: GherkinDocument) {
     if (gherkinDocument.feature) {
-      this.updateFeature(gherkinDocument.feature)
+      this.updateFeature(gherkinDocument.feature, {
+        gherkinDocument,
+      })
     }
   }
 
-  private updateFeature(feature: Feature) {
+  private updateFeature(feature: Feature, lineage: Lineage) {
     feature.children.forEach((featureChild) => {
       if (featureChild.background) {
         this.updateSteps(featureChild.background.steps)
       }
       if (featureChild.scenario) {
-        this.updateSteps(featureChild.scenario.steps)
+        this.updateScenario(featureChild.scenario, {
+          ...lineage,
+          feature,
+        })
       }
       if (featureChild.rule) {
-        featureChild.rule.children.forEach((ruleChild) => {
-          if (ruleChild.background) {
-            this.updateSteps(ruleChild.background.steps)
-          }
-          if (ruleChild.scenario) {
-            this.updateSteps(ruleChild.scenario.steps)
-          }
+        this.updateRule(featureChild.rule, {
+          ...lineage,
+          feature,
         })
       }
     })
+  }
+
+  private updateRule(rule: Rule, lineage: Lineage) {
+    rule.children.forEach((ruleChild) => {
+      if (ruleChild.background) {
+        this.updateSteps(ruleChild.background.steps)
+      }
+      if (ruleChild.scenario) {
+        this.updateScenario(ruleChild.scenario, {
+          ...lineage,
+          rule,
+        })
+      }
+    })
+  }
+
+  private updateScenario(scenario: Scenario, lineage: Lineage) {
+    this.lineageById.set(scenario.id, {
+      ...lineage,
+      scenario,
+    })
+    scenario.examples.forEach((examples, examplesIndex) => {
+      this.lineageById.set(examples.id, {
+        ...lineage,
+        scenario,
+        examples,
+        examplesIndex,
+      })
+      examples.tableBody.forEach((example, exampleIndex) => {
+        this.lineageById.set(example.id, {
+          ...lineage,
+          scenario,
+          examples,
+          examplesIndex,
+          example,
+          exampleIndex,
+        })
+      })
+    })
+    this.updateSteps(scenario.steps)
   }
 
   private updateSteps(steps: ReadonlyArray<Step>) {
@@ -123,6 +180,12 @@ export class ExtendedQuery {
       testCaseFinished.testCaseStartedId,
       testCaseFinished
     )
+  }
+
+  findLineageBy(pickle: Pickle) {
+    const deepestAstNodeId = pickle.astNodeIds.at(-1)
+    assert.ok(deepestAstNodeId, 'Expected Pickle to have at least one astNodeId')
+    return this.lineageById.get(deepestAstNodeId)
   }
 
   findStepBy(pickleStep: PickleStep) {

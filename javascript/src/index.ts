@@ -92,8 +92,9 @@ function makeTestCases(query: ExtendedQuery): ReadonlyArray<ReportTestCase> {
   return query.findAllTestCaseStarted().map((testCaseStarted) => {
     const pickle = query.findPickleBy(testCaseStarted)
     assert.ok(pickle, 'Expected to find Pickle by TestCaseStarted')
+    const lineage = query.findLineageBy(pickle)
     return {
-      classname: pickle.uri,
+      classname: lineage?.feature?.name ?? pickle.uri,
       name: pickle.name,
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
       failure: makeFailure(query, testCaseStarted),
