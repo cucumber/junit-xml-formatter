@@ -1,11 +1,10 @@
-import * as assert from 'node:assert'
-
 import { Query as GherkinQuery } from '@cucumber/gherkin-utils'
-import { Envelope, TestStepResultStatus } from '@cucumber/messages'
+import { Envelope, TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
 import xmlbuilder from 'xmlbuilder'
 
 import { ExtendedQuery } from './ExtendedQuery.js'
 import { countStatuses, durationToSeconds } from './helpers.js'
+import * as assert from 'node:assert'
 
 export default {
   type: 'formatter',
@@ -27,30 +26,18 @@ export default {
       cucumberQuery.update(message)
 
       if (message.testRunFinished) {
-        builder.att('time', durationToSeconds(cucumberQuery.findTestRunDuration()))
-        const statusCounts = cucumberQuery.countMostSevereTestStepResultStatus()
-        builder.att('tests', countStatuses(statusCounts))
-        builder.att(
-          'skipped',
-          countStatuses(statusCounts, (status) => status === TestStepResultStatus.SKIPPED)
-        )
-        builder.att(
-          'failures',
-          countStatuses(
-            statusCounts,
-            (status) =>
-              status !== TestStepResultStatus.PASSED && status !== TestStepResultStatus.SKIPPED
-          )
-        )
-        builder.att('errors', 0)
+        const testSuite = makeReport(cucumberQuery)
+        builder.att('time', testSuite.time)
+        builder.att('tests', testSuite.tests)
+        builder.att('skipped', testSuite.skipped)
+        builder.att('failures', testSuite.failures)
+        builder.att('errors', testSuite.errors)
 
-        for (const testCaseStarted of cucumberQuery.findAllTestCaseStarted()) {
-          const pickle = cucumberQuery.findPickleBy(testCaseStarted)
-          assert.ok(pickle, 'Expected to find Pickle for TestCaseStarted')
-          builder.ele('testcase', {
-            classname: pickle.uri,
-            name: pickle.name,
-            time: durationToSeconds(cucumberQuery.findTestCaseDurationBy(testCaseStarted)),
+        for (const testCase of testSuite.testCases) {
+          const element = builder.ele('testcase', {
+            classname: testCase.classname,
+            name: testCase.name,
+            time: testCase.time,
           })
         }
 
@@ -58,4 +45,46 @@ export default {
       }
     })
   },
+}
+
+interface Report {
+  time: number
+  tests: number
+  skipped: number
+  failures: number
+  errors: number
+  testCases: ReadonlyArray<TestCase>
+}
+
+interface TestCase {
+  classname: string
+  name: string
+  time: number
+}
+
+function makeReport(query: ExtendedQuery): Report {
+  const statuses = query.countMostSevereTestStepResultStatus()
+  return {
+    time: durationToSeconds(query.findTestRunDuration()),
+    tests: countStatuses(statuses),
+    skipped: countStatuses(statuses, (status) => status === TestStepResultStatus.SKIPPED),
+    failures: countStatuses(
+      statuses,
+      (status) => status !== TestStepResultStatus.PASSED && status !== TestStepResultStatus.SKIPPED
+    ),
+    errors: 0,
+    testCases: makeTestCases(query),
+  }
+}
+
+function makeTestCases(query: ExtendedQuery): ReadonlyArray<TestCase> {
+  return query.findAllTestCaseStarted().map((testCaseStarted) => {
+    const pickle = query.findPickleBy(testCaseStarted)
+    assert.ok(pickle, 'Expected to find Pickle by TestCaseStarted')
+    return {
+      classname: pickle.uri,
+      name: pickle.name,
+      time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
+    }
+  })
 }
