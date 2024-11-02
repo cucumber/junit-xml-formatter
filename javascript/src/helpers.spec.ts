@@ -1,8 +1,8 @@
-import { TestStepResultStatus } from '@cucumber/messages'
+import { PickleStep, Step, TestStepResultStatus } from '@cucumber/messages'
 import { expect, use } from 'chai'
 import chaiAlmost from 'chai-almost'
 
-import { countStatuses, durationToSeconds } from './helpers.js'
+import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
 
 use(chaiAlmost())
 
@@ -41,6 +41,18 @@ describe('helpers', () => {
       expect(countStatuses(statuses, (status) => status === TestStepResultStatus.UNDEFINED)).to.eq(
         6
       )
+    })
+  })
+
+  describe('formatStep', () => {
+    it('formats a step', () => {
+      expect(
+        formatStep(
+          { keyword: 'Given ' } as Step,
+          { text: 'I have 42 cukes in my belly' } as PickleStep,
+          TestStepResultStatus.PASSED
+        )
+      ).to.eq('Given I have 42 cukes in my belly...........................................passed')
     })
   })
 })

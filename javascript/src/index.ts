@@ -1,10 +1,11 @@
+import * as assert from 'node:assert'
+
 import { Query as GherkinQuery } from '@cucumber/gherkin-utils'
-import { Envelope, TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
+import { Envelope, TestStepResultStatus } from '@cucumber/messages'
 import xmlbuilder from 'xmlbuilder'
 
 import { ExtendedQuery } from './ExtendedQuery.js'
-import { countStatuses, durationToSeconds } from './helpers.js'
-import * as assert from 'node:assert'
+import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
 
 export default {
   type: 'formatter',
@@ -39,6 +40,7 @@ export default {
             name: testCase.name,
             time: testCase.time,
           })
+          element.ele('system-out', {}).cdata(testCase.output)
         }
 
         write(builder.end({ pretty: true }))
@@ -60,6 +62,7 @@ interface TestCase {
   classname: string
   name: string
   time: number
+  output: string
 }
 
 function makeReport(query: ExtendedQuery): Report {
@@ -85,6 +88,18 @@ function makeTestCases(query: ExtendedQuery): ReadonlyArray<TestCase> {
       classname: pickle.uri,
       name: pickle.name,
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
+      output: query
+        .findTestStepFinishedAndTestStepBy(testCaseStarted)
+        // filter out hooks
+        .filter(([, testStep]) => !!testStep.pickleStepId)
+        .map(([testStepFinished, testStep]) => {
+          const pickleStep = query.findPickleStepBy(testStep)
+          assert.ok(pickleStep, 'Expected to find PickleStep by TestStep')
+          const gherkinStep = query.findStepBy(pickleStep)
+          assert.ok(gherkinStep, 'Expected to find Step by PickleStep')
+          return formatStep(gherkinStep, pickleStep, testStepFinished.testStepResult.status)
+        })
+        .join('\n'),
     }
   })
 }

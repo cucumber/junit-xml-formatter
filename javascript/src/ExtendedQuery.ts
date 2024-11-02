@@ -2,40 +2,55 @@ import * as assert from 'node:assert'
 
 import {
   Envelope,
+  Feature,
   getWorstTestStepResult,
+  GherkinDocument,
   Pickle,
+  PickleStep,
+  Step,
   TestCase,
   TestCaseFinished,
   TestCaseStarted,
   TestRunFinished,
   TestRunStarted,
+  TestStep,
+  TestStepFinished,
   TestStepResultStatus,
   TimeConversion,
 } from '@cucumber/messages'
-import { Query as CucumberQuery } from '@cucumber/query'
+import { ArrayMultimap } from '@teppeis/multimaps'
 
-export class ExtendedQuery extends CucumberQuery {
+export class ExtendedQuery {
   private testRunStarted: TestRunStarted
   private testRunFinished: TestRunFinished
   private testCaseStarted: Array<TestCaseStarted> = []
+  private readonly stepById: Map<string, Step> = new Map()
   private readonly pickleById: Map<string, Pickle> = new Map()
+  private readonly pickleStepById: Map<string, PickleStep> = new Map()
   private readonly testCaseById: Map<string, TestCase> = new Map()
+  private readonly testStepById: Map<string, TestStep> = new Map()
   private readonly testCaseFinishedByTestCaseStartedId: Map<string, TestCaseFinished> = new Map()
+  private readonly testStepFinishedByTestCaseStartedId: ArrayMultimap<string, TestStepFinished> =
+    new ArrayMultimap()
 
   update(envelope: Envelope) {
-    super.update(envelope)
-
+    if (envelope.gherkinDocument) {
+      this.updateGherkinDocument(envelope.gherkinDocument)
+    }
     if (envelope.pickle) {
-      this.pickleById.set(envelope.pickle.id, envelope.pickle)
+      this.updatePickle(envelope.pickle)
     }
     if (envelope.testRunStarted) {
       this.testRunStarted = envelope.testRunStarted
     }
     if (envelope.testCase) {
-      this.testCaseById.set(envelope.testCase.id, envelope.testCase)
+      this.updateTestCase(envelope.testCase)
     }
     if (envelope.testCaseStarted) {
       this.updateTestCaseStarted(envelope.testCaseStarted)
+    }
+    if (envelope.testStepFinished) {
+      this.updateTestStepFinished(envelope.testStepFinished)
     }
     if (envelope.testCaseFinished) {
       this.updateTestCaseFinished(envelope.testCaseFinished)
@@ -43,6 +58,47 @@ export class ExtendedQuery extends CucumberQuery {
     if (envelope.testRunFinished) {
       this.testRunFinished = envelope.testRunFinished
     }
+  }
+
+  private updateGherkinDocument(gherkinDocument: GherkinDocument) {
+    if (gherkinDocument.feature) {
+      this.updateFeature(gherkinDocument.feature)
+    }
+  }
+
+  private updateFeature(feature: Feature) {
+    feature.children.forEach((featureChild) => {
+      if (featureChild.background) {
+        this.updateSteps(featureChild.background.steps)
+      }
+      if (featureChild.scenario) {
+        this.updateSteps(featureChild.scenario.steps)
+      }
+      if (featureChild.rule) {
+        featureChild.rule.children.forEach((ruleChild) => {
+          if (ruleChild.background) {
+            this.updateSteps(ruleChild.background.steps)
+          }
+          if (ruleChild.scenario) {
+            this.updateSteps(ruleChild.scenario.steps)
+          }
+        })
+      }
+    })
+  }
+
+  private updateSteps(steps: ReadonlyArray<Step>) {
+    steps.forEach((step) => this.stepById.set(step.id, step))
+  }
+
+  private updatePickle(pickle: Pickle) {
+    this.pickleById.set(pickle.id, pickle)
+    pickle.steps.forEach((pickleStep) => this.pickleStepById.set(pickleStep.id, pickleStep))
+  }
+
+  private updateTestCase(testCase: TestCase) {
+    this.testCaseById.set(testCase.id, testCase)
+    testCase.testSteps.forEach((testStep) => this.testStepById.set(testStep.id, testStep))
   }
 
   private updateTestCaseStarted(testCaseStarted: TestCaseStarted) {
@@ -55,11 +111,24 @@ export class ExtendedQuery extends CucumberQuery {
     ]
   }
 
+  private updateTestStepFinished(testStepFinished: TestStepFinished) {
+    this.testStepFinishedByTestCaseStartedId.put(
+      testStepFinished.testCaseStartedId,
+      testStepFinished
+    )
+  }
+
   private updateTestCaseFinished(testCaseFinished: TestCaseFinished) {
     this.testCaseFinishedByTestCaseStartedId.set(
       testCaseFinished.testCaseStartedId,
       testCaseFinished
     )
+  }
+
+  findStepBy(pickleStep: PickleStep) {
+    const [astNodeId] = pickleStep.astNodeIds
+    assert.ok('Expected PickleStep to have an astNodeId')
+    return this.stepById.get(astNodeId)
   }
 
   findPickleBy(testCaseStarted: TestCaseStarted) {
@@ -68,6 +137,11 @@ export class ExtendedQuery extends CucumberQuery {
       return undefined
     }
     return this.pickleById.get(testCase.pickleId)
+  }
+
+  findPickleStepBy(testStep: TestStep) {
+    assert.ok(testStep.pickleStepId, 'Expected TestStep to have a pickleStepId')
+    return this.pickleStepById.get(testStep.pickleStepId)
   }
 
   findAllTestCaseStarted(): ReadonlyArray<TestCaseStarted> {
@@ -93,6 +167,22 @@ export class ExtendedQuery extends CucumberQuery {
     )
   }
 
+  findTestStepBy(testStepFinished: TestStepFinished) {
+    return this.testStepById.get(testStepFinished.testStepId)
+  }
+
+  findTestStepFinishedAndTestStepBy(
+    testCaseStarted: TestCaseStarted
+  ): ReadonlyArray<[TestStepFinished, TestStep]> {
+    return this.testStepFinishedByTestCaseStartedId
+      .get(testCaseStarted.id)
+      .map((testStepFinished) => {
+        const testStep = this.findTestStepBy(testStepFinished)
+        assert.ok(testStep, 'Expected to find TestStep by TestStepFinished')
+        return [testStepFinished, testStep]
+      })
+  }
+
   findTestRunDuration() {
     if (!this.testRunStarted || !this.testRunFinished) {
       return undefined
@@ -114,13 +204,11 @@ export class ExtendedQuery extends CucumberQuery {
       [TestStepResultStatus.UNKNOWN]: 0,
     }
     for (const testCaseStarted of this.testCaseStarted) {
-      const testCase = this.findTestCaseBy(testCaseStarted)
-      assert.ok(testCase, 'Expected to find TestCase for TestCaseStarted')
-      const statusesFromSteps = testCase.testSteps.map((testStep) => {
-        return getWorstTestStepResult(this.getTestStepResults(testStep.id))
-      })
-      const overallStatus = getWorstTestStepResult(statusesFromSteps)
-      result[overallStatus.status]++
+      const testStepResults = this.findTestStepFinishedAndTestStepBy(testCaseStarted).map(
+        ([testStepFinished]) => testStepFinished.testStepResult
+      )
+      const mostSevereResult = getWorstTestStepResult(testStepResults)
+      result[mostSevereResult.status]++
     }
     return result
   }
