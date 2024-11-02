@@ -1,3 +1,5 @@
+import * as assert from 'node:assert'
+
 import { Query as GherkinQuery } from '@cucumber/gherkin-utils'
 import { Envelope, TestStepResultStatus } from '@cucumber/messages'
 import xmlbuilder from 'xmlbuilder'
@@ -41,6 +43,17 @@ export default {
           )
         )
         builder.att('errors', 0)
+
+        for (const testCaseStarted of cucumberQuery.findAllTestCaseStarted()) {
+          const pickle = cucumberQuery.findPickleBy(testCaseStarted)
+          assert.ok(pickle, 'Expected to find Pickle for TestCaseStarted')
+          builder.ele('testcase', {
+            classname: pickle.uri,
+            name: pickle.name,
+            time: durationToSeconds(cucumberQuery.findTestCaseDurationBy(testCaseStarted)),
+          })
+        }
+
         write(builder.end({ pretty: true }))
       }
     })
