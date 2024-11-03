@@ -53,9 +53,18 @@ export default {
             time: testCase.time,
           })
           if (testCase.failure) {
-            testcaseElement.ele(testCase.failure.type)
+            const failureElement = testcaseElement.ele(testCase.failure.kind)
+            if (testCase.failure.kind === 'failure' && testCase.failure.type) {
+              failureElement.att('type', testCase.failure.type)
+            }
+            if (testCase.failure.message) {
+              failureElement.att('message', testCase.failure.message)
+            }
+            if (testCase.failure.stack) {
+              failureElement.cdata(testCase.failure.stack)
+            }
           }
-          testcaseElement.ele('system-out', {}).cdata(testCase.output)
+          testcaseElement.ele('system-out').cdata(testCase.output)
         }
 
         write(builder.end({ pretty: true }))
@@ -82,7 +91,10 @@ interface ReportTestCase {
 }
 
 interface ReportFailure {
-  type: 'failure' | 'skipped'
+  kind: 'failure' | 'skipped'
+  type?: string
+  message?: string
+  stack?: string
 }
 
 function makeReport(query: ExtendedQuery): ReportSuite {
@@ -136,6 +148,9 @@ function makeFailure(
     return undefined
   }
   return {
-    type: result.status === TestStepResultStatus.SKIPPED ? 'skipped' : 'failure',
+    kind: result.status === TestStepResultStatus.SKIPPED ? 'skipped' : 'failure',
+    type: result.exception?.type,
+    message: result.exception?.message,
+    stack: result.exception?.stackTrace ?? result.message,
   }
 }
