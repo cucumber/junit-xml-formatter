@@ -23,9 +23,6 @@ import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 class XmlReportData {
@@ -56,14 +53,7 @@ class XmlReportData {
     }
 
     Map<TestStepResultStatus, Long> getTestCaseStatusCounts() {
-        // @formatter:off
-        return query.findAllTestCaseStarted().stream()
-                .map(query::findMostSevereTestStepResulBy)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(TestStepResult::getStatus)
-                .collect(groupingBy(identity(), counting()));
-        // @formatter:on
+        return query.countMostSevereTestStepResultStatus();
     }
 
     int getTestCaseCount() {
