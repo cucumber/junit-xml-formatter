@@ -7,16 +7,18 @@ import { makeReport } from './makeReport.js'
 export default {
   type: 'formatter',
   formatter({
+    options,
     on,
     write,
   }: {
+    options: { suiteName?: string }
     on: (type: 'message', handler: (message: Envelope) => void) => void
     write: (content: string) => void
   }) {
     const query = new ExtendedQuery()
     const builder = xmlbuilder
       .create('testsuite', { invalidCharReplacement: '' })
-      .att('name', 'Cucumber')
+      .att('name', options.suiteName || 'Cucumber')
 
     on('message', (message) => {
       query.update(message)
@@ -54,4 +56,5 @@ export default {
       }
     })
   },
+  optionsKey: 'junit',
 }

@@ -26,6 +26,7 @@ describe('junit-xml-formatter', async () => {
       let emit: (message: Envelope) => void
       let content = ''
       formatter.formatter({
+        options: {},
         on(type, handler) {
           emit = handler
         },
