@@ -52,7 +52,7 @@ export class ExtendedQuery {
       this.updateTestCase(envelope.testCase)
     }
     if (envelope.testCaseStarted) {
-      this.updateTestCaseStarted(envelope.testCaseStarted)
+      this.testCaseStarted.push(envelope.testCaseStarted)
     }
     if (envelope.testStepFinished) {
       this.updateTestStepFinished(envelope.testStepFinished)
@@ -147,16 +147,6 @@ export class ExtendedQuery {
     testCase.testSteps.forEach((testStep) => this.testStepById.set(testStep.id, testStep))
   }
 
-  private updateTestCaseStarted(testCaseStarted: TestCaseStarted) {
-    // ensure this replaces any previous attempt for the same test case
-    this.testCaseStarted = [
-      ...this.testCaseStarted.filter(
-        (existing) => existing.testCaseId !== testCaseStarted.testCaseId
-      ),
-      testCaseStarted,
-    ]
-  }
-
   private updateTestStepFinished(testStepFinished: TestStepFinished) {
     this.testStepFinishedByTestCaseStartedId.put(
       testStepFinished.testCaseStartedId,
@@ -200,7 +190,10 @@ export class ExtendedQuery {
   }
 
   findAllTestCaseStarted(): ReadonlyArray<TestCaseStarted> {
-    return [...this.testCaseStarted]
+    return this.testCaseStarted.filter((testCaseStarted) => {
+      const testCaseFinished = this.testCaseFinishedByTestCaseStartedId.get(testCaseStarted.id)
+      return !testCaseFinished?.willBeRetried
+    })
   }
 
   findTestCaseBy(testCaseStarted: TestCaseStarted) {
