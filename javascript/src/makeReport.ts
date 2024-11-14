@@ -1,15 +1,15 @@
 import assert from 'node:assert'
 
 import { TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
-import { Query } from '@cucumber/query'
-
-import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
 import {
   namingStrategy,
   NamingStrategyExampleName,
   NamingStrategyFeatureName,
   NamingStrategyLength,
-} from './Lineage.js'
+  Query,
+} from '@cucumber/query'
+
+import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
 
 const NAMING_STRATEGY = namingStrategy(
   NamingStrategyLength.LONG,

@@ -20,7 +20,7 @@
     "lint": "eslint --ext ts --max-warnings 0 && prettier --check src"
   },
   "dependencies": {
-    "@cucumber/query": "^13.0.0",
+    "@cucumber/query": "^13.0.1",
     "@teppeis/multimaps": "^3.0.0",
     "xmlbuilder": "^15.1.1"
   },
