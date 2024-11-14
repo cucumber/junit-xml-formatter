@@ -1,7 +1,7 @@
 import { Envelope } from '@cucumber/messages'
+import { Query } from '@cucumber/query'
 import xmlbuilder from 'xmlbuilder'
 
-import { ExtendedQuery } from './ExtendedQuery.js'
 import { makeReport } from './makeReport.js'
 
 export default {
@@ -15,7 +15,7 @@ export default {
     on: (type: 'message', handler: (message: Envelope) => void) => void
     write: (content: string) => void
   }) {
-    const query = new ExtendedQuery()
+    const query = new Query()
     const builder = xmlbuilder
       .create('testsuite', { invalidCharReplacement: '' })
       .att('name', options.suiteName || 'Cucumber')

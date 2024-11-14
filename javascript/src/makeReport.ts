@@ -1,8 +1,8 @@
 import assert from 'node:assert'
 
 import { TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
+import { Query } from '@cucumber/query'
 
-import { ExtendedQuery } from './ExtendedQuery.js'
 import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
 import {
   namingStrategy,
@@ -41,7 +41,7 @@ interface ReportFailure {
   stack?: string
 }
 
-export function makeReport(query: ExtendedQuery): ReportSuite {
+export function makeReport(query: Query): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
     time: durationToSeconds(query.findTestRunDuration()),
@@ -56,14 +56,14 @@ export function makeReport(query: ExtendedQuery): ReportSuite {
   }
 }
 
-function makeTestCases(query: ExtendedQuery): ReadonlyArray<ReportTestCase> {
+function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
   return query.findAllTestCaseStarted().map((testCaseStarted) => {
     const pickle = query.findPickleBy(testCaseStarted)
     assert.ok(pickle, 'Expected to find Pickle by TestCaseStarted')
-    const lineage = query.findLineageBy(pickle)
+    const feature = query.findFeatureBy(testCaseStarted)
 
     return {
-      classname: lineage?.feature?.name ?? pickle.uri,
+      classname: feature?.name ?? pickle.uri,
       name: query.findNameOf(pickle, NAMING_STRATEGY),
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
       failure: makeFailure(query, testCaseStarted),
@@ -83,12 +83,9 @@ function makeTestCases(query: ExtendedQuery): ReadonlyArray<ReportTestCase> {
   })
 }
 
-function makeFailure(
-  query: ExtendedQuery,
-  testCaseStarted: TestCaseStarted
-): ReportFailure | undefined {
+function makeFailure(query: Query, testCaseStarted: TestCaseStarted): ReportFailure | undefined {
   const result = query.findMostSevereTestStepResultBy(testCaseStarted)
-  if (result.status === TestStepResultStatus.PASSED) {
+  if (!result || result.status === TestStepResultStatus.PASSED) {
     return undefined
   }
   return {
