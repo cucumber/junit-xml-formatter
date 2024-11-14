@@ -49,7 +49,9 @@ export default {
               failureElement.cdata(testCase.failure.stack)
             }
           }
-          testcaseElement.ele('system-out').cdata(testCase.output)
+          if (testCase.output) {
+            testcaseElement.ele('system-out').cdata(testCase.output)
+          }
         }
 
         write(builder.end({ pretty: true }))

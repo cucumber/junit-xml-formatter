@@ -45,7 +45,7 @@ export function makeReport(query: Query): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
     time: durationToSeconds(query.findTestRunDuration()),
-    tests: countStatuses(statuses),
+    tests: query.countTestCasesStarted(),
     skipped: countStatuses(statuses, (status) => status === TestStepResultStatus.SKIPPED),
     failures: countStatuses(
       statuses,
