@@ -14,7 +14,7 @@ import formatter from './index.js'
 const asyncPipeline = util.promisify(pipeline)
 use(chaiXml)
 
-describe('junit-xml-formatter', async () => {
+describe('Acceptance Tests', async () => {
   const ndjsonFiles = globbySync(`*.ndjson`, {
     cwd: new URL(path.join(path.dirname(import.meta.url), '../../testdata')),
     absolute: true,

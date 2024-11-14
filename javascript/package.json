@@ -14,7 +14,7 @@
   "author": "David Goss",
   "license": "MIT",
   "scripts": {
-    "compile": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json",
     "test": "mocha 'src/**/*.spec.*'",
     "lint-fix": "eslint --ext ts --max-warnings 0 --fix src && prettier --write src",
     "lint": "eslint --ext ts --max-warnings 0 && prettier --check src"
