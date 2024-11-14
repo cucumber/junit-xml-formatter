@@ -119,7 +119,7 @@ class XmlReportData {
     private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED, null);
 
     TestStepResult getTestCaseStatus(TestCaseStarted testCaseStarted) {
-        return query.findMostSevereTestStepResulBy(testCaseStarted)
+        return query.findMostSevereTestStepResultBy(testCaseStarted)
                 .orElse(SCENARIO_WITH_NO_STEPS);
     }
 
