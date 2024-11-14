@@ -60,17 +60,19 @@ class XmlReportData {
         return query.findAllTestCaseStarted().size();
     }
 
-    String getPickleName(TestCaseStarted testCaseStarted) {
-        Pickle pickle = query.findPickleBy(testCaseStarted)
+    private Pickle getPickle(TestCaseStarted testCaseStarted) {
+        return query.findPickleBy(testCaseStarted)
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
+    }
 
-        return query.findNameOf(pickle, namingStrategy);
+    String getPickleName(TestCaseStarted testCaseStarted) {
+        return query.findNameOf(getPickle(testCaseStarted), namingStrategy);
     }
 
     String getFeatureName(TestCaseStarted testCaseStarted) {
         return query.findFeatureBy(testCaseStarted)
                 .map(Feature::getName)
-                .orElseThrow(() -> new IllegalStateException("No feature for " + testCaseStarted));
+                .orElseGet(() -> this.getPickle(testCaseStarted).getUri());
     }
 
     List<Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
