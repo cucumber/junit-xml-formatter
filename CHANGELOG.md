@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- JavaScript implementation ([#42](https://github.com/cucumber/junit-xml-formatter/pull/42))
 - Update dependency io.cucumber:messages up to v26 ((#38)[https://github.com/cucumber/query/pull/38])
 
 ## [0.5.0] - 2024-06-22
