@@ -14,10 +14,12 @@
   "author": "David Goss",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
-    "test": "mocha 'src/**/*.spec.*'",
+    "build": "tsc --build tsconfig.build.json",
+    "clean": "rm -rf dist",
     "lint-fix": "eslint --ext ts --max-warnings 0 --fix src && prettier --write src",
-    "lint": "eslint --ext ts --max-warnings 0 && prettier --check src"
+    "lint": "eslint --ext ts --max-warnings 0 && prettier --check src",
+    "test": "mocha 'src/**/*.spec.*'",
+    "prepublishOnly": "tsc --build tsconfig.build.json"
   },
   "dependencies": {
     "@cucumber/query": "^13.0.1",
