@@ -56,7 +56,7 @@ class XmlReportWriter {
         Map<TestStepResultStatus, Long> counts = data.getTestCaseStatusCounts();
 
         writer.writeAttribute("tests", String.valueOf(data.getTestCaseCount()));
-        writer.writeAttribute("skipped", counts.getOrDefault(SKIPPED, 0L).toString());
+        writer.writeAttribute("skipped", counts.get(SKIPPED).toString());
         writer.writeAttribute("failures", String.valueOf(countFailures(counts)));
         writer.writeAttribute("errors", "0");
 
@@ -67,7 +67,7 @@ class XmlReportWriter {
     }
 
     private static long countFailures(Map<TestStepResultStatus, Long> counts) {
-        return createNotPassedNotSkippedSet().stream().mapToLong(s -> counts.getOrDefault(s, 0L)).sum();
+        return createNotPassedNotSkippedSet().stream().mapToLong(counts::get).sum();
     }
 
     private static EnumSet<TestStepResultStatus> createNotPassedNotSkippedSet() {

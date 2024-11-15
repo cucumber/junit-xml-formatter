@@ -6,10 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
 ### Added
-- Update dependency io.cucumber:messages up to v26 ((#38)[https://github.com/cucumber/query/pull/38])
 - Add `timestamp` attribute ((#45)[https://github.com/cucumber/junit-xml-formatter/pull/45])
+
+## [0.6.0] - 2024-11-15
+### Added
+- JavaScript implementation ([#42](https://github.com/cucumber/junit-xml-formatter/pull/42))
+- Update dependency io.cucumber:messages up to v26 ([#38](https://github.com/cucumber/junit-xml-formatter/pull/38))
+
+### Fixed
+- Attempts that have been superseded by retries are now omitted from the report ([#42](https://github.com/cucumber/junit-xml-formatter/pull/42))
 
 ## [0.5.0] - 2024-06-22
 ### Added
@@ -37,7 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Java implementation ([#3](https://github.com/cucumber/junit-xml-formatter/pull/3) M.P. Korstanje)
 
-[Unreleased]: https://github.com/cucumber/junit-xml-formatter/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/cucumber/junit-xml-formatter/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/cucumber/junit-xml-formatter/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cucumber/junit-xml-formatter/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cucumber/junit-xml-formatter/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cucumber/junit-xml-formatter/compare/v0.2.1...v0.3.0

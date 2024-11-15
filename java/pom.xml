@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>junit-xml-formatter</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.6.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>JUnit XML Formatter</name>
     <description>Renders Cucumber Messages as JUnit XML</description>
@@ -17,7 +17,7 @@
 
     <properties>
         <project.Automatic-Module-Name>io.cucumber.junitxmlformatter</project.Automatic-Module-Name>
-        <project.build.outputTimestamp>1719064372</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1731653110</project.build.outputTimestamp>
     </properties>
 
     <scm>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>query</artifactId>
-            <version>[12.2.0,13.0.0)</version>
+            <version>[13.0.2,14.0.0)</version>
         </dependency>
 
         <dependency>
