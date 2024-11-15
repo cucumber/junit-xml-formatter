@@ -24,6 +24,7 @@
   "dependencies": {
     "@cucumber/query": "^13.0.2",
     "@teppeis/multimaps": "^3.0.0",
+    "luxon": "^3.5.0",
     "xmlbuilder": "^15.1.1"
   },
   "peerDependencies": {
@@ -35,6 +36,7 @@
     "@types/chai": "^4.3.11",
     "@types/chai-almost": "^1.0.3",
     "@types/chai-xml": "^0.3.6",
+    "@types/luxon": "^3.4.2",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.11.18",
     "@typescript-eslint/eslint-plugin": "5.48.1",

@@ -9,7 +9,7 @@ import {
   Query,
 } from '@cucumber/query'
 
-import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
+import { countStatuses, durationToSeconds, formatStep, formatTimestamp } from './helpers.js'
 
 const NAMING_STRATEGY = namingStrategy(
   NamingStrategyLength.LONG,
@@ -24,6 +24,7 @@ interface ReportSuite {
   failures: number
   errors: number
   testCases: ReadonlyArray<ReportTestCase>
+  timestamp?: string
 }
 
 interface ReportTestCase {
@@ -53,6 +54,7 @@ export function makeReport(query: Query): ReportSuite {
     ),
     errors: 0,
     testCases: makeTestCases(query),
+    timestamp: formatTimestamp(query.findTestRunStarted())
   }
 }
 
