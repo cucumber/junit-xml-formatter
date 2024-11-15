@@ -36,7 +36,7 @@
     "@types/chai-almost": "^1.0.3",
     "@types/chai-xml": "^0.3.6",
     "@types/mocha": "^10.0.6",
-    "@types/node": "18.11.18",
+    "@types/node": "18.19.64",
     "@typescript-eslint/eslint-plugin": "5.48.1",
     "@typescript-eslint/parser": "5.48.1",
     "chai": "^4.3.10",
