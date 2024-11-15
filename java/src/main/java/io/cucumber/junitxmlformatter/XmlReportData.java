@@ -1,11 +1,13 @@
 package io.cucumber.junitxmlformatter;
 
+import io.cucumber.messages.Convertor;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
 import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TestCaseStarted;
+import io.cucumber.messages.types.TestRunStarted;
 import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
@@ -22,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
@@ -123,4 +126,10 @@ class XmlReportData {
                 .orElse(SCENARIO_WITH_NO_STEPS);
     }
 
+    public Optional<String> getTestRunStartedAt() {
+        return query.findTestRunStarted()
+                .map(TestRunStarted::getTimestamp)
+                .map(Convertor::toInstant)
+                .map(ISO_INSTANT::format);
+    }
 }
