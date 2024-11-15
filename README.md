@@ -7,9 +7,10 @@ JUnit XML Formatter
 
 Writes Cucumber message into a JUnit XML report.
 
-The JUnit XML report is a loose standard. We validate it against the
-[Jenkins JUnit XML XSD](./jenkins-junit.xsd) so there should be a good
-chance your CI will understand it.
+The JUnit XML report is
+[not a standard](https://github.com/testmoapp/junitxml/tree/main).  But we
+validate it against the [Jenkins JUnit XML XSD](./jenkins-junit.xsd) so there
+should be a good chance your CI will understand it.
 
 If not, please let us know in the issues!
 
