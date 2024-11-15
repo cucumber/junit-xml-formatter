@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@cucumber/message-streams": "^4.0.1",
-    "@cucumber/messages": "27.0.1",
+    "@cucumber/messages": "27.0.2",
     "@types/chai": "^5.0.0",
     "@types/chai-almost": "^1.0.3",
     "@types/chai-xml": "^0.3.6",
