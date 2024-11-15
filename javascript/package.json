@@ -45,7 +45,7 @@
     "eslint": "8.57.1",
     "eslint-config-prettier": "8.10.0",
     "eslint-plugin-import": "2.27.4",
-    "eslint-plugin-n": "14.0.0",
+    "eslint-plugin-n": "17.13.2",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "9.0.0",
     "globby": "^14.0.2",
