@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
@@ -52,7 +51,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source expected = Input.fromPath(testCase.expected).build();
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
-        XmlAssert.assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
+        assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
     }
 
     @ParameterizedTest
@@ -61,7 +60,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
-        XmlAssert.assertThat(actual).isValidAgainst(jenkinsSchema);
+        assertThat(actual).isValidAgainst(jenkinsSchema);
     }
 
     static final List<String> testCasesWithMissingException = Arrays.asList(
@@ -106,7 +105,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
             expectedProblems.add("cvc-complex-type.4: Attribute 'type' must appear on element 'failure'.");
         }
         Iterable<ValidationProblem> problems = validationResult.getProblems();
-        assertThat(problems).extracting(ValidationProblem::getMessage).containsAll(expectedProblems);
+        Assertions.assertThat(problems).extracting(ValidationProblem::getMessage).containsAll(expectedProblems);
     }
 
     @ParameterizedTest
