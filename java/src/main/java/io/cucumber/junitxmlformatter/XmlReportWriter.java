@@ -59,6 +59,11 @@ class XmlReportWriter {
         writer.writeAttribute("skipped", counts.get(SKIPPED).toString());
         writer.writeAttribute("failures", String.valueOf(countFailures(counts)));
         writer.writeAttribute("errors", "0");
+
+        Optional<String> testRunStartedAt = data.getTestRunStartedAt();
+        if (testRunStartedAt.isPresent()) {
+            writer.writeAttribute("timestamp", testRunStartedAt.get());
+        }
     }
 
     private static long countFailures(Map<TestStepResultStatus, Long> counts) {

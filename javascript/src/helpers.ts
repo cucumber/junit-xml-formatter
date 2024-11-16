@@ -2,9 +2,11 @@ import {
   Duration,
   PickleStep,
   Step,
+  TestRunStarted,
   TestStepResultStatus,
   TimeConversion,
 } from '@cucumber/messages'
+import { DateTime } from 'luxon'
 
 export function durationToSeconds(duration?: Duration) {
   if (!duration) {
@@ -28,4 +30,14 @@ export function formatStep(step: Step, pickleStep: PickleStep, status: TestStepR
     text += '.'
   } while (text.length < 76)
   return text + status.toLowerCase()
+}
+
+export function formatTimestamp(testRunStarted: TestRunStarted | undefined) {
+  if (!testRunStarted) {
+    return undefined
+  }
+  const millis = TimeConversion.timestampToMillisecondsSinceEpoch(testRunStarted.timestamp)
+  return DateTime.fromMillis(millis, { zone: 'UTC' }).toISO({
+    suppressMilliseconds: true,
+  }) as string
 }

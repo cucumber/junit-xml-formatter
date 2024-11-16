@@ -28,7 +28,7 @@ class MessagesToJunitXmlWriterTest {
 
         assertThat(html).isEqualTo("" +
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<testsuite name=\"Cucumber\" time=\"20\" tests=\"0\" skipped=\"0\" failures=\"0\" errors=\"0\">\n" +
+                "<testsuite name=\"Cucumber\" time=\"20\" tests=\"0\" skipped=\"0\" failures=\"0\" errors=\"0\" timestamp=\"1970-01-01T00:00:10Z\">\n" +
                 "</testsuite>\n"
         );
     }

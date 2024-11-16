@@ -31,6 +31,10 @@ export default {
         builder.att('failures', testSuite.failures)
         builder.att('errors', testSuite.errors)
 
+        if (testSuite.timestamp) {
+          builder.att('timestamp', testSuite.timestamp)
+        }
+
         for (const testCase of testSuite.testCases) {
           const testcaseElement = builder.ele('testcase', {
             classname: testCase.classname,

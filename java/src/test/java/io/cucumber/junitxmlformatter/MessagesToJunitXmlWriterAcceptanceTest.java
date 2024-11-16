@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.xmlunit.assertj.XmlAssert;
 import org.xmlunit.builder.Input;
 import org.xmlunit.validation.JAXPValidator;
 import org.xmlunit.validation.Languages;
@@ -20,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -76,11 +78,16 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
-        if (!testCasesWithMissingException.contains(testCase.name)) {
-            assertThat(actual).isValidAgainst(surefireSchema);
-            return;
-        }
 
+        JAXPValidator validator = new JAXPValidator(Languages.W3C_XML_SCHEMA_NS_URI);
+        validator.setSchemaSource(surefireSchema);
+        ValidationResult validationResult = validator.validateInstance(actual);
+
+        List<String> expectedProblems = new ArrayList<>();
+        /*
+         * We add the timestamp attribute to all reports.
+         */
+        expectedProblems.add("cvc-complex-type.3.2.2: Attribute 'timestamp' is not allowed to appear in element 'testsuite'.");
         /*
          This report tries to be compatible with the Jenkins XSD. The Surefire
          XSD is a bit stricter and generally assumes tests fail with an
@@ -94,12 +101,11 @@ class MessagesToJunitXmlWriterAcceptanceTest {
          Since the Surefire XSD is also relatively popular we do check it and
          exclude the cases that don't pass selectively.
          */
-        JAXPValidator validator = new JAXPValidator(Languages.W3C_XML_SCHEMA_NS_URI);
-        validator.setSchemaSource(surefireSchema);
-        ValidationResult validationResult = validator.validateInstance(actual);
+        if (testCasesWithMissingException.contains(testCase.name)) {
+            expectedProblems.add("cvc-complex-type.4: Attribute 'type' must appear on element 'failure'.");
+        }
         Iterable<ValidationProblem> problems = validationResult.getProblems();
-        Assertions.assertThat(problems).extracting(ValidationProblem::getMessage)
-                .containsOnly("cvc-complex-type.4: Attribute 'type' must appear on element 'failure'.");
+        Assertions.assertThat(problems).extracting(ValidationProblem::getMessage).containsAll(expectedProblems);
     }
 
     @ParameterizedTest
