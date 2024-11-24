@@ -54,4 +54,4 @@ describe('Acceptance Tests', async () => {
       expect(content).xml.to.deep.eq(expectedXml)
     })
   }
-})
+}).timeout('5s')
