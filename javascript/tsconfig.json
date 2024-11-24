@@ -11,12 +11,12 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "experimentalDecorators": true,
-    "module": "ESNext",
+    "module": "NodeNext",
     "lib": [
       "ES2022"
     ],
     "target": "ES2022",
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
     "allowSyntheticDefaultImports": true,
     "noEmit": true
   },

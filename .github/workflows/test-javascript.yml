@@ -37,3 +37,6 @@ jobs:
 
       - run: npm install-ci-test
         working-directory: javascript
+
+      - run: npm run build
+        working-directory: javascript
