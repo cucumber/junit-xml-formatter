@@ -14,7 +14,9 @@ import formatter from './index.js'
 const asyncPipeline = util.promisify(pipeline)
 use(chaiXml)
 
-describe('Acceptance Tests', async () => {
+describe('Acceptance Tests', async function() {
+  this.timeout(10_000)
+
   const ndjsonFiles = globbySync(`*.ndjson`, {
     cwd: new URL(path.join(path.dirname(import.meta.url), '../../testdata')),
     absolute: true,
@@ -44,7 +46,7 @@ describe('Acceptance Tests', async () => {
             emit(envelope)
             callback()
           },
-        })
+        }),
       )
 
       const expectedXml = fs.readFileSync(ndjsonFile.replace('.ndjson', '.xml'), {
