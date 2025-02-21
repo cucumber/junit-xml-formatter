@@ -23,8 +23,8 @@ class MessagesToJunitXmlWriterTest {
         Instant finished = Instant.ofEpochSecond(30);
 
         String html = renderAsJunitXml(
-                Envelope.of(new TestRunStarted(toMessage(started))),
-                Envelope.of(new TestRunFinished(null, true, toMessage(finished), null)));
+                Envelope.of(new TestRunStarted(toMessage(started), "some-id")),
+                Envelope.of(new TestRunFinished(null, true, toMessage(finished), null, "some-id")));
 
         assertThat(html).isEqualTo("" +
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
