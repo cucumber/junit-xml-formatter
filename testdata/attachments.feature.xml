@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Cucumber" time="0.045" tests="11" skipped="0" failures="0" errors="0" timestamp="1970-01-01T00:00:00Z">
+<testsuite name="Cucumber" time="0.037" tests="9" skipped="0" failures="0" errors="0" timestamp="1970-01-01T00:00:00Z">
 <testcase classname="Attachments" name="Strings can be attached with a media type" time="0.003">
 <system-out><![CDATA[
 When the string "hello" is attached as "application/octet-stream"...........passed
@@ -31,16 +31,6 @@ When a JPEG image is attached...............................................pass
 ]]></system-out>
 </testcase>
 <testcase classname="Attachments" name="Attaching PNG images" time="0.003">
-<system-out><![CDATA[
-When a PNG image is attached................................................passed
-]]></system-out>
-</testcase>
-<testcase classname="Attachments" name="Attaching images in an examples table - #1.1" time="0.003">
-<system-out><![CDATA[
-When a JPEG image is attached...............................................passed
-]]></system-out>
-</testcase>
-<testcase classname="Attachments" name="Attaching images in an examples table - #1.2" time="0.003">
 <system-out><![CDATA[
 When a PNG image is attached................................................passed
 ]]></system-out>
