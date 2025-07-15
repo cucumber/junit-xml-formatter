@@ -22,7 +22,7 @@
     "prepublishOnly": "tsc --build tsconfig.build.json"
   },
   "dependencies": {
-    "@cucumber/query": "^13.0.2",
+    "@cucumber/query": "^13.5.0",
     "@teppeis/multimaps": "^3.0.0",
     "luxon": "^3.5.0",
     "xmlbuilder": "^15.1.1"
