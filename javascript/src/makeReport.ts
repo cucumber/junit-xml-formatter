@@ -1,5 +1,3 @@
-import assert from 'node:assert'
-
 import { TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
 import {
   namingStrategy,
@@ -9,7 +7,7 @@ import {
   Query,
 } from '@cucumber/query'
 
-import { countStatuses, durationToSeconds, formatStep, formatTimestamp } from './helpers.js'
+import { countStatuses, durationToSeconds, ensure, formatStep, formatTimestamp } from './helpers.js'
 
 const NAMING_STRATEGY = namingStrategy(
   NamingStrategyLength.LONG,
@@ -54,19 +52,21 @@ export function makeReport(query: Query): ReportSuite {
     ),
     errors: 0,
     testCases: makeTestCases(query),
-    timestamp: formatTimestamp(query.findTestRunStarted())
+    timestamp: formatTimestamp(query.findTestRunStarted()),
   }
 }
 
 function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
   return query.findAllTestCaseStarted().map((testCaseStarted) => {
-    const pickle = query.findPickleBy(testCaseStarted)
-    assert.ok(pickle, 'Expected to find Pickle by TestCaseStarted')
-    const feature = query.findFeatureBy(testCaseStarted)
+    const pickle = ensure(
+      query.findPickleBy(testCaseStarted),
+      'Expected to find Pickle by TestCaseStarted'
+    )
+    const lineage = ensure(query.findLineageBy(pickle), 'Expected to find Lineage by Pickle')
 
     return {
-      classname: feature?.name ?? pickle.uri,
-      name: query.findNameOf(pickle, NAMING_STRATEGY),
+      classname: lineage.feature?.name ?? pickle.uri,
+      name: NAMING_STRATEGY.reduce(lineage, pickle),
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
       failure: makeFailure(query, testCaseStarted),
       output: query
@@ -74,10 +74,14 @@ function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
         // filter out hooks
         .filter(([, testStep]) => !!testStep.pickleStepId)
         .map(([testStepFinished, testStep]) => {
-          const pickleStep = query.findPickleStepBy(testStep)
-          assert.ok(pickleStep, 'Expected to find PickleStep by TestStep')
-          const gherkinStep = query.findStepBy(pickleStep)
-          assert.ok(gherkinStep, 'Expected to find Step by PickleStep')
+          const pickleStep = ensure(
+            query.findPickleStepBy(testStep),
+            'Expected to find PickleStep by TestStep'
+          )
+          const gherkinStep = ensure(
+            query.findStepBy(pickleStep),
+            'Expected to find Step by PickleStep'
+          )
           return formatStep(gherkinStep, pickleStep, testStepFinished.testStepResult.status)
         })
         .join('\n'),
