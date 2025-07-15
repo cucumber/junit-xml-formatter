@@ -54,7 +54,7 @@ export function makeReport(query: Query): ReportSuite {
     ),
     errors: 0,
     testCases: makeTestCases(query),
-    timestamp: formatTimestamp(query.findTestRunStarted())
+    timestamp: formatTimestamp(query.findTestRunStarted()),
   }
 }
 
