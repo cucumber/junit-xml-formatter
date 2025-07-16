@@ -12,6 +12,7 @@ import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
+import io.cucumber.query.Lineage;
 import io.cucumber.query.NamingStrategy;
 import io.cucumber.query.Query;
 
@@ -69,11 +70,15 @@ class XmlReportData {
     }
 
     String getPickleName(TestCaseStarted testCaseStarted) {
-        return query.findNameOf(getPickle(testCaseStarted), namingStrategy);
+        Pickle pickle = getPickle(testCaseStarted);
+        return query.findLineageBy(pickle)
+                .map(lineage -> namingStrategy.reduce(lineage, pickle))
+                .orElseGet(pickle::getName);
     }
 
     String getFeatureName(TestCaseStarted testCaseStarted) {
-        return query.findFeatureBy(testCaseStarted)
+        return query.findLineageBy(testCaseStarted)
+                .flatMap(Lineage::feature)
                 .map(Feature::getName)
                 .orElseGet(() -> this.getPickle(testCaseStarted).getUri());
     }
