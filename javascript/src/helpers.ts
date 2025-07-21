@@ -8,6 +8,13 @@ import {
 } from '@cucumber/messages'
 import { DateTime } from 'luxon'
 
+export function ensure<T>(value: T | undefined, message: string): T {
+  if (!value) {
+    throw new Error(message)
+  }
+  return value
+}
+
 export function durationToSeconds(duration?: Duration) {
   if (!duration) {
     return 0
