@@ -17,8 +17,7 @@ Given a step that passes the third time.....................................pass
 </testcase>
 <testcase classname="Retry" name="Test cases won't retry after failing more than the --retry limit" time="0.003">
 <failure type="Error" message="Exception in step">
-<![CDATA[Exception in step
-samples/retry/retry.feature:18]]>
+<![CDATA[samples/retry/retry.feature:18]]>
 </failure>
 <system-out><![CDATA[
 Given a step that always fails..............................................failed

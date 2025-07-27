@@ -19,11 +19,7 @@ Then I should have 15 cucumbers.............................................pass
 
 -8 !== 0
 ">
-<![CDATA[Expected values to be strictly equal:
-
--8 !== 0
-
-samples/examples-tables/examples-tables.feature:14
+<![CDATA[samples/examples-tables/examples-tables.feature:14
 samples/examples-tables/examples-tables.feature:25]]>
 </failure>
 <system-out><![CDATA[
@@ -37,11 +33,7 @@ Then I should have 0 cucumbers..............................................fail
 
 -1 !== 0
 ">
-<![CDATA[Expected values to be strictly equal:
-
--1 !== 0
-
-samples/examples-tables/examples-tables.feature:14
+<![CDATA[samples/examples-tables/examples-tables.feature:14
 samples/examples-tables/examples-tables.feature:26]]>
 </failure>
 <system-out><![CDATA[
