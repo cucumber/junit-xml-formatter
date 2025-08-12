@@ -9,9 +9,7 @@ import java.util.List;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.Writer;
-import java.text.NumberFormat;
 import java.util.EnumSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,7 +17,6 @@ import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 
 class XmlReportWriter {
-    private final NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
     private final XmlReportData data;
 
     XmlReportWriter(XmlReportData data) {
@@ -51,7 +48,7 @@ class XmlReportWriter {
 
     private void writeSuiteAttributes(EscapingXmlStreamWriter writer) throws XMLStreamException {
         writer.writeAttribute("name", "Cucumber");
-        writer.writeAttribute("time", numberFormat.format(data.getSuiteDurationInSeconds()));
+        writer.writeAttribute("time", String.valueOf(data.getSuiteDurationInSeconds()));
 
         Map<TestStepResultStatus, Long> counts = data.getTestCaseStatusCounts();
 
@@ -90,7 +87,7 @@ class XmlReportWriter {
     private void writeTestCaseAttributes(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
         writer.writeAttribute("classname", data.getFeatureName(testCaseStarted));
         writer.writeAttribute("name", data.getPickleName(testCaseStarted));
-        writer.writeAttribute("time", numberFormat.format(data.getDurationInSeconds(testCaseStarted)));
+        writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(testCaseStarted)));
     }
 
     private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {

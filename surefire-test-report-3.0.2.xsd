@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-From: https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd
+From: https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd
 Via: https://maven.apache.org/surefire/maven-surefire-plugin/
 -->
 <!--
@@ -21,16 +21,11 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="3.0">
-    <xs:simpleType name="SUREFIRE_TIME">
-        <xs:restriction base="xs:string">
-            <xs:pattern value="(([0-9]{0,3},)*[0-9]{3}|[0-9]{0,3})*(\.[0-9]{0,3})?"/>
-        </xs:restriction>
-    </xs:simpleType>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="3.0.2">
     <xs:element name="testsuite">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="properties" minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="properties" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element name="property" minOccurs="0" maxOccurs="unbounded">
@@ -50,7 +45,7 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                                     <xs:simpleContent>
                                         <xs:extension base="xs:string">
                                             <xs:attribute name="message" type="xs:string"/>
-                                            <xs:attribute name="type" type="xs:string" use="required"/>
+                                            <xs:attribute name="type" type="xs:string"/>
                                         </xs:extension>
                                     </xs:simpleContent>
                                 </xs:complexType>
@@ -63,7 +58,7 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                                         <xs:element name="system-err" type="xs:string" minOccurs="0"/>
                                     </xs:sequence>
                                     <xs:attribute name="message" type="xs:string"/>
-                                    <xs:attribute name="type" type="xs:string" use="required"/>
+                                    <xs:attribute name="type" type="xs:string"/>
                                 </xs:complexType>
                             </xs:element>
                             <xs:element name="flakyFailure" minOccurs="0" maxOccurs="unbounded">
@@ -74,7 +69,7 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                                         <xs:element name="system-err" type="xs:string" minOccurs="0"/>
                                     </xs:sequence>
                                     <xs:attribute name="message" type="xs:string"/>
-                                    <xs:attribute name="type" type="xs:string" use="required"/>
+                                    <xs:attribute name="type" type="xs:string"/>
                                 </xs:complexType>
                             </xs:element>
                             <xs:element name="skipped" nillable="true" minOccurs="0" maxOccurs="1">
@@ -91,7 +86,7 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                                     <xs:simpleContent>
                                         <xs:extension base="xs:string">
                                             <xs:attribute name="message" type="xs:string"/>
-                                            <xs:attribute name="type" type="xs:string" use="required"/>
+                                            <xs:attribute name="type" type="xs:string"/>
                                         </xs:extension>
                                     </xs:simpleContent>
                                 </xs:complexType>
@@ -104,7 +99,7 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                                         <xs:element name="system-err" type="xs:string" minOccurs="0"/>
                                     </xs:sequence>
                                     <xs:attribute name="message" type="xs:string"/>
-                                    <xs:attribute name="type" type="xs:string" use="required"/>
+                                    <xs:attribute name="type" type="xs:string"/>
                                 </xs:complexType>
                             </xs:element>
                             <xs:element name="flakyError" minOccurs="0" maxOccurs="unbounded">
@@ -115,7 +110,7 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                                         <xs:element name="system-err" type="xs:string" minOccurs="0"/>
                                     </xs:sequence>
                                     <xs:attribute name="message" type="xs:string"/>
-                                    <xs:attribute name="type" type="xs:string" use="required"/>
+                                    <xs:attribute name="type" type="xs:string"/>
                                 </xs:complexType>
                             </xs:element>
                             <xs:element name="system-out" type="xs:string" minOccurs="0"/>
@@ -124,12 +119,13 @@ Via: https://maven.apache.org/surefire/maven-surefire-plugin/
                         <xs:attribute name="name" type="xs:string" use="required"/>
                         <xs:attribute name="classname" type="xs:string"/>
                         <xs:attribute name="group" type="xs:string"/>
-                        <xs:attribute name="time" type="SUREFIRE_TIME" use="required"/>
+                        <xs:attribute name="time" type="xs:float" use="required"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
+            <xs:attribute name="version" type="xs:string"/>
             <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="time" type="SUREFIRE_TIME"/>
+            <xs:attribute name="time" type="xs:float"/>
             <xs:attribute name="tests" type="xs:string" use="required"/>
             <xs:attribute name="errors" type="xs:string" use="required"/>
             <xs:attribute name="skipped" type="xs:string" use="required"/>
