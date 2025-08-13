@@ -64,12 +64,12 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     }
 
     static final List<String> testCasesWithMissingException = Arrays.asList(
-            "examples-tables.feature",
-            "hooks.feature",
-            "pending.feature",
-            "retry.feature",
-            "undefined.feature",
-            "unknown-parameter-type.feature"
+            "examples-tables",
+            "hooks",
+            "pending",
+            "retry",
+            "undefined",
+            "unknown-parameter-type"
     );
 
     @ParameterizedTest
