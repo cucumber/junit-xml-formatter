@@ -19,8 +19,7 @@ Then I should have 15 cucumbers.............................................pass
 
 -8 !== 0
 ">
-<![CDATA[samples/examples-tables/examples-tables.feature:14
-samples/examples-tables/examples-tables.feature:25]]>
+<![CDATA[samples/examples-tables/examples-tables.feature:14]]>
 </failure>
 <system-out><![CDATA[
 Given there are 12 cucumbers................................................passed
@@ -33,8 +32,7 @@ Then I should have 0 cucumbers..............................................fail
 
 -1 !== 0
 ">
-<![CDATA[samples/examples-tables/examples-tables.feature:14
-samples/examples-tables/examples-tables.feature:26]]>
+<![CDATA[samples/examples-tables/examples-tables.feature:14]]>
 </failure>
 <system-out><![CDATA[
 Given there are 0 cucumbers.................................................passed

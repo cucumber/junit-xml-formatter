@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.xmlunit.assertj.XmlAssert;
 import org.xmlunit.builder.Input;
 import org.xmlunit.validation.JAXPValidator;
 import org.xmlunit.validation.Languages;
@@ -22,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -62,15 +60,6 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
         assertThat(actual).isValidAgainst(jenkinsSchema);
     }
-
-    static final List<String> testCasesWithMissingException = Arrays.asList(
-            "examples-tables.feature",
-            "hooks.feature",
-            "pending.feature",
-            "retry.feature",
-            "undefined.feature",
-            "unknown-parameter-type.feature"
-    );
 
     @ParameterizedTest
     @MethodSource("acceptance")
