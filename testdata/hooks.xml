@@ -7,7 +7,8 @@ When a step passes..........................................................pass
 </testcase>
 <testcase classname="Hooks" name="No tags and a failed step" time="0.007">
 <failure type="Error" message="Exception in step">
-<![CDATA[samples/hooks/hooks.feature:8]]>
+<![CDATA[Error: Exception in step
+samples/hooks/hooks.feature:8]]>
 </failure>
 <system-out><![CDATA[
 When a step fails...........................................................failed
