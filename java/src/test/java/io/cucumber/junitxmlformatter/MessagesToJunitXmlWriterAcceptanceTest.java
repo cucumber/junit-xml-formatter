@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.xmlunit.assertj.XmlAssert;
 import org.xmlunit.builder.Input;
 import org.xmlunit.validation.JAXPValidator;
 import org.xmlunit.validation.Languages;
@@ -22,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -63,21 +61,12 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         assertThat(actual).isValidAgainst(jenkinsSchema);
     }
 
-    static final List<String> testCasesWithMissingException = Arrays.asList(
-            "examples-tables.feature",
-            "hooks.feature",
-            "pending.feature",
-            "retry.feature",
-            "undefined.feature",
-            "unknown-parameter-type.feature"
-    );
-
     @ParameterizedTest
     @MethodSource("acceptance")
     void validateAgainstSurefire(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
-        Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.xsd")).build();
+        Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.2.xsd")).build();
 
         JAXPValidator validator = new JAXPValidator(Languages.W3C_XML_SCHEMA_NS_URI);
         validator.setSchemaSource(surefireSchema);
@@ -88,22 +77,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
          * We add the timestamp attribute to all reports.
          */
         expectedProblems.add("cvc-complex-type.3.2.2: Attribute 'timestamp' is not allowed to appear in element 'testsuite'.");
-        /*
-         This report tries to be compatible with the Jenkins XSD. The Surefire
-         XSD is a bit stricter and generally assumes tests fail with an
-         exception. While this is true for Cucumber-JVM, this isn't true for
-         all Cucumber implementations.
 
-         E.g. in Cucumber-JVM a scenario would report it is pending by throwing
-         a PendingException. However, in Javascript this would be done by
-         returning the string "pending".
-
-         Since the Surefire XSD is also relatively popular we do check it and
-         exclude the cases that don't pass selectively.
-         */
-        if (testCasesWithMissingException.contains(testCase.name)) {
-            expectedProblems.add("cvc-complex-type.4: Attribute 'type' must appear on element 'failure'.");
-        }
         Iterable<ValidationProblem> problems = validationResult.getProblems();
         Assertions.assertThat(problems).extracting(ValidationProblem::getMessage).containsAll(expectedProblems);
     }

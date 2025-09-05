@@ -5,9 +5,17 @@ on:
     branches:
       - main
       - renovate/**
+    paths:
+      - java/**
+      - testdata/**
+      - .github/**
   pull_request:
     branches:
       - main
+    paths:
+      - java/**
+      - testdata/**
+      - .github/**
   workflow_call:
 
 jobs:
@@ -21,9 +29,9 @@ jobs:
         java: ["11", "17"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: ${{ matrix.java }}
@@ -31,4 +39,3 @@ jobs:
 
       - run: mvn verify
         working-directory: java
-

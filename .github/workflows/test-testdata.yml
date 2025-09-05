@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - testdata/**
   pull_request:
     branches:
       - main
+    paths:
+      - testdata/**
 
 jobs:
   test-testdata:
@@ -14,9 +18,9 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         cache: 'npm'
         cache-dependency-path: testdata/package-lock.json
