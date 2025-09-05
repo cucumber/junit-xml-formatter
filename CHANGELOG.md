@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Update dependency cucumber/query  to ^13.3.0 ([#77](https://github.com/cucumber/junit-xml-formatter/pull/77))
+- Update dependency io.cucumber:query up to v13.5
+
+### Fixed
+- Remove unnecessary coupling to `node:assert` ([#77](https://github.com/cucumber/junit-xml-formatter/pull/77))
 
 ## [0.8.1] - 2025-08-13
 ### Fixed
