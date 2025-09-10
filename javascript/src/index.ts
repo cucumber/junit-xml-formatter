@@ -41,6 +41,13 @@ export default {
             name: testCase.name,
             time: testCase.time,
           })
+          if (testCase.requirements.length > 0) {
+            const properties = testcaseElement.ele('properties')
+            properties.ele('property', {
+              name: 'requirements',
+              value: testCase.requirements.join(",")
+            })
+          }
           if (testCase.failure) {
             const failureElement = testcaseElement.ele(testCase.failure.kind)
             if (testCase.failure.kind === 'failure' && testCase.failure.type) {

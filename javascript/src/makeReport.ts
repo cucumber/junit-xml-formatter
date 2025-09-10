@@ -15,6 +15,8 @@ const NAMING_STRATEGY = namingStrategy(
   NamingStrategyExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED
 )
 
+const REQUIREMENT_TAG_PREFIX = "@Req:"
+
 interface ReportSuite {
   time: number
   tests: number
@@ -31,6 +33,7 @@ interface ReportTestCase {
   time: number
   failure?: ReportFailure
   output: string
+  requirements: string[]
 }
 
 interface ReportFailure {
@@ -85,6 +88,9 @@ function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
           return formatStep(gherkinStep, pickleStep, testStepFinished.testStepResult.status)
         })
         .join('\n'),
+      requirements: pickle.tags
+        .filter(tag => tag.name.startsWith(REQUIREMENT_TAG_PREFIX))
+        .map(tag => tag.name.substring(REQUIREMENT_TAG_PREFIX.length)),
     }
   })
 }

@@ -18,6 +18,7 @@ import io.cucumber.query.Query;
 
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -35,6 +36,7 @@ class XmlReportData {
     private final NamingStrategy namingStrategy;
 
     private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
+    private static final String REQUIREMENT_PREFIX = "@Req:";
 
     XmlReportData(NamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
@@ -81,6 +83,19 @@ class XmlReportData {
                 .flatMap(Lineage::feature)
                 .map(Feature::getName)
                 .orElseGet(() -> this.getPickle(testCaseStarted).getUri());
+    }
+
+    /**
+     * Extracts a requirement tag denoted by starting with "@Req:"
+     */
+    List<String> getFeatureRequirements(TestCaseStarted testCaseStarted) {
+        return query.findPickleBy(testCaseStarted)
+                .map(Pickle::getTags)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(tag -> tag.getName().startsWith(REQUIREMENT_PREFIX))
+                .map(tag -> tag.getName().substring(REQUIREMENT_PREFIX.length()))
+                .collect(toList());
     }
 
     List<Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {

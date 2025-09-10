@@ -5,11 +5,11 @@ import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
-import java.util.List;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.Writer;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -78,6 +78,7 @@ class XmlReportWriter {
         writer.writeStartElement("testcase");
         writeTestCaseAttributes(writer, testCaseStarted);
         writer.writeNewLine();
+        writeRequirementProperties(writer, testCaseStarted);
         writeNonPassedElement(writer, testCaseStarted);
         writeStepAndResultList(writer, testCaseStarted);
         writer.writeEndElement();
@@ -88,6 +89,19 @@ class XmlReportWriter {
         writer.writeAttribute("classname", data.getFeatureName(testCaseStarted));
         writer.writeAttribute("name", data.getPickleName(testCaseStarted));
         writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(testCaseStarted)));
+    }
+
+    private void writeRequirementProperties(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
+        List<String> requirements = data.getFeatureRequirements(testCaseStarted);
+
+        if (!requirements.isEmpty()) {
+            writer.writeStartElement("properties");
+            writer.writeStartElement("property");
+            writer.writeAttribute("name", "requirements");
+            writer.writeAttribute("value", String.join(",", requirements));
+            writer.writeNewLine();
+        }
+
     }
 
     private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
