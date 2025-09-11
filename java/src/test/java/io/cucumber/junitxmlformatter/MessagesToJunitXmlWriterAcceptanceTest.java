@@ -34,7 +34,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
 
     static List<TestCase> acceptance() throws IOException {
-        try (Stream<Path> paths = Files.list(Paths.get("../testdata"))) {
+        try (Stream<Path> paths = Files.list(Paths.get("../testdata/src"))) {
             return paths
                     .filter(path -> path.getFileName().toString().endsWith(".ndjson"))
                     .map(TestCase::new)
