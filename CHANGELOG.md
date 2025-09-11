@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.9.0] - 2025-09-11
 ### Changed
 - Update dependency cucumber/query  to 14.0.1
 - Update dependency io.cucumber:query up to v14.0.1
@@ -63,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Java implementation ([#3](https://github.com/cucumber/junit-xml-formatter/pull/3) M.P. Korstanje)
 
-[Unreleased]: https://github.com/cucumber/junit-xml-formatter/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/cucumber/junit-xml-formatter/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/cucumber/junit-xml-formatter/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/cucumber/junit-xml-formatter/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/cucumber/junit-xml-formatter/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/cucumber/junit-xml-formatter/compare/v0.7.0...v0.7.1
