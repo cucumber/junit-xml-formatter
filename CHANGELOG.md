@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Update dependency cucumber/query  to ^13.3.0 ([#77](https://github.com/cucumber/junit-xml-formatter/pull/77))
-- Update dependency io.cucumber:query up to v13.5
+- Update dependency cucumber/query  to 14.0.1
+- Update dependency io.cucumber:query up to v14.0.1
 
 ### Fixed
 - Remove unnecessary coupling to `node:assert` ([#77](https://github.com/cucumber/junit-xml-formatter/pull/77))

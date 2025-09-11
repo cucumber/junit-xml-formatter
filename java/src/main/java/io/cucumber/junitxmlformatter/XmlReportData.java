@@ -15,6 +15,7 @@ import io.cucumber.messages.types.TestStepResultStatus;
 import io.cucumber.query.Lineage;
 import io.cucumber.query.NamingStrategy;
 import io.cucumber.query.Query;
+import io.cucumber.query.Repository;
 
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
@@ -25,13 +26,17 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
+import static io.cucumber.query.Repository.RepositoryFeature.INCLUDE_GHERKIN_DOCUMENTS;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
 class XmlReportData {
 
-    private final Query query = new Query();
+    private final Repository repository = Repository.builder()
+            .feature(INCLUDE_GHERKIN_DOCUMENTS, true)
+            .build();
+    private final Query query = new Query(repository);
     private final NamingStrategy namingStrategy;
 
     private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
@@ -41,7 +46,7 @@ class XmlReportData {
     }
 
     void collect(Envelope envelope) {
-        query.update(envelope);
+        repository.update(envelope);
     }
 
     double getSuiteDurationInSeconds() {
