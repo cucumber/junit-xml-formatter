@@ -130,5 +130,5 @@ dependencies can be provided by adding `com.fasterxml:aalto-xml` to your depende
 ## Contributing
 
 Each language implementation validates itself against the examples in the
-`testdata` folder. See the [testdata/README.md](testdata/README.md) for more
+`testdata` folder. See the [testdata/README.md](testdata/src/README.md) for more
 information.

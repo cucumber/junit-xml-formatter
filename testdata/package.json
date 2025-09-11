@@ -4,12 +4,12 @@
   "description": "The demo formatter uses some test data for acceptance testing.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "shx cp node_modules/@cucumber/compatibility-kit/features/**/*.ndjson ."
+    "postinstall": "shx cp node_modules/@cucumber/compatibility-kit/features/**/*.ndjson ./src"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@cucumber/compatibility-kit": "^21.0.0",
+    "@cucumber/compatibility-kit": "^22.0.0",
     "shx": "^0.4.0"
   }
 }
