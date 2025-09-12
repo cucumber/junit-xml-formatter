@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @see <a href=https://github.com/cucumber/junit-xml-formatter>Cucumber JUnit XML Formatter - README.md</a>
  */
-public class MessagesToJunitXmlWriter implements AutoCloseable {
+public final class MessagesToJunitXmlWriter implements AutoCloseable {
 
     private final OutputStreamWriter out;
     private final XmlReportData data;
