@@ -24,10 +24,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
+import static io.cucumber.junitxmlformatter.MessageOrderer.simulateParallelExecution;
+import static java.nio.file.Files.readAllBytes;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
@@ -51,6 +54,16 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
     }
+    
+    @ParameterizedTest
+    @MethodSource("acceptance")
+    void testWithSimulatedParallelExecution(TestCase testCase) throws IOException {
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream(), simulateParallelExecution());
+        Source expected = Input.fromPath(testCase.expected).build();
+        Source actual = Input.fromByteArray(bytes.toByteArray()).build();
+        assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
+    }
+
 
     @ParameterizedTest
     @MethodSource("acceptance")
@@ -81,7 +94,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         Iterable<ValidationProblem> problems = validationResult.getProblems();
         Assertions.assertThat(problems).extracting(ValidationProblem::getMessage).containsAll(expectedProblems);
     }
-
+    
     @ParameterizedTest
     @MethodSource("acceptance")
     @Disabled
@@ -90,18 +103,29 @@ class MessagesToJunitXmlWriterAcceptanceTest {
             writeJunitXmlReport(testCase, out);
         }
     }
-
-    private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
+    
+    private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out, Consumer<List<Envelope>> orderer) throws IOException {
+        List<Envelope> messages = new ArrayList<>();
         try (InputStream in = Files.newInputStream(testCase.source)) {
             try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
-                try (MessagesToJunitXmlWriter writer = new MessagesToJunitXmlWriter(out)) {
-                    for (Envelope envelope : envelopes) {
-                        writer.write(envelope);
-                    }
+                for (Envelope envelope : envelopes) {
+                    messages.add(envelope);
                 }
             }
         }
+        orderer.accept(messages);
+
+        try (MessagesToJunitXmlWriter writer = new MessagesToJunitXmlWriter(out)) {
+            for (Envelope envelope : messages) {
+                writer.write(envelope);
+            }
+        }
+        
         return out;
+    }
+    
+    private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
+        return writeJunitXmlReport(testCase, out, MessageOrderer.originalOrder());
     }
 
     static class TestCase {
