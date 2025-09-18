@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Cucumber" time="0.049" tests="7" skipped="0" failures="4" errors="0" timestamp="1970-01-01T00:00:00Z">
+<testsuite name="Cucumber" time="0.037" tests="4" skipped="0" failures="1" errors="0" timestamp="1970-01-01T00:00:00Z">
 <testcase classname="Retry" name="Test cases that pass aren't retried" time="0.003">
 <system-out><![CDATA[
 Given a step that always passes.............................................passed
@@ -22,26 +22,6 @@ samples/retry/retry.feature:18]]>
 </failure>
 <system-out><![CDATA[
 Given a step that always fails..............................................failed
-]]></system-out>
-</testcase>
-<testcase classname="Retry" name="Test cases won't retry when the status is AMBIGUOUS" time="0.003">
-<failure/>
-<system-out><![CDATA[
-Given an ambiguous step.....................................................ambiguous
-]]></system-out>
-</testcase>
-<testcase classname="Retry" name="Test cases won't retry when the status is PENDING" time="0.003">
-<failure>
-<![CDATA[TODO]]>
-</failure>
-<system-out><![CDATA[
-Given a pending step........................................................pending
-]]></system-out>
-</testcase>
-<testcase classname="Retry" name="Test cases won't retry when the status is UNDEFINED" time="0.003">
-<failure/>
-<system-out><![CDATA[
-Given a non-existent step...................................................undefined
 ]]></system-out>
 </testcase>
 </testsuite>
