@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -100,7 +99,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @Disabled
     void updateExpectedFiles(TestCase testCase) throws IOException {
         try (OutputStream out = Files.newOutputStream(testCase.expected)) {
-            writeJunitXmlReport(testCase, messageOrderer.originalOrder());
+            writeJunitXmlReport(testCase, out, messageOrderer.originalOrder());
         }
     }
 
