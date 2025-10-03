@@ -31,7 +31,7 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
     }
 
     public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, OutputStream out) {
-        this(createNamingStrategy(requireNonNull(exampleNameStrategy, LONG, EXCLUDE)), out);
+        this(createNamingStrategy(requireNonNull(exampleNameStrategy), LONG, EXCLUDE), out);
     }
 
     public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, NamingStrategy.strategy strategy, OutputStream out) {
