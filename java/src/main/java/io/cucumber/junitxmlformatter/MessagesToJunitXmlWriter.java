@@ -31,11 +31,19 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
     }
 
     public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, OutputStream out) {
-        this(createNamingStrategy(requireNonNull(exampleNameStrategy)), out);
+        this(createNamingStrategy(requireNonNull(exampleNameStrategy, LONG, EXCLUDE)), out);
     }
 
-    private static NamingStrategy createNamingStrategy(NamingStrategy.ExampleName exampleName) {
-        return NamingStrategy.strategy(LONG).featureName(EXCLUDE).exampleName(exampleName).build();
+    public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, NamingStrategy.strategy strategy, OutputStream out) {
+        this(createNamingStrategy(requireNonNull(exampleNameStrategy), requireNonNull(strategy), EXCLUDE), out);
+    }
+
+    public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, NamingStrategy.strategy strategy, NamingStrategy.FeatureName featureNameStrategy, OutputStream out) {
+        this(createNamingStrategy(requireNonNull(exampleNameStrategy), requireNonNull(strategy), requireNonNull(featureNameStrategy)), out);
+    }
+
+    private static NamingStrategy createNamingStrategy(NamingStrategy.ExampleName exampleName, NamingStrategy.strategy strategy, NamingStrategy.FeatureName featureName) {
+        return NamingStrategy.strategy(strategy).featureName(featureName).exampleName(exampleName).build();
     }
 
     private MessagesToJunitXmlWriter(NamingStrategy namingStrategy, OutputStream out) {
