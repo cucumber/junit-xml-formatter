@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+-  Support configurable `NamingStrategy.Strategy` and `NamingStrategy.FeatureName` 
+
 ## [0.9.0] - 2025-09-11
 ### Changed
 - Update dependency cucumber/query  to 14.0.1
