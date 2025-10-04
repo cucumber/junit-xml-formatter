@@ -40,7 +40,7 @@ interface ReportFailure {
   stack?: string
 }
 
-export function makeReport(query, customNamingStrategy = NAMING_STRATEGY): ReportSuite {
+export function makeReport(query: Query, customNamingStrategy: NamingStrategy = NAMING_STRATEGY): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
     time: durationToSeconds(query.findTestRunDuration()),
