@@ -40,7 +40,7 @@ interface ReportFailure {
   stack?: string
 }
 
-export function makeReport(query: Query): ReportSuite {
+export function makeReport(query, customNamingStrategy = NAMING_STRATEGY): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
     time: durationToSeconds(query.findTestRunDuration()),
@@ -51,12 +51,12 @@ export function makeReport(query: Query): ReportSuite {
       (status) => status !== TestStepResultStatus.PASSED && status !== TestStepResultStatus.SKIPPED
     ),
     errors: 0,
-    testCases: makeTestCases(query),
+    testCases: makeTestCases(query, customNamingStrategy),
     timestamp: formatTimestamp(query.findTestRunStarted()),
   }
 }
 
-function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
+function makeTestCases(query: Query, namingStrategy: NamingStrategy): ReadonlyArray<ReportTestCase> {
   return query.findAllTestCaseStarted().map((testCaseStarted) => {
     const pickle = ensure(
       query.findPickleBy(testCaseStarted),
