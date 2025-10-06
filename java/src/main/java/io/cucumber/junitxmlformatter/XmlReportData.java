@@ -28,21 +28,25 @@ import java.util.Optional;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.query.Repository.RepositoryFeature.INCLUDE_GHERKIN_DOCUMENTS;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
 class XmlReportData {
+    private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
 
     private final Repository repository = Repository.builder()
             .feature(INCLUDE_GHERKIN_DOCUMENTS, true)
             .build();
     private final Query query = new Query(repository);
-    private final NamingStrategy namingStrategy;
+    private final String testSuiteName;
+    private final String testClassName;
+    private final NamingStrategy testNamingStrategy;
 
-    private static final long MILLIS_PER_SECOND = SECONDS.toMillis(1L);
-
-    XmlReportData(NamingStrategy namingStrategy) {
-        this.namingStrategy = namingStrategy;
+    XmlReportData(String testSuiteName, String testClassName, NamingStrategy testNamingStrategy) {
+        this.testSuiteName = requireNonNull(testSuiteName);
+        this.testClassName = testClassName;
+        this.testNamingStrategy = requireNonNull(testNamingStrategy);
     }
 
     void collect(Envelope envelope) {
@@ -74,20 +78,27 @@ class XmlReportData {
                 .orElseThrow(() -> new IllegalStateException("No pickle for " + testCaseStarted.getId()));
     }
 
-    String getPickleName(TestCaseStarted testCaseStarted) {
+    String getTestName(TestCaseStarted testCaseStarted) {
         Pickle pickle = getPickle(testCaseStarted);
         return query.findLineageBy(pickle)
-                .map(lineage -> namingStrategy.reduce(lineage, pickle))
+                .map(lineage -> testNamingStrategy.reduce(lineage, pickle))
                 .orElseGet(pickle::getName);
     }
 
-    String getFeatureName(TestCaseStarted testCaseStarted) {
+    String getTestClassName(TestCaseStarted testCaseStarted) {
+        if (testClassName != null) {
+            return testClassName;
+        }
         return query.findLineageBy(testCaseStarted)
                 .flatMap(Lineage::feature)
                 .map(Feature::getName)
                 .orElseGet(() -> this.getPickle(testCaseStarted).getUri());
     }
 
+    String getTestSuiteName() {
+        return testSuiteName;
+    }
+    
     List<Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
         return query.findTestStepFinishedAndTestStepBy(testCaseStarted)
                 .stream()
@@ -138,7 +149,7 @@ class XmlReportData {
                 .orElse(SCENARIO_WITH_NO_STEPS);
     }
 
-    public Optional<String> getTestRunStartedAt() {
+    Optional<String> getTestRunStartedAt() {
         return query.findTestRunStarted()
                 .map(TestRunStarted::getTimestamp)
                 .map(Convertor::toInstant)

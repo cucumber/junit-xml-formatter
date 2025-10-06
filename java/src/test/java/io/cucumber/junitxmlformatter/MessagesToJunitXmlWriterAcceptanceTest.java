@@ -94,7 +94,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
         try (InputStream in = Files.newInputStream(testCase.source)) {
             try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
-                try (MessagesToJunitXmlWriter writer = new MessagesToJunitXmlWriter(out)) {
+                try (MessagesToJunitXmlWriter writer = MessagesToJunitXmlWriter.builder().build(out)) {
                     for (Envelope envelope : envelopes) {
                         writer.write(envelope);
                     }
