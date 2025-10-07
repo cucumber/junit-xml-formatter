@@ -76,7 +76,7 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
          * {@link NamingStrategy.Strategy#LONG} strategy with {@link NamingStrategy.FeatureName#EXCLUDE} and
          * {@link NamingStrategy.ExampleName#NUMBER_AND_PICKLE_IF_PARAMETERIZED}. 
          */
-        public Builder namingStrategy(NamingStrategy namingStrategy) {
+        public Builder testNamingStrategy(NamingStrategy namingStrategy) {
             this.testNamingStrategy = requireNonNull(namingStrategy);
             return this;
         }

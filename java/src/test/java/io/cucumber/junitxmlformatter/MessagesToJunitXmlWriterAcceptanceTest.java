@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
+import static io.cucumber.query.NamingStrategy.Strategy.LONG;
+import static io.cucumber.query.NamingStrategy.strategy;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
@@ -57,9 +59,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
                         MessagesToJunitXmlWriter.builder()
                                 .testSuiteName("Cucumber Suite")
                                 .testClassName("Cucumber Class")
-                                .namingStrategy(NamingStrategy
-                                        .strategy(Strategy.LONG)
-                                        .build())
+                                .testNamingStrategy(strategy(LONG).build())
                 )
         );
 
