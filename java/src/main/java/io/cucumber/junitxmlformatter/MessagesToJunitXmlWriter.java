@@ -64,7 +64,7 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
 
         /**
          * Sets the value for the {@code <testcase classname="..." .../>} attribute. Defaults to the name of the
-         * feature file.
+         * feature.
          */
         public Builder testClassName(String testClassName) {
             this.testClassName = testClassName;
