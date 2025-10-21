@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
--  Support configurable `NamingStrategy.Strategy` and `NamingStrategy.FeatureName` ([#105](https://github.com/cucumber/junit-xml-formatter/pull/105))
+-  Support configurable testsuite name, testcase classname, and testcase name. ([#105](https://github.com/cucumber/junit-xml-formatter/pull/105))
 
 ## [0.9.0] - 2025-09-11
 ### Changed
