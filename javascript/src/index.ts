@@ -1,5 +1,5 @@
 import { Envelope } from '@cucumber/messages'
-import { Query } from '@cucumber/query'
+import { NamingStrategy, Query } from '@cucumber/query'
 import xmlbuilder from 'xmlbuilder'
 
 import { makeReport } from './makeReport.js'
@@ -11,7 +11,11 @@ export default {
     on,
     write,
   }: {
-    options: { suiteName?: string }
+    options: {
+      suiteName?: string
+      testClassName?: string
+      testNamingStrategy?: NamingStrategy
+    }
     on: (type: 'message', handler: (message: Envelope) => void) => void
     write: (content: string) => void
   }) {
@@ -24,7 +28,7 @@ export default {
       query.update(message)
 
       if (message.testRunFinished) {
-        const testSuite = makeReport(query)
+        const testSuite = makeReport(query, options.testClassName, options.testNamingStrategy)
         builder.att('time', testSuite.time)
         builder.att('tests', testSuite.tests)
         builder.att('skipped', testSuite.skipped)
