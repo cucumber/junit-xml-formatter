@@ -42,9 +42,9 @@ interface ReportFailure {
 }
 
 export function makeReport(
-    query: Query,
-    testClassName: string | undefined = undefined,
-    customNamingStrategy: NamingStrategy = NAMING_STRATEGY
+  query: Query,
+  testClassName: string | undefined = undefined,
+  customNamingStrategy: NamingStrategy = NAMING_STRATEGY
 ): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
