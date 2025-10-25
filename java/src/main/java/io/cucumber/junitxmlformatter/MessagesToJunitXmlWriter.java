@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
+import static io.cucumber.query.NamingStrategy.ExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED;
 import static io.cucumber.query.NamingStrategy.FeatureName.EXCLUDE;
 import static io.cucumber.query.NamingStrategy.Strategy.LONG;
 import static java.util.Objects.requireNonNull;
@@ -22,24 +23,75 @@ import static java.util.Objects.requireNonNull;
  */
 public final class MessagesToJunitXmlWriter implements AutoCloseable {
 
+    private static final String DEFAULT_TEST_SUITE_NAME = "Cucumber";
     private final OutputStreamWriter out;
     private final XmlReportData data;
     private boolean streamClosed = false;
 
     public MessagesToJunitXmlWriter(OutputStream out) {
-        this(NamingStrategy.ExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED, out);
+        this("Cucumber", null, createNamingStrategy(NUMBER_AND_PICKLE_IF_PARAMETERIZED), out);
     }
 
+    @Deprecated
     public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, OutputStream out) {
-        this(createNamingStrategy(requireNonNull(exampleNameStrategy)), out);
+        this("Cucumber", null, createNamingStrategy(requireNonNull(exampleNameStrategy)), out);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private String testSuiteName = DEFAULT_TEST_SUITE_NAME;
+        private String testClassName;
+        private NamingStrategy testNamingStrategy = NamingStrategy.strategy(LONG)
+                .featureName(EXCLUDE)
+                .exampleName(NUMBER_AND_PICKLE_IF_PARAMETERIZED)
+                .build();
+
+        private Builder() {
+
+        }
+
+        /**
+         * Sets the value for the {@code <testsuite name="..." .../>} attribute. Defaults to {@value DEFAULT_TEST_SUITE_NAME}. 
+         */
+        public Builder testSuiteName(String testSuiteName) {
+            this.testSuiteName = requireNonNull(testSuiteName);
+            return this;
+        }
+
+        /**
+         * Sets the value for the {@code <testcase classname="..." .../>} attribute. Defaults to the name of the
+         * feature.
+         */
+        public Builder testClassName(String testClassName) {
+            this.testClassName = testClassName;
+            return this;
+        }
+
+        /**
+         * Set the naming strategy used for the {@code <testcase name="...".../> attribute}. Defaults to the
+         * {@link NamingStrategy.Strategy#LONG} strategy with {@link NamingStrategy.FeatureName#EXCLUDE} and
+         * {@link NamingStrategy.ExampleName#NUMBER_AND_PICKLE_IF_PARAMETERIZED}. 
+         */
+        public Builder testNamingStrategy(NamingStrategy namingStrategy) {
+            this.testNamingStrategy = requireNonNull(namingStrategy);
+            return this;
+        }
+
+        public MessagesToJunitXmlWriter build(OutputStream out) {
+            return new MessagesToJunitXmlWriter(testSuiteName, testClassName, testNamingStrategy, requireNonNull(out));
+        }
     }
 
     private static NamingStrategy createNamingStrategy(NamingStrategy.ExampleName exampleName) {
-        return NamingStrategy.strategy(LONG).featureName(EXCLUDE).exampleName(exampleName).build();
+        return NamingStrategy.strategy(NamingStrategy.Strategy.LONG).featureName(NamingStrategy.FeatureName.EXCLUDE).exampleName(exampleName).build();
     }
 
-    private MessagesToJunitXmlWriter(NamingStrategy namingStrategy, OutputStream out) {
-        this.data = new XmlReportData(namingStrategy);
+    private MessagesToJunitXmlWriter(String testSuiteName, String testClassName, NamingStrategy testNamingStrategy, OutputStream out) {
+        this.data = new XmlReportData(testSuiteName, testClassName, testNamingStrategy);
         this.out = new OutputStreamWriter(
                 requireNonNull(out),
                 StandardCharsets.UTF_8
