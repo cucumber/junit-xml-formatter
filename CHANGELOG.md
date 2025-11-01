@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+-  Support configurable testsuite name, testcase classname, and testcase name. ([#105](https://github.com/cucumber/junit-xml-formatter/pull/105))
+
 ## [0.10.0] - 2025-10-27
 ### Changed
 - Update dependency io.cucumber:messages up to v30

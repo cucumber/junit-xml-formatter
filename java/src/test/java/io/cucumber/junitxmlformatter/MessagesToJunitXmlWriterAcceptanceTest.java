@@ -2,6 +2,8 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
 import io.cucumber.messages.types.Envelope;
+import io.cucumber.query.NamingStrategy;
+import io.cucumber.query.NamingStrategy.Strategy;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,23 +26,44 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
+import static io.cucumber.query.NamingStrategy.Strategy.LONG;
+import static io.cucumber.query.NamingStrategy.strategy;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
     private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
 
     static List<TestCase> acceptance() throws IOException {
+        List<TestCase> testCases = new ArrayList<>();
+
         try (Stream<Path> paths = Files.list(Paths.get("../testdata/src"))) {
-            return paths
+            paths
                     .filter(path -> path.getFileName().toString().endsWith(".ndjson"))
-                    .map(TestCase::new)
+                    .map(source -> new TestCase(
+                                    source,
+                                    "default",
+                                    MessagesToJunitXmlWriter.builder()
+                            )
+                    )
                     .sorted(Comparator.comparing(testCase -> testCase.source))
-                    .collect(Collectors.toList());
+                    .forEach(testCases::add);
         }
+
+        testCases.add(
+                new TestCase(
+                        Paths.get("../testdata/src/examples-tables.ndjson"),
+                        "custom",
+                        MessagesToJunitXmlWriter.builder()
+                                .testSuiteName("Cucumber Suite")
+                                .testClassName("Cucumber Class")
+                                .testNamingStrategy(strategy(LONG).build())
+                )
+        );
+
+        return testCases;
     }
 
     @ParameterizedTest
@@ -94,7 +117,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
         try (InputStream in = Files.newInputStream(testCase.source)) {
             try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
-                try (MessagesToJunitXmlWriter writer = new MessagesToJunitXmlWriter(out)) {
+                try (MessagesToJunitXmlWriter writer = testCase.getBuilder().build(out)) {
                     for (Envelope envelope : envelopes) {
                         writer.write(envelope);
                     }
@@ -109,17 +132,25 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         private final Path expected;
 
         private final String name;
+        private final MessagesToJunitXmlWriter.Builder builder;
+        private final String strategyName;
 
-        TestCase(Path source) {
+        TestCase(Path source, String namingStrategyName, MessagesToJunitXmlWriter.Builder builder) {
             this.source = source;
             String fileName = source.getFileName().toString();
             this.name = fileName.substring(0, fileName.lastIndexOf(".ndjson"));
-            this.expected = source.getParent().resolve(name + ".xml");
+            this.expected = source.getParent().resolve(name + "." + namingStrategyName + ".xml");
+            this.builder = builder;
+            this.strategyName = namingStrategyName;
+        }
+
+        MessagesToJunitXmlWriter.Builder getBuilder() {
+            return builder;
         }
 
         @Override
         public String toString() {
-            return name;
+            return name + " -> " + strategyName;
         }
 
         @Override

@@ -5,6 +5,7 @@ import util from 'node:util'
 
 import { NdjsonToMessageStream } from '@cucumber/message-streams'
 import { Envelope } from '@cucumber/messages'
+import { namingStrategy, NamingStrategyLength } from '@cucumber/query'
 import { expect, use } from 'chai'
 import chaiXml from 'chai-xml'
 import { globbySync } from 'globby'
@@ -22,13 +23,33 @@ describe('Acceptance Tests', async function () {
     absolute: true,
   })
 
-  for (const ndjsonFile of ndjsonFiles) {
+  const testCases = ndjsonFiles.map((ndjsonFile) => {
     const [suiteName] = path.basename(ndjsonFile).split('.')
-    it(suiteName, async () => {
+    return {
+      suiteName,
+      source: ndjsonFile,
+      strategyName: 'default',
+      options: {},
+    }
+  })
+
+  testCases.push({
+    suiteName: 'examples-tables',
+    source: '../testdata/src/examples-tables.ndjson',
+    strategyName: 'custom',
+    options: {
+      suiteName: 'Cucumber Suite',
+      testClassName: 'Cucumber Class',
+      testNamingStrategy: namingStrategy(NamingStrategyLength.LONG),
+    },
+  })
+
+  for (const testCase of testCases) {
+    it(testCase.suiteName + ' -> ' + testCase.strategyName, async () => {
       let emit: (message: Envelope) => void
       let content = ''
       formatter.formatter({
-        options: {},
+        options: testCase.options,
         on(type, handler) {
           emit = handler
         },
@@ -38,7 +59,7 @@ describe('Acceptance Tests', async function () {
       })
 
       await asyncPipeline(
-        fs.createReadStream(ndjsonFile, { encoding: 'utf-8' }),
+        fs.createReadStream(testCase.source, { encoding: 'utf-8' }),
         new NdjsonToMessageStream(),
         new Writable({
           objectMode: true,
@@ -49,9 +70,12 @@ describe('Acceptance Tests', async function () {
         })
       )
 
-      const expectedXml = fs.readFileSync(ndjsonFile.replace('.ndjson', '.xml'), {
-        encoding: 'utf-8',
-      })
+      const expectedXml = fs.readFileSync(
+        testCase.source.replace('.ndjson', '.' + testCase.strategyName + '.xml'),
+        {
+          encoding: 'utf-8',
+        }
+      )
       expect(content).xml.to.be.valid()
       expect(content).xml.to.deep.eq(expectedXml)
     })

@@ -1,5 +1,6 @@
 import { TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
 import {
+  NamingStrategy,
   namingStrategy,
   NamingStrategyExampleName,
   NamingStrategyFeatureName,
@@ -40,7 +41,11 @@ interface ReportFailure {
   stack?: string
 }
 
-export function makeReport(query: Query): ReportSuite {
+export function makeReport(
+  query: Query,
+  testClassName: string | undefined = undefined,
+  customNamingStrategy: NamingStrategy = NAMING_STRATEGY
+): ReportSuite {
   const statuses = query.countMostSevereTestStepResultStatus()
   return {
     time: durationToSeconds(query.findTestRunDuration()),
@@ -51,12 +56,16 @@ export function makeReport(query: Query): ReportSuite {
       (status) => status !== TestStepResultStatus.PASSED && status !== TestStepResultStatus.SKIPPED
     ),
     errors: 0,
-    testCases: makeTestCases(query),
+    testCases: makeTestCases(query, testClassName, customNamingStrategy),
     timestamp: formatTimestamp(query.findTestRunStarted()),
   }
 }
 
-function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
+function makeTestCases(
+  query: Query,
+  testClassName: string | undefined,
+  testNamingStrategy: NamingStrategy
+): ReadonlyArray<ReportTestCase> {
   return query.findAllTestCaseStarted().map((testCaseStarted) => {
     const pickle = ensure(
       query.findPickleBy(testCaseStarted),
@@ -65,8 +74,8 @@ function makeTestCases(query: Query): ReadonlyArray<ReportTestCase> {
     const lineage = ensure(query.findLineageBy(pickle), 'Expected to find Lineage by Pickle')
 
     return {
-      classname: lineage.feature?.name ?? pickle.uri,
-      name: NAMING_STRATEGY.reduce(lineage, pickle),
+      classname: testClassName ?? lineage.feature?.name ?? pickle.uri,
+      name: testNamingStrategy.reduce(lineage, pickle),
       time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
       failure: makeFailure(query, testCaseStarted),
       output: query
