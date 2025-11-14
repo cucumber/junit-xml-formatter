@@ -53,7 +53,7 @@ class XmlReportWriter {
         Map<TestStepResultStatus, Long> counts = data.getTestCaseStatusCounts();
 
         writer.writeAttribute("tests", String.valueOf(data.getTestCaseCount()));
-        writer.writeAttribute("skipped", counts.get(SKIPPED).toString());
+        writer.writeAttribute("skipped", String.valueOf(counts.get(SKIPPED)));
         writer.writeAttribute("failures", String.valueOf(countFailures(counts)));
         writer.writeAttribute("errors", "0");
 
