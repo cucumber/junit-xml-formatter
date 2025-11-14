@@ -2,8 +2,6 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
 import io.cucumber.messages.types.Envelope;
-import io.cucumber.query.NamingStrategy;
-import io.cucumber.query.NamingStrategy.Strategy;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,14 +29,14 @@ import java.util.stream.Stream;
 import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
 import static io.cucumber.query.NamingStrategy.Strategy.LONG;
 import static io.cucumber.query.NamingStrategy.strategy;
+import static java.util.Objects.requireNonNull;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
-    private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
+    private static final NdjsonToMessageIterable.Deserializer deserializer = json -> OBJECT_MAPPER.readValue(json, Envelope.class);
 
     static List<TestCase> acceptance() throws IOException {
         List<TestCase> testCases = new ArrayList<>();
-
         try (Stream<Path> paths = Files.list(Paths.get("../testdata/src"))) {
             paths
                     .filter(path -> path.getFileName().toString().endsWith(".ndjson"))
@@ -130,7 +128,6 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     static class TestCase {
         private final Path source;
         private final Path expected;
-
         private final String name;
         private final MessagesToJunitXmlWriter.Builder builder;
         private final String strategyName;
@@ -139,7 +136,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
             this.source = source;
             String fileName = source.getFileName().toString();
             this.name = fileName.substring(0, fileName.lastIndexOf(".ndjson"));
-            this.expected = source.getParent().resolve(name + "." + namingStrategyName + ".xml");
+            this.expected = requireNonNull(source.getParent()).resolve(name + "." + namingStrategyName + ".xml");
             this.builder = builder;
             this.strategyName = namingStrategyName;
         }
@@ -155,15 +152,13 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            TestCase testCase = (TestCase) o;
-            return source.equals(testCase.source);
+            if (!(o instanceof TestCase testCase)) return false;
+            return Objects.equals(source, testCase.source) && Objects.equals(strategyName, testCase.strategyName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(source);
+            return Objects.hash(source, strategyName);
         }
     }
 
