@@ -56,7 +56,7 @@ class EscapingXmlStreamWriter implements AutoCloseable {
 
     void writeCData(String data) throws XMLStreamException {
         // https://stackoverflow.com/questions/223652/is-there-a-way-to-escape-a-cdata-end-token-in-xml
-        for (String part : CDATA_TERMINATOR_SPLIT.split(data)) {
+        for (String part : CDATA_TERMINATOR_SPLIT.split(data, -1)) {
             // see https://www.w3.org/TR/xml/#dt-cdsection
             writer.writeCData(escapeIllegalChars(part));
         }
@@ -88,6 +88,7 @@ class EscapingXmlStreamWriter implements AutoCloseable {
         return escaped.toString();
     }
 
+    @SuppressWarnings("UnnecessaryParentheses")
     private static boolean isLegal(int codePoint) {
         // see https://www.w3.org/TR/xml/#charsets
         return codePoint == 0x9

@@ -16,6 +16,7 @@ import io.cucumber.query.Lineage;
 import io.cucumber.query.NamingStrategy;
 import io.cucumber.query.Query;
 import io.cucumber.query.Repository;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
@@ -40,10 +41,10 @@ class XmlReportData {
             .build();
     private final Query query = new Query(repository);
     private final String testSuiteName;
-    private final String testClassName;
+    private final @Nullable String testClassName;
     private final NamingStrategy testNamingStrategy;
 
-    XmlReportData(String testSuiteName, String testClassName, NamingStrategy testNamingStrategy) {
+    XmlReportData(String testSuiteName, @Nullable String testClassName, NamingStrategy testNamingStrategy) {
         this.testSuiteName = requireNonNull(testSuiteName);
         this.testClassName = testClassName;
         this.testNamingStrategy = requireNonNull(testNamingStrategy);
@@ -140,7 +141,7 @@ class XmlReportData {
     }
 
     private static final io.cucumber.messages.types.Duration ZERO_DURATION =
-            new io.cucumber.messages.types.Duration(0L, 0L);
+            new io.cucumber.messages.types.Duration(0L, 0);
     // By definition, but see https://github.com/cucumber/gherkin/issues/11
     private static final TestStepResult SCENARIO_WITH_NO_STEPS = new TestStepResult(ZERO_DURATION, null, PASSED, null);
 
