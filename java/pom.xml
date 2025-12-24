@@ -16,7 +16,7 @@
     <url>https://github.com/cucumber/junit-xml-formatter</url>
 
     <properties>
-        <project.Automatic-Module-Name>io.cucumber.junitxmlformatter</project.Automatic-Module-Name>
+        <osgi.bundle-symbolic-name>io.cucumber.junitxmlformatter</osgi.bundle-symbolic-name>
         <project.build.outputTimestamp>1763140063</project.build.outputTimestamp>
     </properties>
 
