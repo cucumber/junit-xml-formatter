@@ -1,9 +1,8 @@
 package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.NdjsonToMessageIterable;
+import io.cucumber.messages.ndjson.Deserializer;
 import io.cucumber.messages.types.Envelope;
-import io.cucumber.query.NamingStrategy;
-import io.cucumber.query.NamingStrategy.Strategy;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,13 +27,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
 import static io.cucumber.query.NamingStrategy.Strategy.LONG;
 import static io.cucumber.query.NamingStrategy.strategy;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
-    private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
 
     static List<TestCase> acceptance() throws IOException {
         List<TestCase> testCases = new ArrayList<>();
@@ -116,7 +113,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
         try (InputStream in = Files.newInputStream(testCase.source)) {
-            try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
+            try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, new Deserializer())) {
                 try (MessagesToJunitXmlWriter writer = testCase.getBuilder().build(out)) {
                     for (Envelope envelope : envelopes) {
                         writer.write(envelope);
