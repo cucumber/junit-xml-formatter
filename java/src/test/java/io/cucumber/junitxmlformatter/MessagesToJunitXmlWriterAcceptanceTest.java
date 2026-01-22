@@ -127,6 +127,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     private static ByteArrayOutputStream writeJunitXmlReport(TestCase testCase, Consumer<List<Envelope>> orderer) throws IOException {
         return writeJunitXmlReport(testCase, new ByteArrayOutputStream(), orderer);
     }
+
     private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out, Consumer<List<Envelope>> orderer) throws IOException {
         try (var in = Files.newInputStream(testCase.source)) {
             try (var reader = new NdjsonToMessageReader(in, new Deserializer())) {
