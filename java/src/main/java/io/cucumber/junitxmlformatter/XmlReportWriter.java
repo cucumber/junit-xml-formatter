@@ -155,8 +155,10 @@ class XmlReportWriter {
             String stepText = r.getKey();
             String status = r.getValue();
             sb.append(stepText);
-            sb.append(".");
-            for (int i = 75 - stepText.length(); i > 0; i--) {
+            // minimum of two dots between step text and status.
+            sb.append("..");
+            // pad to 76 characters per line
+            for (int i = 76 - 2 - stepText.length(); i > 0; i--) {
                 sb.append(".");
             }
             sb.append(status);
