@@ -41,7 +41,7 @@ When a link to "https://cucumber.io" is attached............................pass
 samples/attachments/attachments.feature:39]]>
 </failure>
 <system-out><![CDATA[
-When the string "hello" is attached as "application/octet-stream" before a failure.failed
+When the string "hello" is attached as "application/octet-stream" before a failure..failed
 ]]></system-out>
 </testcase>
 </testsuite>
