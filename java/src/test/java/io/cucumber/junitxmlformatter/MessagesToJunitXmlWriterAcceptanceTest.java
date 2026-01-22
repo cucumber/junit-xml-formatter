@@ -1,7 +1,8 @@
 package io.cucumber.junitxmlformatter;
 
 import io.cucumber.compatibilitykit.MessageOrderer;
-import io.cucumber.messages.NdjsonToMessageIterable;
+import io.cucumber.messages.NdjsonToMessageReader;
+import io.cucumber.messages.ndjson.Deserializer;
 import io.cucumber.messages.types.Envelope;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -16,7 +17,6 @@ import org.xmlunit.validation.ValidationResult;
 import javax.xml.transform.Source;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,22 +29,42 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.cucumber.junitxmlformatter.Jackson.OBJECT_MAPPER;
+import static io.cucumber.query.NamingStrategy.Strategy.LONG;
+import static io.cucumber.query.NamingStrategy.strategy;
+import static java.util.Objects.requireNonNull;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
-    private static final NdjsonToMessageIterable.Deserializer deserializer = (json) -> OBJECT_MAPPER.readValue(json, Envelope.class);
     private static final Random random = new Random(202509282040L);
     private static final MessageOrderer messageOrderer = new MessageOrderer(random);
 
     static List<TestCase> acceptance() throws IOException {
+        List<TestCase> testCases = new ArrayList<>();
         try (Stream<Path> paths = Files.list(Paths.get("../testdata/src"))) {
-            return paths
+            paths
                     .filter(path -> path.getFileName().toString().endsWith(".ndjson"))
-                    .map(TestCase::new)
+                    .map(source -> new TestCase(
+                                    source,
+                                    "default",
+                                    MessagesToJunitXmlWriter.builder()
+                            )
+                    )
                     .sorted(Comparator.comparing(testCase -> testCase.source))
-                    .collect(Collectors.toList());
+                    .forEach(testCases::add);
         }
+
+        testCases.add(
+                new TestCase(
+                        Paths.get("../testdata/src/examples-tables.ndjson"),
+                        "custom",
+                        MessagesToJunitXmlWriter.builder()
+                                .testSuiteName("Cucumber Suite")
+                                .testClassName("Cucumber Class")
+                                .testNamingStrategy(strategy(LONG).build())
+                )
+        );
+
+        return testCases;
     }
 
     @ParameterizedTest
@@ -59,8 +79,9 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void testWithSimulatedParallelExecution(TestCase testCase) throws IOException {
-        ByteArrayOutputStream actual = writeJunitXmlReport(testCase, messageOrderer.simulateParallelExecution());
-        byte[] expected = Files.readAllBytes(testCase.expected);
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.simulateParallelExecution());
+        Source expected = Input.fromPath(testCase.expected).build();
+        Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
     }
 
@@ -107,19 +128,15 @@ class MessagesToJunitXmlWriterAcceptanceTest {
         return writeJunitXmlReport(testCase, new ByteArrayOutputStream(), orderer);
     }
     private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out, Consumer<List<Envelope>> orderer) throws IOException {
-        List<Envelope> messages = new ArrayList<>();
-        try (InputStream in = Files.newInputStream(testCase.source)) {
-            try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, deserializer)) {
-                for (Envelope envelope : envelopes) {
-                    messages.add(envelope);
+        try (var in = Files.newInputStream(testCase.source)) {
+            try (var reader = new NdjsonToMessageReader(in, new Deserializer())) {
+                try (MessagesToJunitXmlWriter writer = testCase.getBuilder().build(out)) {
+                    List<Envelope> messages = reader.lines().collect(Collectors.toList());
+                    orderer.accept(messages);
+                    for (Envelope envelope : messages) {
+                        writer.write(envelope);
+                    }
                 }
-            }
-        }
-        orderer.accept(messages);
-
-        try (MessagesToJunitXmlWriter writer = new MessagesToJunitXmlWriter(out)) {
-            for (Envelope envelope : messages) {
-                writer.write(envelope);
             }
         }
         return out;
@@ -128,19 +145,26 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     static class TestCase {
         private final Path source;
         private final Path expected;
-
         private final String name;
+        private final MessagesToJunitXmlWriter.Builder builder;
+        private final String strategyName;
 
-        TestCase(Path source) {
+        TestCase(Path source, String namingStrategyName, MessagesToJunitXmlWriter.Builder builder) {
             this.source = source;
             String fileName = source.getFileName().toString();
             this.name = fileName.substring(0, fileName.lastIndexOf(".ndjson"));
-            this.expected = source.getParent().resolve(name + ".xml");
+            this.expected = requireNonNull(source.getParent()).resolve(name + "." + namingStrategyName + ".xml");
+            this.builder = builder;
+            this.strategyName = namingStrategyName;
+        }
+
+        MessagesToJunitXmlWriter.Builder getBuilder() {
+            return builder;
         }
 
         @Override
         public String toString() {
-            return name;
+            return name + " -> " + strategyName;
         }
 
     }

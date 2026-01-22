@@ -47,13 +47,13 @@ class XmlReportWriter {
     }
 
     private void writeSuiteAttributes(EscapingXmlStreamWriter writer) throws XMLStreamException {
-        writer.writeAttribute("name", "Cucumber");
+        writer.writeAttribute("name", data.getTestSuiteName());
         writer.writeAttribute("time", String.valueOf(data.getSuiteDurationInSeconds()));
 
         Map<TestStepResultStatus, Long> counts = data.getTestCaseStatusCounts();
 
         writer.writeAttribute("tests", String.valueOf(data.getTestCaseCount()));
-        writer.writeAttribute("skipped", counts.get(SKIPPED).toString());
+        writer.writeAttribute("skipped", String.valueOf(counts.get(SKIPPED)));
         writer.writeAttribute("failures", String.valueOf(countFailures(counts)));
         writer.writeAttribute("errors", "0");
 
@@ -85,8 +85,8 @@ class XmlReportWriter {
     }
 
     private void writeTestCaseAttributes(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
-        writer.writeAttribute("classname", data.getFeatureName(testCaseStarted));
-        writer.writeAttribute("name", data.getPickleName(testCaseStarted));
+        writer.writeAttribute("classname", data.getTestClassName(testCaseStarted));
+        writer.writeAttribute("name", data.getTestName(testCaseStarted));
         writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(testCaseStarted)));
     }
 
