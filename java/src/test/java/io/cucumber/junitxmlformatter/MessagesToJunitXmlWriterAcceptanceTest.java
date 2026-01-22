@@ -1,6 +1,7 @@
 package io.cucumber.junitxmlformatter;
 
-import io.cucumber.messages.NdjsonToMessageIterable;
+import io.cucumber.compatibilitykit.MessageOrderer;
+import io.cucumber.messages.NdjsonToMessageReader;
 import io.cucumber.messages.ndjson.Deserializer;
 import io.cucumber.messages.types.Envelope;
 import org.assertj.core.api.Assertions;
@@ -16,7 +17,6 @@ import org.xmlunit.validation.ValidationResult;
 import javax.xml.transform.Source;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +24,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.cucumber.query.NamingStrategy.Strategy.LONG;
@@ -33,6 +35,8 @@ import static java.util.Objects.requireNonNull;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 class MessagesToJunitXmlWriterAcceptanceTest {
+    private static final Random random = new Random(202509282040L);
+    private static final MessageOrderer messageOrderer = new MessageOrderer(random);
 
     static List<TestCase> acceptance() throws IOException {
         List<TestCase> testCases = new ArrayList<>();
@@ -66,7 +70,16 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void test(TestCase testCase) throws IOException {
-        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.originalOrder());
+        Source expected = Input.fromPath(testCase.expected).build();
+        Source actual = Input.fromByteArray(bytes.toByteArray()).build();
+        assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
+    }
+
+    @ParameterizedTest
+    @MethodSource("acceptance")
+    void testWithSimulatedParallelExecution(TestCase testCase) throws IOException {
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.simulateParallelExecution());
         Source expected = Input.fromPath(testCase.expected).build();
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         assertThat(actual).and(expected).ignoreWhitespace().areIdentical();
@@ -75,7 +88,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void validateAgainstJenkins(TestCase testCase) throws IOException {
-        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.originalOrder());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         Source jenkinsSchema = Input.fromPath(Paths.get("../jenkins-junit.xsd")).build();
         assertThat(actual).isValidAgainst(jenkinsSchema);
@@ -84,7 +97,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @ParameterizedTest
     @MethodSource("acceptance")
     void validateAgainstSurefire(TestCase testCase) throws IOException {
-        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, new ByteArrayOutputStream());
+        ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.originalOrder());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
         Source surefireSchema = Input.fromPath(Paths.get("../surefire-test-report-3.0.2.xsd")).build();
 
@@ -107,15 +120,21 @@ class MessagesToJunitXmlWriterAcceptanceTest {
     @Disabled
     void updateExpectedFiles(TestCase testCase) throws IOException {
         try (OutputStream out = Files.newOutputStream(testCase.expected)) {
-            writeJunitXmlReport(testCase, out);
+            writeJunitXmlReport(testCase, out, messageOrderer.originalOrder());
         }
     }
 
-    private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out) throws IOException {
-        try (InputStream in = Files.newInputStream(testCase.source)) {
-            try (NdjsonToMessageIterable envelopes = new NdjsonToMessageIterable(in, new Deserializer())) {
+    private static ByteArrayOutputStream writeJunitXmlReport(TestCase testCase, Consumer<List<Envelope>> orderer) throws IOException {
+        return writeJunitXmlReport(testCase, new ByteArrayOutputStream(), orderer);
+    }
+
+    private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out, Consumer<List<Envelope>> orderer) throws IOException {
+        try (var in = Files.newInputStream(testCase.source)) {
+            try (var reader = new NdjsonToMessageReader(in, new Deserializer())) {
                 try (MessagesToJunitXmlWriter writer = testCase.getBuilder().build(out)) {
-                    for (Envelope envelope : envelopes) {
+                    List<Envelope> messages = reader.lines().collect(Collectors.toList());
+                    orderer.accept(messages);
+                    for (Envelope envelope : messages) {
                         writer.write(envelope);
                     }
                 }
@@ -149,16 +168,6 @@ class MessagesToJunitXmlWriterAcceptanceTest {
             return name + " -> " + strategyName;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof TestCase testCase)) return false;
-            return Objects.equals(source, testCase.source) && Objects.equals(strategyName, testCase.strategyName);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(source, strategyName);
-        }
     }
 
 }

@@ -1,6 +1,7 @@
 package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.Convertor;
+import io.cucumber.messages.LocationComparator;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.Pickle;
@@ -20,6 +21,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +31,7 @@ import java.util.Optional;
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.query.Repository.RepositoryFeature.INCLUDE_GHERKIN_DOCUMENTS;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import static java.util.Comparator.nullsFirst;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -136,8 +139,11 @@ class XmlReportData {
         return stepKeyWord + stepText;
     }
 
+    private static final Comparator<Pickle> pickleComparator = Comparator.comparing(Pickle::getUri)
+            .thenComparing(pickle -> pickle.getLocation().orElse(null), nullsFirst(new LocationComparator()));
+
     List<TestCaseStarted> getAllTestCaseStarted() {
-        return query.findAllTestCaseStarted();
+        return query.findAllTestCaseStartedOrderBy(Query::findPickleBy, pickleComparator);
     }
 
     private static final io.cucumber.messages.types.Duration ZERO_DURATION =
