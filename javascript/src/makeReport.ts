@@ -1,4 +1,4 @@
-import { TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
+import { Pickle, TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
 import {
   NamingStrategy,
   namingStrategy,
@@ -61,41 +61,58 @@ export function makeReport(
   }
 }
 
+const pickleComparator = (a: Pickle, b: Pickle): number => {
+  if (a.uri !== b.uri) {
+    return a.uri.localeCompare(b.uri)
+  }
+  if (!a.location) {
+    return !b.location ? 0 : -1
+  } else if (!b.location) {
+    return 1
+  }
+  return a.location.line - b.location.line
+}
+
 function makeTestCases(
   query: Query,
   testClassName: string | undefined,
   testNamingStrategy: NamingStrategy
 ): ReadonlyArray<ReportTestCase> {
-  return query.findAllTestCaseStarted().map((testCaseStarted) => {
-    const pickle = ensure(
-      query.findPickleBy(testCaseStarted),
-      'Expected to find Pickle by TestCaseStarted'
+  return query
+    .findAllTestCaseStartedOrderBy(
+      (q, testCaseStarted) => q.findPickleBy(testCaseStarted),
+      pickleComparator
     )
-    const lineage = ensure(query.findLineageBy(pickle), 'Expected to find Lineage by Pickle')
+    .map((testCaseStarted) => {
+      const pickle = ensure(
+        query.findPickleBy(testCaseStarted),
+        'Expected to find Pickle by TestCaseStarted'
+      )
+      const lineage = ensure(query.findLineageBy(pickle), 'Expected to find Lineage by Pickle')
 
-    return {
-      classname: testClassName ?? lineage.feature?.name ?? pickle.uri,
-      name: testNamingStrategy.reduce(lineage, pickle),
-      time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
-      failure: makeFailure(query, testCaseStarted),
-      output: query
-        .findTestStepFinishedAndTestStepBy(testCaseStarted)
-        // filter out hooks
-        .filter(([, testStep]) => !!testStep.pickleStepId)
-        .map(([testStepFinished, testStep]) => {
-          const pickleStep = ensure(
-            query.findPickleStepBy(testStep),
-            'Expected to find PickleStep by TestStep'
-          )
-          const gherkinStep = ensure(
-            query.findStepBy(pickleStep),
-            'Expected to find Step by PickleStep'
-          )
-          return formatStep(gherkinStep, pickleStep, testStepFinished.testStepResult.status)
-        })
-        .join('\n'),
-    }
-  })
+      return {
+        classname: testClassName ?? lineage.feature?.name ?? pickle.uri,
+        name: testNamingStrategy.reduce(lineage, pickle),
+        time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
+        failure: makeFailure(query, testCaseStarted),
+        output: query
+          .findTestStepFinishedAndTestStepBy(testCaseStarted)
+          // filter out hooks
+          .filter(([, testStep]) => !!testStep.pickleStepId)
+          .map(([testStepFinished, testStep]) => {
+            const pickleStep = ensure(
+              query.findPickleStepBy(testStep),
+              'Expected to find PickleStep by TestStep'
+            )
+            const gherkinStep = ensure(
+              query.findStepBy(pickleStep),
+              'Expected to find Step by PickleStep'
+            )
+            return formatStep(gherkinStep, pickleStep, testStepFinished.testStepResult.status)
+          })
+          .join('\n'),
+      }
+    })
 }
 
 function makeFailure(query: Query, testCaseStarted: TestCaseStarted): ReportFailure | undefined {
