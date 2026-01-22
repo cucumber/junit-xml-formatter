@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed 
 - Update dependency io.cucumber:messages up to v30
+- Write test cases in canonical order ([#98](https://github.com/cucumber/testng-xml-formatter/pull/98))
 
 ## [0.11.0] - 2025-11-14
 ### Added
