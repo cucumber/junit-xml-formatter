@@ -157,10 +157,8 @@ class XmlReportWriter {
             sb.append(stepText);
             // minimum of two dots between step text and status.
             sb.append("..");
-            // pad to 76 characters per line
-            for (int i = 76 - 2 - stepText.length(); i > 0; i--) {
-                sb.append(".");
-            }
+            // pad to 76 characters per line, minus the two mandatory dots and step text
+            sb.append(".".repeat(Math.max(0, 76 - 2 - stepText.length())));
             sb.append(status);
             sb.append("\n");
         });
