@@ -1,55 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <testsuite name="Cucumber" time="0.049" tests="6" skipped="1" failures="4" errors="0" timestamp="1970-01-01T00:00:00Z">
-<testcase classname="All statuses" name="Passing" time="0.007">
-<system-out><![CDATA[
-Given a step................................................................passed
+  <testcase classname="All statuses" name="Passing" time="0.007" file="samples/all-statuses/all-statuses.feature">
+    <system-out><![CDATA[Given a step................................................................passed
 And a step..................................................................passed
-And a step..................................................................passed
-]]></system-out>
-</testcase>
-<testcase classname="All statuses" name="Failing" time="0.007">
-<failure type="Error" message="whoops">
-<![CDATA[Error: whoops
-samples/all-statuses/all-statuses.feature:13]]>
-</failure>
-<system-out><![CDATA[
-Given a step................................................................passed
+And a step..................................................................passed]]></system-out>
+  </testcase>
+  <testcase classname="All statuses" name="Failing" time="0.007" file="samples/all-statuses/all-statuses.feature">
+    <failure type="Error" message="whoops"><![CDATA[Error: whoops
+samples/all-statuses/all-statuses.feature:13]]></failure>
+    <system-out><![CDATA[Given a step................................................................passed
 And a failing step..........................................................failed
-And a step..................................................................skipped
-]]></system-out>
-</testcase>
-<testcase classname="All statuses" name="Pending" time="0.007">
-<failure>
-<![CDATA[TODO]]>
-</failure>
-<system-out><![CDATA[
-Given a step................................................................passed
+And a step..................................................................skipped]]></system-out>
+  </testcase>
+  <testcase classname="All statuses" name="Pending" time="0.007" file="samples/all-statuses/all-statuses.feature">
+    <failure><![CDATA[TODO]]></failure>
+    <system-out><![CDATA[Given a step................................................................passed
 And a pending step..........................................................pending
-And a step..................................................................skipped
-]]></system-out>
-</testcase>
-<testcase classname="All statuses" name="Skipped" time="0.007">
-<skipped/>
-<system-out><![CDATA[
-Given a step................................................................passed
+And a step..................................................................skipped]]></system-out>
+  </testcase>
+  <testcase classname="All statuses" name="Skipped" time="0.007" file="samples/all-statuses/all-statuses.feature">
+    <skipped/>
+    <system-out><![CDATA[Given a step................................................................passed
 And a skipped step..........................................................skipped
-And a step..................................................................skipped
-]]></system-out>
-</testcase>
-<testcase classname="All statuses" name="Undefined" time="0.007">
-<failure/>
-<system-out><![CDATA[
-Given a step................................................................passed
+And a step..................................................................skipped]]></system-out>
+  </testcase>
+  <testcase classname="All statuses" name="Undefined" time="0.007" file="samples/all-statuses/all-statuses.feature">
+    <failure/>
+    <system-out><![CDATA[Given a step................................................................passed
 And an undefined step.......................................................undefined
-And a step..................................................................skipped
-]]></system-out>
-</testcase>
-<testcase classname="All statuses" name="Ambiguous" time="0.007">
-<failure/>
-<system-out><![CDATA[
-Given a step................................................................passed
+And a step..................................................................skipped]]></system-out>
+  </testcase>
+  <testcase classname="All statuses" name="Ambiguous" time="0.007" file="samples/all-statuses/all-statuses.feature">
+    <failure/>
+    <system-out><![CDATA[Given a step................................................................passed
 And an ambiguous step.......................................................ambiguous
-And a step..................................................................skipped
-]]></system-out>
-</testcase>
+And a step..................................................................skipped]]></system-out>
+  </testcase>
 </testsuite>

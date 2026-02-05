@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <testsuite name="Cucumber" time="0.005" tests="1" skipped="0" failures="1" errors="0" timestamp="1970-01-01T00:00:00Z">
-<testcase classname="Parameter Types" name="undefined parameter type" time="0.003">
-<failure/>
-<system-out><![CDATA[
-Given CDG is closed because of a strike.....................................undefined
-]]></system-out>
-</testcase>
+  <testcase classname="Parameter Types" name="undefined parameter type" time="0.003" file="samples/unknown-parameter-type/unknown-parameter-type.feature">
+    <failure/>
+    <system-out><![CDATA[Given CDG is closed because of a strike.....................................undefined]]></system-out>
+  </testcase>
 </testsuite>

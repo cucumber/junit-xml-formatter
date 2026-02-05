@@ -30,6 +30,7 @@ interface ReportTestCase {
   classname: string
   name: string
   time: number
+  file: string
   failure?: ReportFailure
   output: string
 }
@@ -94,6 +95,7 @@ function makeTestCases(
         classname: testClassName ?? lineage.feature?.name ?? pickle.uri,
         name: testNamingStrategy.reduce(lineage, pickle),
         time: durationToSeconds(query.findTestCaseDurationBy(testCaseStarted)),
+        file: pickle.uri,
         failure: makeFailure(query, testCaseStarted),
         output: query
           .findTestStepFinishedAndTestStepBy(testCaseStarted)
