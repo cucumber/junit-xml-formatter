@@ -50,7 +50,7 @@ export default {
             if (testCase.failure.kind === 'failure' && testCase.failure.type) {
               failureElement.att('type', testCase.failure.type)
             }
-            if (testCase.failure.message) {
+            if (testCase.failure.kind === 'failure' && testCase.failure.message) {
               failureElement.att('message', testCase.failure.message)
             }
             if (testCase.failure.stack) {

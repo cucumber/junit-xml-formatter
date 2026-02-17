@@ -114,7 +114,7 @@ class XmlReportWriter {
         if (status != SKIPPED && exceptionType.isPresent()) {
             writer.writeAttribute("type", exceptionType.get());
         }
-        if (exceptionMessage.isPresent()) {
+        if (status != SKIPPED && exceptionMessage.isPresent()) {
             writer.writeAttribute("message", exceptionMessage.get());
         }
         if (hasMessageOrStackTrace) {

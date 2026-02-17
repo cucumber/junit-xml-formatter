@@ -19,9 +19,7 @@ And a step..................................................................skip
 ]]></system-out>
 </testcase>
 <testcase classname="All statuses" name="Pending" time="0.007">
-<failure>
-<![CDATA[TODO]]>
-</failure>
+<failure/>
 <system-out><![CDATA[
 Given a step................................................................passed
 And a pending step..........................................................pending
