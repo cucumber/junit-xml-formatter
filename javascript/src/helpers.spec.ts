@@ -2,7 +2,7 @@ import { PickleStep, Step, TestStepResultStatus } from '@cucumber/messages'
 import { expect, use } from 'chai'
 import chaiAlmost from 'chai-almost'
 
-import { countStatuses, durationToSeconds, formatStep } from './helpers.js'
+import { countStatuses, durationToSeconds, formatStep } from './helpers'
 
 use(chaiAlmost())
 

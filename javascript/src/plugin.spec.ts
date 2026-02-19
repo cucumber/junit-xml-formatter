@@ -1,25 +1,24 @@
 import fs from 'node:fs'
 import * as path from 'node:path'
-import { pipeline, Writable } from 'node:stream'
-import util from 'node:util'
+import { Writable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
 
 import { NdjsonToMessageStream } from '@cucumber/message-streams'
 import { Envelope } from '@cucumber/messages'
 import { namingStrategy, NamingStrategyLength } from '@cucumber/query'
 import { expect, use } from 'chai'
 import chaiXml from 'chai-xml'
-import { globbySync } from 'globby'
+import globby from 'globby'
 
-import formatter from './index.js'
+import { plugin } from './plugin'
 
-const asyncPipeline = util.promisify(pipeline)
 use(chaiXml)
 
 describe('Acceptance Tests', async function () {
   this.timeout(10_000)
 
-  const ndjsonFiles = globbySync(`*.ndjson`, {
-    cwd: new URL(path.join(path.dirname(import.meta.url), '../../testdata/src')),
+  const ndjsonFiles = globby.sync(`*.ndjson`, {
+    cwd: path.join(__dirname, '../../testdata/src'),
     absolute: true,
   })
 
@@ -48,7 +47,7 @@ describe('Acceptance Tests', async function () {
     it(testCase.suiteName + ' -> ' + testCase.strategyName, async () => {
       let emit: (message: Envelope) => void
       let content = ''
-      formatter.formatter({
+      plugin.formatter({
         options: testCase.options,
         on(type, handler) {
           emit = handler
@@ -58,7 +57,7 @@ describe('Acceptance Tests', async function () {
         },
       })
 
-      await asyncPipeline(
+      await pipeline(
         fs.createReadStream(testCase.source, { encoding: 'utf-8' }),
         new NdjsonToMessageStream(),
         new Writable({
