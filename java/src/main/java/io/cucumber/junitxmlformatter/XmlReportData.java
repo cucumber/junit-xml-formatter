@@ -104,16 +104,20 @@ class XmlReportData {
     }
     
     List<Entry<String, String>> getStepsAndResult(TestCaseStarted testCaseStarted) {
+        //refactor: extract this lambda into a private method named renderTestStepEntry 
+        // and use a method reference this::renderTestStepEntry 
         return query.findTestStepFinishedAndTestStepBy(testCaseStarted)
                 .stream()
                 // Exclude hooks
                 .filter(entry -> entry.getValue().getPickleStepId().isPresent())
-                .map(testStep -> {
-                    String key = renderTestStepText(testStep.getValue());
-                    String value = renderTestStepResult(testStep.getKey());
-                    return new SimpleEntry<>(key, value);
-                })
+                .map(this::renderTestStepEntry)     
                 .collect(toList());
+    }
+
+    private Entry<String, String> renderTestStepEntry(Entry<TestStepFinished, TestStep> testStep) {
+        String key = renderTestStepText(testStep.getValue());
+        String value = renderTestStepResult(testStep.getKey());
+        return new SimpleEntry<>(key, value);
     }
 
     private String renderTestStepResult(TestStepFinished testStepFinished) {
