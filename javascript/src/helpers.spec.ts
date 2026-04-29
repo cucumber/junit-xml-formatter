@@ -1,4 +1,4 @@
-import { PickleStep, Step, TestStepResultStatus } from '@cucumber/messages'
+import { type PickleStep, type Step, TestStepResultStatus } from '@cucumber/messages'
 import { expect, use } from 'chai'
 import chaiAlmost from 'chai-almost'
 

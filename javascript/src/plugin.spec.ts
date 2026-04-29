@@ -4,8 +4,8 @@ import { Writable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
 import { NdjsonToMessageStream } from '@cucumber/message-streams'
-import { Envelope } from '@cucumber/messages'
-import { namingStrategy, NamingStrategyLength } from '@cucumber/query'
+import type { Envelope } from '@cucumber/messages'
+import { NamingStrategyLength, namingStrategy } from '@cucumber/query'
 import { expect, use } from 'chai'
 import chaiXml from 'chai-xml'
 import globby from 'globby'
@@ -44,12 +44,12 @@ describe('Acceptance Tests', async function () {
   })
 
   for (const testCase of testCases) {
-    it(testCase.suiteName + ' -> ' + testCase.strategyName, async () => {
+    it(`${testCase.suiteName} -> ${testCase.strategyName}`, async () => {
       let emit: (message: Envelope) => void
       let content = ''
       plugin.formatter({
         options: testCase.options,
-        on(type, handler) {
+        on(_type, handler) {
           emit = handler
         },
         write: (chunk) => {
@@ -70,7 +70,7 @@ describe('Acceptance Tests', async function () {
       )
 
       const expectedXml = fs.readFileSync(
-        testCase.source.replace('.ndjson', '.' + testCase.strategyName + '.xml'),
+        testCase.source.replace('.ndjson', `.${testCase.strategyName}.xml`),
         {
           encoding: 'utf-8',
         }

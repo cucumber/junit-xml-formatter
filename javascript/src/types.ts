@@ -1,4 +1,4 @@
-import { NamingStrategy } from '@cucumber/query'
+import type { NamingStrategy } from '@cucumber/query'
 
 export interface Options {
   suiteName?: string

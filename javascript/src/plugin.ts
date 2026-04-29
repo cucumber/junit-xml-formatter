@@ -1,7 +1,7 @@
-import { Envelope } from '@cucumber/messages'
+import type { Envelope } from '@cucumber/messages'
 
 import { JUnitXmlPrinter } from './JUnitXmlPrinter'
-import { Options } from './types'
+import type { Options } from './types'
 
 export const plugin = {
   type: 'formatter',

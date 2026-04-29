@@ -1,9 +1,9 @@
 import {
-  Duration,
-  PickleStep,
-  Step,
-  TestRunStarted,
-  TestStepResultStatus,
+  type Duration,
+  type PickleStep,
+  type Step,
+  type TestRunStarted,
+  type TestStepResultStatus,
   TimeConversion,
 } from '@cucumber/messages'
 import { DateTime } from 'luxon'
