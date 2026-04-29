@@ -1,16 +1,21 @@
-import { Envelope, Pickle, TestCaseStarted, TestStepResultStatus } from '@cucumber/messages'
 import {
-  NamingStrategy,
-  namingStrategy,
+  type Envelope,
+  type Pickle,
+  type TestCaseStarted,
+  TestStepResultStatus,
+} from '@cucumber/messages'
+import {
+  type NamingStrategy,
   NamingStrategyExampleName,
   NamingStrategyFeatureName,
   NamingStrategyLength,
+  namingStrategy,
   Query,
 } from '@cucumber/query'
 import xmlbuilder from 'xmlbuilder'
 
 import { countStatuses, durationToSeconds, ensure, formatStep, formatTimestamp } from './helpers'
-import { Options } from './types'
+import type { Options } from './types'
 
 const DEFAULT_NAMING_STRATEGY = namingStrategy(
   NamingStrategyLength.LONG,
