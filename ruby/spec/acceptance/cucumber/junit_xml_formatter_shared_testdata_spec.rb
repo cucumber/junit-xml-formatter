@@ -57,8 +57,6 @@ RSpec.describe Cucumber::JunitXmlFormatter do
     expected = File.join(SHARED_TESTDATA_DIR, "#{name}.default.xml")
 
     it "matches #{File.basename(expected)}" do
-      pending('message-to-JUnit XML report model and XML writer semantics are implemented in follow-up yaks')
-
       envelopes = read_envelopes(fixture)
       actual = write_report(envelopes)
 
@@ -68,8 +66,6 @@ RSpec.describe Cucumber::JunitXmlFormatter do
   # rubocop:enable RSpec/LeakyLocalVariable
 
   it 'matches examples-tables.custom.xml with custom naming options' do
-    pending('custom naming strategy API is not implemented yet')
-
     envelopes = read_envelopes(SHARED_CUSTOM_NAMING_FIXTURE)
     actual = write_report(envelopes, **custom_naming_options)
 
