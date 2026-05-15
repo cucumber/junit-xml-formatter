@@ -1,10 +1,8 @@
-PATH
-  remote: ../../messages/ruby
-  specs:
-    cucumber-messages (32.3.1)
-
-PATH
-  remote: ../../query/ruby
+GIT
+  remote: https://github.com/cucumber/query.git
+  revision: 40021d5f55cf27bff3bdccb10a4ef2f96a18b0a5
+  ref: ruby-implementation
+  glob: ruby/*.gemspec
   specs:
     cucumber-query (15.0.1)
       cucumber-messages (>= 32.0.0, < 33.0.0)
@@ -20,6 +18,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.3)
+    cucumber-messages (32.3.1)
     diff-lcs (1.6.2)
     json (2.19.5)
     language_server-protocol (3.17.0.5)
@@ -30,7 +29,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.3-arm64-darwin)
       racc (~> 1.4)
-    parallel (2.1.0)
+    parallel (1.28.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
@@ -87,9 +86,9 @@ PLATFORMS
 
 DEPENDENCIES
   cucumber-junit-xml-formatter!
-  cucumber-messages!
   cucumber-query!
   nokogiri (~> 1.18)
+  parallel (< 2.0)
   rake (~> 13.1)
   rspec (~> 3.13)
   rubocop (~> 1.80)
