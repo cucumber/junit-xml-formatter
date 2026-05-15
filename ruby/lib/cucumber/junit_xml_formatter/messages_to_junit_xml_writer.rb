@@ -10,6 +10,16 @@ module Cucumber
     # envelope is seen, or when #close is called.
     class MessagesToJunitXmlWriter
       DEFAULT_SUITE_NAME = 'Cucumber'
+      DEFAULT_NAMING_STRATEGY = Cucumber::Query.naming_strategy(
+        Cucumber::Query::NAMING_STRATEGY_LENGTH_LONG,
+        Cucumber::Query::NAMING_STRATEGY_FEATURE_NAME_EXCLUDE,
+        Cucumber::Query::NAMING_STRATEGY_EXAMPLE_NAME_NUMBER_AND_PICKLE_IF_PARAMETERIZED
+      )
+      NAMING_STRATEGIES = {
+        long: Cucumber::Query.naming_strategy(Cucumber::Query::NAMING_STRATEGY_LENGTH_LONG),
+        short: Cucumber::Query.naming_strategy(Cucumber::Query::NAMING_STRATEGY_LENGTH_SHORT),
+        default: DEFAULT_NAMING_STRATEGY
+      }.freeze
       NON_FAILURE_STATUSES = %w[PASSED SKIPPED].freeze
 
       attr_reader :stream, :suite_name, :test_class_name, :test_naming_strategy, :query
@@ -18,7 +28,7 @@ module Cucumber
         @stream = stream
         @suite_name = suite_name
         @test_class_name = test_class_name
-        @test_naming_strategy = test_naming_strategy
+        @test_naming_strategy = resolve_test_naming_strategy(test_naming_strategy)
         @query = Cucumber::Query::Query.new
         @closed = false
       end
@@ -44,6 +54,17 @@ module Cucumber
 
       private
 
+      def test_case_name_for(pickle)
+        lineage = query.find_lineage_by(pickle)
+        raise ArgumentError, "expected to find lineage for pickle #{pickle.id}" unless lineage
+
+        test_naming_strategy.reduce(lineage, pickle)
+      end
+
+      def test_case_classname_for(pickle)
+        test_class_name || query.find_lineage_by(pickle)&.dig(:feature)&.name || pickle.uri
+      end
+
       def build_report
         <<~XML.chomp
           <?xml version="1.0"?>
@@ -58,6 +79,14 @@ module Cucumber
       end
 
       def statuses = @statuses ||= query.count_most_severe_test_step_result_status
+
+      def resolve_test_naming_strategy(strategy)
+        return DEFAULT_NAMING_STRATEGY unless strategy
+        return NAMING_STRATEGIES.fetch(strategy) if strategy.is_a?(Symbol)
+        return strategy if strategy.respond_to?(:reduce)
+
+        raise ArgumentError, 'test_naming_strategy must be a Symbol or respond to #reduce'
+      end
 
       def timestamp_attribute
         timestamp = query.find_test_run_started&.timestamp
