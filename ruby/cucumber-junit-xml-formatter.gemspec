@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'cucumber-messages', '>= 32.0.0', '< 33.0.0'
   s.add_dependency 'cucumber-query', '>= 15.0.0', '< 16.0.0'
 
+  s.add_development_dependency 'nokogiri', '~> 1.18'
   s.add_development_dependency 'rake', '~> 13.1'
   s.add_development_dependency 'rspec', '~> 3.13'
   s.add_development_dependency 'rubocop', '~> 1.80'

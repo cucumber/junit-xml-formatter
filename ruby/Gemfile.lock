@@ -24,6 +24,12 @@ GEM
     json (2.19.5)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
+    mini_portile2 (2.8.9)
+    nokogiri (1.19.3)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.19.3-arm64-darwin)
+      racc (~> 1.4)
     parallel (2.1.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
@@ -83,6 +89,7 @@ DEPENDENCIES
   cucumber-junit-xml-formatter!
   cucumber-messages!
   cucumber-query!
+  nokogiri (~> 1.18)
   rake (~> 13.1)
   rspec (~> 3.13)
   rubocop (~> 1.80)

@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 require 'cucumber/messages/helpers/ndjson_to_message_enumerator'
+require 'nokogiri'
 require 'stringio'
 
 SHARED_TESTDATA_DIR = File.expand_path('../../../../testdata/src', __dir__)
 SHARED_DEFAULT_FIXTURES = Dir[File.join(SHARED_TESTDATA_DIR, '*.ndjson')].freeze
 SHARED_CUSTOM_NAMING_FIXTURE = File.join(SHARED_TESTDATA_DIR, 'examples-tables.ndjson')
+JENKINS_SCHEMA = File.expand_path('../../../../jenkins-junit.xsd', __dir__)
+SUREFIRE_SCHEMA = File.expand_path('../../../../surefire-test-report-3.0.2.xsd', __dir__)
 
 RSpec.describe Cucumber::JunitXmlFormatter do
   def read_envelopes(path)
@@ -51,6 +54,13 @@ RSpec.describe Cucumber::JunitXmlFormatter do
     xml.gsub(/>\s+</, '><').strip
   end
 
+  def schema_validation_errors(xml, schema_path)
+    schema = Nokogiri::XML::Schema(File.read(schema_path))
+    document = Nokogiri::XML(xml, &:strict)
+
+    schema.validate(document).map(&:message)
+  end
+
   # rubocop:disable RSpec/LeakyLocalVariable
   SHARED_DEFAULT_FIXTURES.each do |fixture|
     name = File.basename(fixture, '.ndjson')
@@ -77,6 +87,33 @@ RSpec.describe Cucumber::JunitXmlFormatter do
     actual = write_report(envelopes)
 
     expect_xml_to_match(actual, File.join(SHARED_TESTDATA_DIR, 'multiple-features-reversed.default.xml'))
+  end
+
+  SHARED_DEFAULT_FIXTURES.each do |fixture|
+    name = File.basename(fixture, '.ndjson')
+
+    it "generates Jenkins-valid XML for #{name}" do
+      envelopes = read_envelopes(fixture)
+      actual = write_report(envelopes)
+
+      expect(schema_validation_errors(actual, JENKINS_SCHEMA)).to be_empty
+    end
+  end
+
+  it 'generates Jenkins-valid XML with custom naming options' do
+    envelopes = read_envelopes(SHARED_CUSTOM_NAMING_FIXTURE)
+    actual = write_report(envelopes, **custom_naming_options)
+
+    expect(schema_validation_errors(actual, JENKINS_SCHEMA)).to be_empty
+  end
+
+  it 'documents the known Surefire schema timestamp incompatibility' do
+    envelopes = read_envelopes(File.join(SHARED_TESTDATA_DIR, 'minimal.ndjson'))
+    actual = write_report(envelopes)
+
+    expect(schema_validation_errors(actual, SUREFIRE_SCHEMA)).to include(
+      a_string_including("attribute 'timestamp': The attribute 'timestamp' is not allowed")
+    )
   end
 
   def custom_naming_options
