@@ -73,8 +73,6 @@ RSpec.describe Cucumber::JunitXmlFormatter do
   end
 
   it 'covers simulated parallel message ordering' do
-    pending('deterministic report ordering is implemented with the message-to-JUnit XML report model')
-
     envelopes = read_envelopes(File.join(SHARED_TESTDATA_DIR, 'multiple-features-reversed.ndjson')).reverse
     actual = write_report(envelopes)
 

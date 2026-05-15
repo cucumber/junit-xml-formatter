@@ -133,7 +133,7 @@ RSpec.describe Cucumber::JunitXmlFormatter do
     end
 
     def test_case_names(writer)
-      writer.query.find_all_pickles.map { |pickle| writer.__send__(:test_case_name_for, pickle) }
+      writer.data.ordered_test_cases.map { |test_case_started| writer.data.test_case_name(test_case_started) }
     end
 
     def default_examples_table_names

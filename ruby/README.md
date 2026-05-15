@@ -36,8 +36,8 @@ writer.close
 ```
 
 `#update` is an alias for `#write`, matching the message-driven printer idiom in
-other Cucumber formatter packages. The writer finalizes automatically when it
-receives a `testRunFinished` envelope; calling `#close` is safe and idempotent.
+other Cucumber formatter packages. Call `#close` after all envelopes have been
+written; it is safe and idempotent.
 
 Supported constructor options are:
 
