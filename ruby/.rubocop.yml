@@ -1,0 +1,25 @@
+plugins:
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+
+Layout/EndOfLine:
+  EnforcedStyle: lf
+
+Style/Documentation:
+  Enabled: false
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Exclude:
+    - spec/unit/**/*
+
+RSpec/SpecFilePathFormat:
+  Exclude:
+    - spec/unit/**/*
