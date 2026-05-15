@@ -5,10 +5,10 @@ version = File.read(File.expand_path('VERSION', __dir__)).strip
 Gem::Specification.new do |s|
   s.name        = 'cucumber-junit-xml-formatter'
   s.version     = version
-  s.authors     = ['Cucumber Ltd']
+  s.authors     = ['Matt Wynne']
   s.description = 'JUnit XML formatting of Cucumber messages'
   s.summary     = "cucumber-junit-xml-formatter-#{s.version}"
-  s.email       = 'cukes@googlegroups.com'
+  s.email       = 'hello@cucumber.io'
   s.homepage    = 'https://github.com/cucumber/junit-xml-formatter#readme'
   s.platform    = Gem::Platform::RUBY
   s.license     = 'MIT'
