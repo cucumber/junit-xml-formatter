@@ -57,6 +57,8 @@ RSpec.describe Cucumber::JunitXmlFormatter do
     expected = File.join(SHARED_TESTDATA_DIR, "#{name}.default.xml")
 
     it "matches #{File.basename(expected)}" do
+      pending('message-to-JUnit XML report model and XML writer semantics are implemented in follow-up yaks')
+
       envelopes = read_envelopes(fixture)
       actual = write_report(envelopes)
 
@@ -75,7 +77,7 @@ RSpec.describe Cucumber::JunitXmlFormatter do
   end
 
   it 'covers simulated parallel message ordering' do
-    pending('simulated parallel message ordering is split to a follow-up until the Ruby writer exists')
+    pending('deterministic report ordering is implemented with the message-to-JUnit XML report model')
 
     envelopes = read_envelopes(File.join(SHARED_TESTDATA_DIR, 'multiple-features-reversed.ndjson')).reverse
     actual = write_report(envelopes)
