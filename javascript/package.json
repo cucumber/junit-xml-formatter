@@ -17,7 +17,7 @@
     "clean": "rm -rf dist",
     "fix": "biome check --fix --error-on-warnings",
     "lint": "biome check --error-on-warnings",
-    "test": "mocha 'src/**/*.spec.*'",
+    "test": "mocha \"src/**/*.spec.ts\"",
     "prepublishOnly": "tsc --build tsconfig.build.json"
   },
   "dependencies": {
