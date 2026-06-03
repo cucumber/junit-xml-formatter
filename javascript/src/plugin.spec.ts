@@ -8,7 +8,7 @@ import type { Envelope } from '@cucumber/messages'
 import { NamingStrategyLength, namingStrategy } from '@cucumber/query'
 import { expect, use } from 'chai'
 import chaiXml from 'chai-xml'
-import globby from 'globby'
+import { globbySync } from 'globby'
 
 import { plugin } from './plugin'
 
@@ -17,7 +17,7 @@ use(chaiXml)
 describe('Acceptance Tests', async function () {
   this.timeout(10_000)
 
-  const ndjsonFiles = globby.sync(`*.ndjson`, {
+  const ndjsonFiles = globbySync(`*.ndjson`, {
     cwd: path.join(__dirname, '../../testdata/src'),
     absolute: true,
   })
