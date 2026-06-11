@@ -1,6 +1,6 @@
-import { plugin } from './plugin'
+import { plugin } from './plugin.js'
 
-export * from './JUnitXmlPrinter'
-export * from './types'
+export * from './JUnitXmlPrinter.js'
+export * from './types.js'
 
 export default plugin

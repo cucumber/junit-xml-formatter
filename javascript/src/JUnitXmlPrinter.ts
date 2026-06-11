@@ -14,8 +14,8 @@ import {
 } from '@cucumber/query'
 import xmlbuilder from 'xmlbuilder'
 
-import { countStatuses, durationToSeconds, ensure, formatStep, formatTimestamp } from './helpers'
-import type { Options } from './types'
+import { countStatuses, durationToSeconds, ensure, formatStep, formatTimestamp } from './helpers.js'
+import type { Options } from './types.js'
 
 const DEFAULT_NAMING_STRATEGY = namingStrategy(
   NamingStrategyLength.LONG,

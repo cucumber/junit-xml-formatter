@@ -1,6 +1,7 @@
 {
   "name": "@cucumber/junit-xml-formatter",
   "version": "0.13.3",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -17,6 +18,7 @@
     "clean": "rm -rf dist",
     "fix": "biome check --fix --error-on-warnings",
     "lint": "biome check --error-on-warnings",
+    "postbuild": "node -e \"require('.')\"",
     "test": "mocha \"src/**/*.spec.ts\"",
     "prepublishOnly": "npm run build"
   },
