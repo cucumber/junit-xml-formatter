@@ -23,7 +23,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@cucumber/query": "^15.0.1 || ^16.0.0",
+    "@cucumber/query": "^16.0.0",
     "@teppeis/multimaps": "^3.0.0",
     "luxon": "^3.5.0",
     "xmlbuilder": "^15.1.1"
