@@ -10,7 +10,7 @@ import { expect, use } from 'chai'
 import chaiXml from 'chai-xml'
 import { globbySync } from 'globby'
 
-import { plugin } from './plugin'
+import { plugin } from './plugin.js'
 
 use(chaiXml)
 
@@ -18,7 +18,7 @@ describe('Acceptance Tests', async function () {
   this.timeout(10_000)
 
   const ndjsonFiles = globbySync(`*.ndjson`, {
-    cwd: path.join(__dirname, '../../testdata/src'),
+    cwd: path.join(import.meta.dirname, '../../testdata/src'),
     absolute: true,
   })
 
