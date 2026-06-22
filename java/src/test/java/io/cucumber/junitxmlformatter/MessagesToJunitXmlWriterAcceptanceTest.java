@@ -3,6 +3,7 @@ package io.cucumber.junitxmlformatter;
 import io.cucumber.compatibilitykit.MessageOrderer;
 import io.cucumber.messages.NdjsonToMessageReader;
 import io.cucumber.messages.ndjson.Deserializer;
+import io.cucumber.messages.ndjson.Json;
 import io.cucumber.messages.types.Envelope;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -37,6 +38,9 @@ import static org.xmlunit.assertj.XmlAssert.assertThat;
 class MessagesToJunitXmlWriterAcceptanceTest {
     private static final Random random = new Random(202509282040L);
     private static final MessageOrderer messageOrderer = new MessageOrderer(random);
+    private static final Deserializer<Envelope> deserializer = Json.instance()
+            .map(json -> json.deserializer(Envelope.class))
+            .orElseThrow();
 
     static List<TestCase> acceptance() throws IOException {
         List<TestCase> testCases = new ArrayList<>();
@@ -130,7 +134,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     private static <T extends OutputStream> T writeJunitXmlReport(TestCase testCase, T out, Consumer<List<Envelope>> orderer) throws IOException {
         try (var in = Files.newInputStream(testCase.source)) {
-            try (var reader = new NdjsonToMessageReader(in, new Deserializer())) {
+            try (var reader = new NdjsonToMessageReader(in, deserializer::readValue)) {
                 try (MessagesToJunitXmlWriter writer = testCase.getBuilder().build(out)) {
                     List<Envelope> messages = reader.lines().collect(Collectors.toList());
                     orderer.accept(messages);
