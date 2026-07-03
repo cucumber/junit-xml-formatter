@@ -15,6 +15,10 @@ import { plugin } from './plugin.js'
 use(chaiXml)
 
 describe('Acceptance Tests', async function () {
+  function normalizeEol(value: string) {
+    return value.replaceAll(/\r\n/g, '\n')
+  }
+
   this.timeout(10_000)
 
   const ndjsonFiles = globbySync(`*.ndjson`, {
@@ -76,7 +80,7 @@ describe('Acceptance Tests', async function () {
         }
       )
       expect(content).xml.to.be.valid()
-      expect(content).xml.to.deep.eq(expectedXml)
+      expect(content).xml.to.deep.eq(normalizeEol(expectedXml))
     })
   }
 }).timeout('5s')
