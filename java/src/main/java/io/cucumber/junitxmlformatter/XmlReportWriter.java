@@ -1,5 +1,6 @@
 package io.cucumber.junitxmlformatter;
 
+import io.cucumber.junitxmlformatter.SourceReferenceFormatter.ClassMethodName;
 import io.cucumber.messages.types.Exception;
 import io.cucumber.messages.types.TestCaseStarted;
 import io.cucumber.messages.types.TestRunHookFinished;
@@ -13,15 +14,18 @@ import java.io.Writer;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 
 class XmlReportWriter {
     private final XmlReportData data;
+    private final SourceReferenceFormatter sourceReferenceFormatter;
 
-    XmlReportWriter(XmlReportData data) {
+    XmlReportWriter(XmlReportData data, Function<String, String> uriFormatter) {
         this.data = data;
+        this.sourceReferenceFormatter = new SourceReferenceFormatter(uriFormatter);
     }
 
     void writeXmlReport(Writer out) throws XMLStreamException {
@@ -89,7 +93,13 @@ class XmlReportWriter {
     }
 
     private void writeSyntheticTestcaseAttributes(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
-        writer.writeAttribute("name", "Test Run Hook");
+        var classMethodName = data.findSourceReferenceBy(nonPassingTestRunHookFinished)
+                .flatMap(sourceReferenceFormatter::format);
+        var className = classMethodName.map(ClassMethodName::className);
+        if (className.isPresent()) {
+            writer.writeAttribute("class", className.get());
+        }
+        writer.writeAttribute("name", classMethodName.map(ClassMethodName::methodName).orElse("Unknown"));
         writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(nonPassingTestRunHookFinished)));
     }
 

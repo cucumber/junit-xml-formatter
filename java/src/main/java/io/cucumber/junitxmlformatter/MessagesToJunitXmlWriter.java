@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 import static io.cucumber.query.NamingStrategy.ExampleName.NUMBER_AND_PICKLE_IF_PARAMETERIZED;
 import static io.cucumber.query.NamingStrategy.FeatureName.EXCLUDE;
@@ -28,14 +29,15 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
     private final OutputStreamWriter out;
     private final XmlReportData data;
     private boolean streamClosed = false;
+    private final Function<String, String> uriFormatter;
 
     public MessagesToJunitXmlWriter(OutputStream out) {
-        this("Cucumber", null, createNamingStrategy(NUMBER_AND_PICKLE_IF_PARAMETERIZED), out);
+        this("Cucumber", null, createNamingStrategy(NUMBER_AND_PICKLE_IF_PARAMETERIZED), Function.identity(), out);
     }
 
     @Deprecated
     public MessagesToJunitXmlWriter(NamingStrategy.ExampleName exampleNameStrategy, OutputStream out) {
-        this("Cucumber", null, createNamingStrategy(requireNonNull(exampleNameStrategy)), out);
+        this("Cucumber", null, createNamingStrategy(requireNonNull(exampleNameStrategy)), Function.identity(), out);
     }
 
     public static Builder builder() {
@@ -46,12 +48,13 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
         return NamingStrategy.strategy(NamingStrategy.Strategy.LONG).featureName(NamingStrategy.FeatureName.EXCLUDE).exampleName(exampleName).build();
     }
 
-    private MessagesToJunitXmlWriter(String testSuiteName, @Nullable String testClassName, NamingStrategy testNamingStrategy, OutputStream out) {
+    private MessagesToJunitXmlWriter(String testSuiteName, @Nullable String testClassName, NamingStrategy testNamingStrategy, Function<String, String> uriFormatter, OutputStream out) {
         this.data = new XmlReportData(testSuiteName, testClassName, testNamingStrategy);
         this.out = new OutputStreamWriter(
                 requireNonNull(out),
                 StandardCharsets.UTF_8
         );
+        this.uriFormatter = requireNonNull(uriFormatter);
     }
 
     /**
@@ -81,7 +84,7 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
         }
 
         try {
-            new XmlReportWriter(data).writeXmlReport(out);
+            new XmlReportWriter(data, uriFormatter).writeXmlReport(out);
         } catch (XMLStreamException e) {
             throw new IOException("Error while transforming.", e);
         } finally {
@@ -101,9 +104,32 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
                 .featureName(EXCLUDE)
                 .exampleName(NUMBER_AND_PICKLE_IF_PARAMETERIZED)
                 .build();
+        private Function<String, String> uriFormatter = Function.identity();
 
         private Builder() {
 
+        }
+
+        private static Function<String, String> removePrefix(String prefix) {
+            // TODO: Needs coverage
+            return s -> {
+                if (s.startsWith(prefix)) {
+                    return s.substring(prefix.length());
+                }
+                return s;
+            };
+        }
+
+        /**
+         * Removes a given prefix from all URI locations.
+         * <p>
+         * The typical usage would be to trim the current working directory.
+         * This makes the report more readable.
+         */
+        public Builder removeUriPrefix(String prefix) {
+            // TODO: Needs coverage
+            this.uriFormatter = removePrefix(requireNonNull(prefix));
+            return this;
         }
 
         /**
@@ -134,7 +160,7 @@ public final class MessagesToJunitXmlWriter implements AutoCloseable {
         }
 
         public MessagesToJunitXmlWriter build(OutputStream out) {
-            return new MessagesToJunitXmlWriter(testSuiteName, testClassName, testNamingStrategy, requireNonNull(out));
+            return new MessagesToJunitXmlWriter(testSuiteName, testClassName, testNamingStrategy, uriFormatter, requireNonNull(out));
         }
     }
 }
