@@ -1,8 +1,10 @@
 import {
   type Envelope,
   type Pickle,
-  type TestCaseStarted,
+  type TestRunHookFinished,
+  type TestStepResult,
   TestStepResultStatus,
+  TimeConversion,
 } from '@cucumber/messages'
 import {
   type NamingStrategy,
@@ -29,8 +31,14 @@ interface ReportSuite {
   skipped: number
   failures: number
   errors: number
+  nonPassingTestRunHooks: ReadonlyArray<ReportNonPassingTestRunHook>
   testCases: ReadonlyArray<ReportTestCase>
   timestamp?: string
+}
+
+interface ReportNonPassingTestRunHook {
+  time: number
+  failure?: ReportFailure
 }
 
 interface ReportTestCase {
@@ -68,6 +76,24 @@ export class JUnitXmlPrinter {
   update(envelope: Envelope): void {
     this.query.update(envelope)
 
+    function writeFailureElement(
+      testcaseElement: xmlbuilder.XMLElement,
+      failure: ReportFailure | undefined
+    ) {
+      if (failure) {
+        const failureElement = testcaseElement.ele(failure.kind)
+        if (failure.kind === 'failure' && failure.type) {
+          failureElement.att('type', failure.type)
+        }
+        if (failure.kind === 'failure' && failure.message) {
+          failureElement.att('message', failure.message)
+        }
+        if (failure.stack) {
+          failureElement.cdata(failure.stack)
+        }
+      }
+    }
+
     if (envelope.testRunFinished) {
       const testSuite = this.makeReport()
       this.builder.att('time', testSuite.time)
@@ -80,24 +106,21 @@ export class JUnitXmlPrinter {
         this.builder.att('timestamp', testSuite.timestamp)
       }
 
+      for (const nonPassingTestRunHook of testSuite.nonPassingTestRunHooks) {
+        const syntheticTestcaseElement = this.builder.ele('testcase', {
+          name: 'Test Run Hook',
+          time: nonPassingTestRunHook.time,
+        })
+        writeFailureElement(syntheticTestcaseElement, nonPassingTestRunHook.failure)
+      }
+
       for (const testCase of testSuite.testCases) {
         const testcaseElement = this.builder.ele('testcase', {
           classname: testCase.classname,
           name: testCase.name,
           time: testCase.time,
         })
-        if (testCase.failure) {
-          const failureElement = testcaseElement.ele(testCase.failure.kind)
-          if (testCase.failure.kind === 'failure' && testCase.failure.type) {
-            failureElement.att('type', testCase.failure.type)
-          }
-          if (testCase.failure.kind === 'failure' && testCase.failure.message) {
-            failureElement.att('message', testCase.failure.message)
-          }
-          if (testCase.failure.stack) {
-            failureElement.cdata(testCase.failure.stack)
-          }
-        }
+        writeFailureElement(testcaseElement, testCase.failure)
         if (testCase.output) {
           testcaseElement.ele('system-out').cdata(testCase.output)
         }
@@ -119,9 +142,36 @@ export class JUnitXmlPrinter {
           status !== TestStepResultStatus.PASSED && status !== TestStepResultStatus.SKIPPED
       ),
       errors: 0,
+      nonPassingTestRunHooks: this.makeNonPassingTestRunHooks(),
       testCases: this.makeTestCases(),
       timestamp: formatTimestamp(this.query.findTestRunStarted()),
     }
+  }
+
+  private makeNonPassingTestRunHooks(): ReadonlyArray<ReportNonPassingTestRunHook> {
+    return this.query
+      .findAllTestRunHookFinished()
+      .filter((testRunHookFinished) => {
+        const status = testRunHookFinished.result.status
+        return !(status === TestStepResultStatus.PASSED || status === TestStepResultStatus.SKIPPED)
+      })
+      .map((testRunHookFinished) => {
+        return {
+          time: durationToSeconds(this.findTestRunHookDurationBy(testRunHookFinished)),
+          failure: this.makeFailure(testRunHookFinished.result),
+        }
+      })
+  }
+
+  private findTestRunHookDurationBy(testRunHookFinished: TestRunHookFinished) {
+    const testRunHookStart = this.query.findTestRunHookStartedBy(testRunHookFinished)
+    if (!testRunHookStart) {
+      return undefined
+    }
+    return TimeConversion.millisecondsToDuration(
+      TimeConversion.timestampToMillisecondsSinceEpoch(testRunHookFinished.timestamp) -
+        TimeConversion.timestampToMillisecondsSinceEpoch(testRunHookStart.timestamp)
+    )
   }
 
   private makeTestCases(): ReadonlyArray<ReportTestCase> {
@@ -144,7 +194,7 @@ export class JUnitXmlPrinter {
           classname: this.testClassName ?? lineage.feature?.name ?? pickle.uri,
           name: this.namingStrategy.reduce(lineage, pickle),
           time: durationToSeconds(this.query.findTestCaseDurationBy(testCaseStarted)),
-          failure: this.makeFailure(testCaseStarted),
+          failure: this.makeFailure(this.query.findMostSevereTestStepResultBy(testCaseStarted)),
           output: this.query
             .findTestStepFinishedAndTestStepBy(testCaseStarted)
             .filter(([, testStep]) => !!testStep.pickleStepId)
@@ -176,8 +226,7 @@ export class JUnitXmlPrinter {
     return a.location.line - b.location.line
   }
 
-  private makeFailure(testCaseStarted: TestCaseStarted): ReportFailure | undefined {
-    const result = this.query.findMostSevereTestStepResultBy(testCaseStarted)
+  private makeFailure(result: TestStepResult | undefined): ReportFailure | undefined {
     if (!result || result.status === TestStepResultStatus.PASSED) {
       return undefined
     }
