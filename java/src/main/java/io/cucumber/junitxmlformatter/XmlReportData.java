@@ -4,10 +4,13 @@ import io.cucumber.messages.Convertor;
 import io.cucumber.messages.LocationComparator;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.Feature;
+import io.cucumber.messages.types.Hook;
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
+import io.cucumber.messages.types.SourceReference;
 import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TestCaseStarted;
+import io.cucumber.messages.types.TestRunHookFinished;
 import io.cucumber.messages.types.TestRunStarted;
 import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
@@ -22,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,7 +33,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
+import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 import static io.cucumber.query.Repository.RepositoryFeature.INCLUDE_GHERKIN_DOCUMENTS;
+import static io.cucumber.query.Repository.RepositoryFeature.INCLUDE_HOOKS;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.util.Comparator.nullsFirst;
 import static java.util.Objects.requireNonNull;
@@ -41,8 +47,9 @@ class XmlReportData {
 
     private final Repository repository = Repository.builder()
             .feature(INCLUDE_GHERKIN_DOCUMENTS, true)
+            .feature(INCLUDE_HOOKS, true)
             .build();
-    private final Query query = new Query(repository);
+    final Query query = new Query(repository);
     private final String testSuiteName;
     private final @Nullable String testClassName;
     private final NamingStrategy testNamingStrategy;
@@ -65,6 +72,17 @@ class XmlReportData {
 
     double getDurationInSeconds(TestCaseStarted testCaseStarted) {
         return query.findTestCaseDurationBy(testCaseStarted)
+                .orElse(Duration.ZERO)
+                .toMillis() / (double) MILLIS_PER_SECOND;
+    }
+
+    double getDurationInSeconds(TestRunHookFinished testRunHookFinished) {
+        return query.findTestRunHookStartedBy(testRunHookFinished)
+                .map(testRunHookStarted -> {
+                    var start = Convertor.toInstant(testRunHookStarted.getTimestamp());
+                    var end = Convertor.toInstant(testRunHookFinished.getTimestamp());
+                    return Duration.between(start, end);
+                })
                 .orElse(Duration.ZERO)
                 .toMillis() / (double) MILLIS_PER_SECOND;
     }
@@ -161,5 +179,18 @@ class XmlReportData {
                 .map(TestRunStarted::getTimestamp)
                 .map(Convertor::toInstant)
                 .map(ISO_INSTANT::format);
+    }
+
+    List<TestRunHookFinished> getAllNonPassingTestRunHooksFinished() {
+        var excluded = EnumSet.of(PASSED, SKIPPED);
+        return query.findAllTestRunHookFinished()
+                .stream()
+                .filter(testRunHookFinished -> !excluded.contains(testRunHookFinished.getResult().getStatus()))
+                .toList();
+    }
+
+    Optional<SourceReference> findSourceReferenceBy(TestRunHookFinished testRunHookFinished) {
+        return query.findHookBy(testRunHookFinished)
+                .map(Hook::getSourceReference);
     }
 }

@@ -1,7 +1,9 @@
 package io.cucumber.junitxmlformatter;
 
+import io.cucumber.junitxmlformatter.SourceReferenceFormatter.ClassMethodName;
 import io.cucumber.messages.types.Exception;
 import io.cucumber.messages.types.TestCaseStarted;
+import io.cucumber.messages.types.TestRunHookFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
@@ -12,15 +14,18 @@ import java.io.Writer;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
 import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 
 class XmlReportWriter {
     private final XmlReportData data;
+    private final SourceReferenceFormatter sourceReferenceFormatter;
 
-    XmlReportWriter(XmlReportData data) {
+    XmlReportWriter(XmlReportData data, Function<String, String> uriFormatter) {
         this.data = data;
+        this.sourceReferenceFormatter = new SourceReferenceFormatter(uriFormatter);
     }
 
     void writeXmlReport(Writer out) throws XMLStreamException {
@@ -37,6 +42,10 @@ class XmlReportWriter {
         writer.writeStartElement("testsuite");
         writeSuiteAttributes(writer);
         writer.writeNewLine();
+
+        for (TestRunHookFinished nonPassingTestRunHookFinished : data.getAllNonPassingTestRunHooksFinished()) {
+            writeSyntheticTestcase(writer, nonPassingTestRunHookFinished);
+        }
 
         for (TestCaseStarted testCaseStarted : data.getAllTestCaseStarted()) {
             writeTestcase(writer, testCaseStarted);
@@ -74,6 +83,26 @@ class XmlReportWriter {
         return notPassedNotSkipped;
     }
 
+    private void writeSyntheticTestcase(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
+        writer.writeStartElement("testcase");
+        writeSyntheticTestcaseAttributes(writer, nonPassingTestRunHookFinished);
+        writer.writeNewLine();
+        writeNonPassedElement(writer, nonPassingTestRunHookFinished);
+        writer.writeEndElement();
+        writer.writeNewLine();
+    }
+
+    private void writeSyntheticTestcaseAttributes(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
+        var classMethodName = data.findSourceReferenceBy(nonPassingTestRunHookFinished)
+                .flatMap(sourceReferenceFormatter::format);
+        var className = classMethodName.map(ClassMethodName::className);
+        if (className.isPresent()) {
+            writer.writeAttribute("class", className.get());
+        }
+        writer.writeAttribute("name", classMethodName.map(ClassMethodName::methodName).orElse("Unknown"));
+        writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(nonPassingTestRunHookFinished)));
+    }
+
     private void writeTestcase(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
         writer.writeStartElement("testcase");
         writeTestCaseAttributes(writer, testCaseStarted);
@@ -90,8 +119,15 @@ class XmlReportWriter {
         writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(testCaseStarted)));
     }
 
+    private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
+        writeNonPassedElement(writer, nonPassingTestRunHookFinished.getResult());
+    }
+
     private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
-        TestStepResult result = data.getTestCaseStatus(testCaseStarted);
+        writeNonPassedElement(writer, data.getTestCaseStatus(testCaseStarted));
+    }
+
+    private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestStepResult result) throws XMLStreamException {
         TestStepResultStatus status = result.getStatus();
         if (status == TestStepResultStatus.PASSED) {
             return;
