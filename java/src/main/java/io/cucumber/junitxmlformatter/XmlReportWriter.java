@@ -2,6 +2,7 @@ package io.cucumber.junitxmlformatter;
 
 import io.cucumber.messages.types.Exception;
 import io.cucumber.messages.types.TestCaseStarted;
+import io.cucumber.messages.types.TestRunHookFinished;
 import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.messages.types.TestStepResultStatus;
 
@@ -37,6 +38,10 @@ class XmlReportWriter {
         writer.writeStartElement("testsuite");
         writeSuiteAttributes(writer);
         writer.writeNewLine();
+
+        for (TestRunHookFinished nonPassingTestRunHookFinished : data.getAllNonPassingTestRunHooksFinished()) {
+            writeSyntheticTestcase(writer, nonPassingTestRunHookFinished);
+        }
 
         for (TestCaseStarted testCaseStarted : data.getAllTestCaseStarted()) {
             writeTestcase(writer, testCaseStarted);
@@ -74,6 +79,20 @@ class XmlReportWriter {
         return notPassedNotSkipped;
     }
 
+    private void writeSyntheticTestcase(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
+        writer.writeStartElement("testcase");
+        writeSyntheticTestcaseAttributes(writer, nonPassingTestRunHookFinished);
+        writer.writeNewLine();
+        writeNonPassedElement(writer, nonPassingTestRunHookFinished);
+        writer.writeEndElement();
+        writer.writeNewLine();
+    }
+
+    private void writeSyntheticTestcaseAttributes(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
+        writer.writeAttribute("name", "Test Run Hook");
+        writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(nonPassingTestRunHookFinished)));
+    }
+
     private void writeTestcase(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
         writer.writeStartElement("testcase");
         writeTestCaseAttributes(writer, testCaseStarted);
@@ -90,8 +109,15 @@ class XmlReportWriter {
         writer.writeAttribute("time", String.valueOf(data.getDurationInSeconds(testCaseStarted)));
     }
 
+    private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestRunHookFinished nonPassingTestRunHookFinished) throws XMLStreamException {
+        writeNonPassedElement(writer, nonPassingTestRunHookFinished.getResult());
+    }
+
     private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestCaseStarted testCaseStarted) throws XMLStreamException {
-        TestStepResult result = data.getTestCaseStatus(testCaseStarted);
+        writeNonPassedElement(writer, data.getTestCaseStatus(testCaseStarted));
+    }
+
+    private void writeNonPassedElement(EscapingXmlStreamWriter writer, TestStepResult result) throws XMLStreamException {
         TestStepResultStatus status = result.getStatus();
         if (status == TestStepResultStatus.PASSED) {
             return;

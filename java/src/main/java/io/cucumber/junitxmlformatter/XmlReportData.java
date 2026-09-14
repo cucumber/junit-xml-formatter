@@ -8,6 +8,7 @@ import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
 import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TestCaseStarted;
+import io.cucumber.messages.types.TestRunHookFinished;
 import io.cucumber.messages.types.TestRunStarted;
 import io.cucumber.messages.types.TestStep;
 import io.cucumber.messages.types.TestStepFinished;
@@ -29,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import static io.cucumber.messages.types.TestStepResultStatus.PASSED;
+import static io.cucumber.messages.types.TestStepResultStatus.SKIPPED;
 import static io.cucumber.query.Repository.RepositoryFeature.INCLUDE_GHERKIN_DOCUMENTS;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.util.Comparator.nullsFirst;
@@ -65,6 +67,17 @@ class XmlReportData {
 
     double getDurationInSeconds(TestCaseStarted testCaseStarted) {
         return query.findTestCaseDurationBy(testCaseStarted)
+                .orElse(Duration.ZERO)
+                .toMillis() / (double) MILLIS_PER_SECOND;
+    }
+
+    public double getDurationInSeconds(TestRunHookFinished testRunHookFinished) {
+        return query.findTestRunHookStartedBy(testRunHookFinished)
+                .map(testRunHookStarted -> {
+                    var start = Convertor.toInstant(testRunHookStarted.getTimestamp());
+                    var end = Convertor.toInstant(testRunHookFinished.getTimestamp());
+                    return Duration.between(start, end);
+                })
                 .orElse(Duration.ZERO)
                 .toMillis() / (double) MILLIS_PER_SECOND;
     }
@@ -161,5 +174,15 @@ class XmlReportData {
                 .map(TestRunStarted::getTimestamp)
                 .map(Convertor::toInstant)
                 .map(ISO_INSTANT::format);
+    }
+
+    List<TestRunHookFinished> getAllNonPassingTestRunHooksFinished() {
+        return query.findAllTestRunHookFinished()
+                .stream()
+                .filter(testRunHookFinished -> {
+                    TestStepResultStatus status = testRunHookFinished.getResult().getStatus();
+                    return !(status == PASSED || status == SKIPPED);
+                })
+                .toList();
     }
 }

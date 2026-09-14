@@ -6,7 +6,8 @@ import io.cucumber.messages.ndjson.Deserializer;
 import io.cucumber.messages.ndjson.Json;
 import io.cucumber.messages.types.Envelope;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.xmlunit.builder.Input;
@@ -73,6 +74,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     @ParameterizedTest
     @MethodSource("acceptance")
+    @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
     void test(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.originalOrder());
         Source expected = Input.fromPath(testCase.expected).build();
@@ -82,6 +84,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     @ParameterizedTest
     @MethodSource("acceptance")
+    @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
     void testWithSimulatedParallelExecution(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.simulateParallelExecution());
         Source expected = Input.fromPath(testCase.expected).build();
@@ -91,6 +94,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     @ParameterizedTest
     @MethodSource("acceptance")
+    @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
     void validateAgainstJenkins(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.originalOrder());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
@@ -100,6 +104,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     @ParameterizedTest
     @MethodSource("acceptance")
+    @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
     void validateAgainstSurefire(TestCase testCase) throws IOException {
         ByteArrayOutputStream bytes = writeJunitXmlReport(testCase, messageOrderer.originalOrder());
         Source actual = Input.fromByteArray(bytes.toByteArray()).build();
@@ -121,7 +126,7 @@ class MessagesToJunitXmlWriterAcceptanceTest {
 
     @ParameterizedTest
     @MethodSource("acceptance")
-    @Disabled
+    @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
     void updateExpectedFiles(TestCase testCase) throws IOException {
         try (OutputStream out = Files.newOutputStream(testCase.expected)) {
             writeJunitXmlReport(testCase, out, messageOrderer.originalOrder());
