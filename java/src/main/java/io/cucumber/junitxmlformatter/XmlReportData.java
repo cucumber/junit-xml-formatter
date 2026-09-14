@@ -71,7 +71,7 @@ class XmlReportData {
                 .toMillis() / (double) MILLIS_PER_SECOND;
     }
 
-    public double getDurationInSeconds(TestRunHookFinished testRunHookFinished) {
+    double getDurationInSeconds(TestRunHookFinished testRunHookFinished) {
         return query.findTestRunHookStartedBy(testRunHookFinished)
                 .map(testRunHookStarted -> {
                     var start = Convertor.toInstant(testRunHookStarted.getTimestamp());
