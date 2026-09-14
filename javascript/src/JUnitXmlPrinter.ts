@@ -37,6 +37,7 @@ interface ReportSuite {
 }
 
 interface ReportNonPassingTestRunHook {
+  name: string
   time: number
   failure?: ReportFailure
 }
@@ -108,7 +109,7 @@ export class JUnitXmlPrinter {
 
       for (const nonPassingTestRunHook of testSuite.nonPassingTestRunHooks) {
         const syntheticTestcaseElement = this.builder.ele('testcase', {
-          name: 'Test Run Hook',
+          name: nonPassingTestRunHook.name,
           time: nonPassingTestRunHook.time,
         })
         writeFailureElement(syntheticTestcaseElement, nonPassingTestRunHook.failure)
@@ -157,10 +158,18 @@ export class JUnitXmlPrinter {
       })
       .map((testRunHookFinished) => {
         return {
+          name: this.findTesRunHookName(testRunHookFinished),
           time: durationToSeconds(this.findTestRunHookDurationBy(testRunHookFinished)),
           failure: this.makeFailure(testRunHookFinished.result),
         }
       })
+  }
+
+  private findTesRunHookName(testRunHookFinished: TestRunHookFinished) {
+    const findHookBy = this.query.findHookBy(testRunHookFinished)
+    const sourceReference = findHookBy?.sourceReference
+    const uri = sourceReference?.uri ?? '(unknown)'
+    return sourceReference?.location ? `${uri}:${sourceReference.location.line}` : uri
   }
 
   private findTestRunHookDurationBy(testRunHookFinished: TestRunHookFinished) {
