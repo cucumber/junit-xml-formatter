@@ -10,21 +10,21 @@
     </parent>
 
     <artifactId>junit-xml-formatter</artifactId>
-    <version>0.15.1-SNAPSHOT</version>
+    <version>0.16.0</version>
     <packaging>jar</packaging>
     <name>JUnit XML Formatter</name>
     <description>Renders Cucumber Messages as JUnit XML</description>
     <url>https://github.com/cucumber/junit-xml-formatter</url>
 
     <properties>
-        <project.build.outputTimestamp>1789419575</project.build.outputTimestamp>
+        <project.build.outputTimestamp>1794574247</project.build.outputTimestamp>
     </properties>
 
     <scm>
         <connection>scm:git:https://github.com/cucumber/junit-xml-formatter.git</connection>
         <developerConnection>scm:git:git@github.com:cucumber/junit-xml-formatter.git</developerConnection>
         <url>https://github.com/cucumber/junit-xml-formatter.git</url>
-        <tag>HEAD</tag>
+        <tag>v0.16.0</tag>
     </scm>
 
     <dependencyManagement>
