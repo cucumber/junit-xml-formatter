@@ -17,6 +17,7 @@
     <url>https://github.com/cucumber/junit-xml-formatter</url>
 
     <properties>
+        <osgi.bundle-symbolic-name>io.cucumber.xmlformatter</osgi.bundle-symbolic-name>
         <project.build.outputTimestamp>1794574250</project.build.outputTimestamp>
     </properties>
 
@@ -124,6 +125,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
